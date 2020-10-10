@@ -1,4 +1,4 @@
-﻿# SomeTampermonkeyScripts  
+# SomeTampermonkeyScripts  
 some scripts I use  
 click link to install  
 
@@ -14,4 +14,4 @@ click button to copy
 [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text  
 click button to copy  
-![](https://i.imgur.com/ki7Zmnb.jpg)  
+![](https://i.imgur.com/1IEqFnA.jpg)  
