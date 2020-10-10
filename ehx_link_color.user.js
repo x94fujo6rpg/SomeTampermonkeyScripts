@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         ehx_link_color
+// @name         ehx link color
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
-// @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.js
+// @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js
 // @version      0.1
 // @description  change unvisited link color
 // @author       x94fujo6

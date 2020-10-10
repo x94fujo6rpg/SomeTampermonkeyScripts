@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         anti-bili-anti-copy
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
-// @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.js
+// @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js
 // @version      0.1
 // @description  copy
 // @author       x94fujo6
