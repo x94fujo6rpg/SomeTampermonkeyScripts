@@ -3,7 +3,7 @@ some scripts I use
 click link to install  
 
 [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
-remove bilibili rarticle copy protection
+remove bilibili article copy protection
 
 [ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change e-hentai/exhentai unvisited link color
