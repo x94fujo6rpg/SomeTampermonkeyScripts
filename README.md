@@ -1,4 +1,4 @@
-﻿﻿# SomeTampermonkeyScripts  
+# SomeTampermonkeyScripts  
 some scripts I use  
 click link to install  
 
