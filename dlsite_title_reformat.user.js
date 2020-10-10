@@ -2,10 +2,11 @@
 // @name         dlsite title reformat
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.2
+// @version      0.21
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
+// @match        https://www.dlsite.com/home/work/=/product_id/*
 // @grant        none
 // ==/UserScript==
 
