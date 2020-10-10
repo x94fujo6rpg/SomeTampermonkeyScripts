@@ -12,6 +12,7 @@
 (function () {
     'use strict';
     window.onload = main();
+
     function main() {
         let link = document.location.href;
         let title = document.querySelector(`a[href="${link}"]`);
@@ -20,38 +21,93 @@
         title = title.parentNode;
         let RJ = link.slice(link.lastIndexOf("/") + 1).replace(".html", "");
 
-        // remove excess text
+        // save original title
+        let originaltext = titletext;
+
+        // remove excess text 【...】
         while (titletext.indexOf("【") != -1) {
             let start = titletext.indexOf("【");
             let end = titletext.indexOf("】") + 1;
             let removestr = titletext.substring(start, end);
             titletext = titletext.replace(removestr, "");
+            titletext = titletext.trim();
         }
-        titletext = titletext.trim();
-        titletext = `${RJ} ${titletext}`;
+
+        // remove『』if it at start & end
+        if (titletext.indexOf("『" === 0 && titletext.indexOf("』") === titletext.length - 1)) {
+            titletext = titletext.replace("『", "").replace("』", "");
+            titletext = titletext.trim();
+        }
+
+        // number + original title
+        let original = document.createElement("span");
+        original.textContent = `${RJ} ${originaltext}`;
+        title.append(original);
+
+        // ------------------------------------------------------
+        title.append(newline());
 
         // formatted title
         let span = document.createElement("span");
-        span.textContent = titletext;
+        span.textContent = `${RJ} ${titletext}`;
         title.append(span);
 
-        // newline
-        title.append(document.createElement("br"));
+        // ------------------------------------------------------
+        title.append(newline());
 
         // add copy Number button
-        let button = document.createElement("button");
-        $(button).click(function () {
+        let button_number = document.createElement("button");
+        $(button_number).click(function () {
             navigator.clipboard.writeText(RJ);
         });
-        button.textContent = "Copy Number";
-        title.append(button);
+        button_number.textContent = "Copy Number";
+        title.append(button_number);
 
-        // add copy Full title button
-        let button2 = document.createElement("button");
-        $(button2).click(function () {
+        // ------------------------------------------------------
+        title.append(newseparate());
+
+        // add copy Original button
+        let button_original = document.createElement("button");
+        $(button_original).click(function () {
+            navigator.clipboard.writeText(originaltext);
+        });
+        button_original.textContent = "Copy Original";
+        title.append(button_original);
+
+        // add copy Number+Original button
+        button_original = document.createElement("button");
+        $(button_original).click(function () {
+            navigator.clipboard.writeText(`${RJ} ${originaltext}`);
+        });
+        button_original.textContent = "Copy Number+Original";
+        title.append(button_original);
+
+        // ------------------------------------------------------
+        title.append(newseparate());
+
+        // add copy Formatted button
+        let button_formatted = document.createElement("button");
+        $(button_formatted).click(function () {
             navigator.clipboard.writeText(titletext);
         });
-        button2.textContent = "Copy Full Title";
-        title.append(button2);
+        button_formatted.textContent = "Copy Formatted";
+        title.append(button_formatted);
+
+        // add copy Number+Formatted button
+        button_formatted = document.createElement("button");
+        $(button_formatted).click(function () {
+            navigator.clipboard.writeText(`${RJ} ${titletext}`);
+        });
+        button_formatted.textContent = "Copy Number+Formatted";
+        title.append(button_formatted);
+    }
+
+    function newline() {
+        return document.createElement("br");
+    }
+
+    function newseparate() {
+        let ele = document.createElement("span").textContent = " / ";
+        return ele;
     }
 })();
