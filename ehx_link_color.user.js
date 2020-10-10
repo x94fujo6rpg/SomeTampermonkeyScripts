@@ -12,7 +12,9 @@
 
 (function() {
     'use strict';
+    let link = document.location.href;
+    let color = (link.indexOf("exhentai")!=-1) ? "DeepPink": "DeepPink"; // ex:eh
     let style = document.createElement("style");
     document.head.appendChild(style);
-    style.sheet.insertRule("a:link {color: orange;}");
+    style.sheet.insertRule(`a:link {color: ${color};}`);
 })();
