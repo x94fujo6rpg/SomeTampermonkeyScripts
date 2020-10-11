@@ -2,7 +2,7 @@
 // @name         dlsite title reformat
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.21
+// @version      0.22
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -101,6 +101,51 @@
         });
         button_formatted.textContent = "Copy Number+Formatted";
         title.append(button_formatted);
+
+        // ------------------------------------------------------
+        // creat track list if any
+        let list = tracklist();
+        if (list) {
+            let pos = document.querySelector(".work_parts.type_text");
+            let textbox = document.createElement("textarea");
+            let count = 0;
+            let maxlength = 0;
+            list.forEach(line => {
+                textbox.value += `${line}\n`;
+                count++;
+                if (line.length > maxlength) maxlength = line.length;
+            });
+            $(textbox).attr({
+                name: "mytracklist",
+                rows: count + 1,
+                cols: maxlength * 2,
+            });
+            pos.insertAdjacentElement("afterbegin", textbox);
+            let copyall = document.createElement("button");
+            copyall.textContent = "Copy All";
+            $(copyall).click(function () {
+                textbox.select();
+                textbox.setSelectionRange(0, 99999);
+                document.execCommand("copy");
+            });
+            textbox.insertAdjacentElement("afterend", newline());
+            textbox.insertAdjacentElement("afterend", copyall);
+            textbox.insertAdjacentElement("afterend", newline());
+        }
+    }
+
+    function tracklist() {
+        let list = document.querySelector(".work_tracklist");
+        if (list) {
+            let tracklist = [];
+            list = list.querySelectorAll(".work_tracklist_item");
+            list.forEach((ele, index) => {
+                tracklist.push(`${index + 1}. ${ele.querySelector(".title").textContent}`);
+            });
+            return tracklist;
+        } else {
+            return false;
+        }
     }
 
     function newline() {
