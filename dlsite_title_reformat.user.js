@@ -26,12 +26,20 @@
         let originaltext = titletext;
 
         // remove excess text 【...】
+        let count = 0;
         while (titletext.indexOf("【") != -1) {
             let start = titletext.indexOf("【");
             let end = titletext.indexOf("】") + 1;
-            let removestr = titletext.substring(start, end);
+            let removestr = "";
+            if (end) {
+                removestr = titletext.substring(start, end);
+            } else {
+                removestr = titletext.slice(start);
+            }
             titletext = titletext.replace(removestr, "");
             titletext = titletext.trim();
+            count++;
+            if (count > 100) break;
         }
 
         // remove『』if it at start & end
