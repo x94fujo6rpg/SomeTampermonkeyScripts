@@ -2,7 +2,7 @@
 // @name         ehx direct download
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.15
+// @version      0.16
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -23,25 +23,29 @@
     'use strict';
     let api;
     let domain;
+    let hid = false;
     window.onload = main();
 
     function main() {
         api = setApi();
         let pos = document.querySelector(".ido");
+        let bs = "width: max-content";
 
         let e = document.createElement("button");
         e.id = "puretext";
         e.textContent = "Show Pure Text";
-        e.style = "width: max-content";
-        e.onclick = function () { return puretext(); }
+        e.style = bs;
+        e.onclick = function () { return puretext(); };
         pos.insertAdjacentElement("afterbegin", e);
 
         e = document.createElement("button");
         e.id = "ddbutton";
         e.textContent = "Show Archive Download";
-        e.style = "width: max-content";
+        e.style = bs;
         e.onclick = function () { return click2start(); };
         pos.insertAdjacentElement("afterbegin", e);
+
+        if (hid) hlexg();
     }
 
     function setApi() {
@@ -56,6 +60,11 @@
         } else {
             return false;
         }
+    }
+
+    function hlexg() {
+        let w = document.querySelectorAll("s");
+        if (w.length > 0) w.forEach(ele => ele.parentElement.parentElement.parentElement.parentElement.style.backgroundColor = "gold");
     }
 
     function puretext() {
@@ -129,10 +138,16 @@
             let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
             if (gallery) {
                 let ele = document.createElement("button");
+                ele.id = g.gid;
                 ele.className = "gdd";
                 ele.href = "#";
                 ele.style = "width: max-content; align-self: center;";
-                ele.onclick = function () { return my_popUp(archivelink, 480, 320); };
+                ele.onclick = function () { 
+                    let s = document.getElementById(g.gid).style;
+                     s.color= "gray";
+                     s.backgroundColor = "transparent";
+                    return my_popUp(archivelink, 480, 320); 
+                };
                 ele.textContent = "Archive Download";
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
