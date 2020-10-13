@@ -142,11 +142,11 @@
                 ele.className = "gdd";
                 ele.href = "#";
                 ele.style = "width: max-content; align-self: center;";
-                ele.onclick = function () { 
+                ele.onclick = function () {
                     let s = document.getElementById(g.gid).style;
-                     s.color= "gray";
-                     s.backgroundColor = "transparent";
-                    return my_popUp(archivelink, 480, 320); 
+                    s.color = "gray";
+                    s.backgroundColor = "transparent";
+                    return my_popUp(archivelink, 480, 320);
                 };
                 ele.textContent = "Archive Download";
                 let pos = gallery.parentElement.querySelector(".puretext");
