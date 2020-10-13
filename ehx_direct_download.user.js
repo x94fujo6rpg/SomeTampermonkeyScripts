@@ -2,7 +2,7 @@
 // @name         ehx direct download
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.11
+// @version      0.13
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -24,7 +24,21 @@
 
     function main() {
         api = setApi();
-        if (api) setTimeout(gallerylist, 1000);
+
+        let pos = document.querySelector(".ptt");
+        let e = document.createElement("button");
+        e.id = "ddbutton";
+        e.textContent = "Show Archive Download";
+        e.style = "width: max-content";
+        e.onclick = function() { return click2start(); };
+        pos.insertAdjacentElement("beforebegin", e);
+
+        e = document.createElement("button");
+        e.id = "puretext";
+        e.textContent = "Show Pure Text";
+        e.style = "width: max-content";
+        e.onclick = function() { return puretext(); }
+        pos.insertAdjacentElement("beforebegin", e);
     }
 
     function setApi() {
@@ -38,6 +52,30 @@
             return eh;
         } else {
             return false;
+        }
+    }
+
+    function puretext() {
+        document.getElementById("puretext").remove();
+        let gallery = document.querySelectorAll(".gl1t");
+        gallery.forEach(ele => {
+            let e = document.createElement("span");
+            e.textContent = ele.querySelector("a[href]").textContent;
+            e.className = "gl4t puretext";
+            let pos = ele.querySelector(".gdd");
+            if (pos) {
+                pos.insertAdjacentElement("beforebegin", e);
+            } else {
+                pos = ele.querySelector(".gl3t");
+                pos.insertAdjacentElement("afterend", e);
+            }            
+        });
+    }
+
+    function click2start() {
+        if (api) {
+            document.getElementById("ddbutton").remove();
+            gallerylist();
         }
     }
 
@@ -67,12 +105,6 @@
                         }
                     }
                 }
-                // add pure text
-                let e = document.createElement("span");
-                e.textContent = ele.querySelector("a[href]").textContent;
-                e.className = "gl4t dd";
-                link = ele.querySelector(".gl3t");
-                link.insertAdjacentElement("afterend", e);
             });
             requestdata(alldata);
         }
@@ -83,7 +115,7 @@
             setTimeout(() => {
                 let data = datalist[index];
                 if (data) my_api_call(data);
-            }, 1000 * index);
+            }, 3000 * index);
         }
     }
 
@@ -94,11 +126,14 @@
             let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
             if (gallery) {
                 let ele = document.createElement("button");
+                ele.className = "gdd";
                 ele.href = "#";
                 ele.style = "width: max-content; align-self: center;";
                 ele.onclick = function () { return my_popUp(archivelink, 480, 320); };
                 ele.textContent = "Archive Download";
-                gallery.parentElement.querySelector(".dd").insertAdjacentElement("afterend", ele);
+                let pos = gallery.parentElement.querySelector(".puretext");
+                if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
+                pos.insertAdjacentElement("afterend", ele); 
             }
         });
     }
