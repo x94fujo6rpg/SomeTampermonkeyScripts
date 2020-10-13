@@ -2,16 +2,19 @@
 // @name         ehx direct download
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.13
+// @version      0.15
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
 // @exclude      https://e-hentai.org/*.php*
+// @exclude      https://e-hentai.org/mytags
 // @exclude      https://e-hentai.org/g/*
+// @exclude      https://e-hentai.org/mpv/*
 // @match        https://exhentai.org/*
 // @exclude      https://exhentai.org/*.php*
 // @exclude      https://exhentai.org/mytags
 // @exclude      https://exhentai.org/g/*
+// @exclude      https://exhentai.org/mpv/*
 // @grant        none
 // ==/UserScript==
 
@@ -24,21 +27,21 @@
 
     function main() {
         api = setApi();
+        let pos = document.querySelector(".ido");
 
-        let pos = document.querySelector(".ptt");
         let e = document.createElement("button");
-        e.id = "ddbutton";
-        e.textContent = "Show Archive Download";
-        e.style = "width: max-content";
-        e.onclick = function() { return click2start(); };
-        pos.insertAdjacentElement("beforebegin", e);
-
-        e = document.createElement("button");
         e.id = "puretext";
         e.textContent = "Show Pure Text";
         e.style = "width: max-content";
-        e.onclick = function() { return puretext(); }
-        pos.insertAdjacentElement("beforebegin", e);
+        e.onclick = function () { return puretext(); }
+        pos.insertAdjacentElement("afterbegin", e);
+
+        e = document.createElement("button");
+        e.id = "ddbutton";
+        e.textContent = "Show Archive Download";
+        e.style = "width: max-content";
+        e.onclick = function () { return click2start(); };
+        pos.insertAdjacentElement("afterbegin", e);
     }
 
     function setApi() {
@@ -68,7 +71,7 @@
             } else {
                 pos = ele.querySelector(".gl3t");
                 pos.insertAdjacentElement("afterend", e);
-            }            
+            }
         });
     }
 
@@ -133,7 +136,7 @@
                 ele.textContent = "Archive Download";
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
-                pos.insertAdjacentElement("afterend", ele); 
+                pos.insertAdjacentElement("afterend", ele);
             }
         });
     }
