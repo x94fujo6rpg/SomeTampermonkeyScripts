@@ -10,7 +10,8 @@ remove bilibili article copy protection
 add button for each gallery in list view to use archive download directly  
 because there is a limit on how many requests you can send at once  
 this need some time to process  
-**warning: don't open new page rapidly when you using this, it may trigger api limit protection**  
+~~warning: don't open new page rapidly when you using this, it may trigger api limit protection~~  
+now you have to click button to enable it (pervent too many requests)  
 
 [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change e-hentai/exhentai unvisited link color
