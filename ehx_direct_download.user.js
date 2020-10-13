@@ -2,7 +2,7 @@
 // @name         ehx direct download
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.1
+// @version      0.11
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -67,6 +67,12 @@
                         }
                     }
                 }
+                // add pure text
+                let e = document.createElement("span");
+                e.textContent = ele.querySelector("a[href]").textContent;
+                e.className = "gl4t dd";
+                link = ele.querySelector(".gl3t");
+                link.insertAdjacentElement("afterend", e);
             });
             requestdata(alldata);
         }
@@ -92,7 +98,7 @@
                 ele.style = "width: max-content; align-self: center;";
                 ele.onclick = function () { return my_popUp(archivelink, 480, 320); };
                 ele.textContent = "Archive Download";
-                gallery.insertAdjacentElement("afterend", ele);
+                gallery.parentElement.querySelector(".dd").insertAdjacentElement("afterend", ele);
             }
         });
     }
