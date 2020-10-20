@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.30
+// @version      0.31
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -237,7 +237,7 @@
             list.push(gid);
             console.log(`${m}datasize:${listDataSize(list)}`);
 
-            while (listDataSize(list) > 4080) {
+            while (listDataSize(list) > 4000) {
                 let r = list.shift();
                 console.log(`${m}reach limit, remove [${r}], newsize:${listDataSize(list)}`);
                 count++;
@@ -272,6 +272,6 @@
         let exp = expday * 1000 * 60 * 60 * 24;
         time.setTime(time.getTime() + exp);
         exp = time.toUTCString();
-        document.cookie = `${ckey}=${cvalue};`;
+        document.cookie = `${ckey}=${cvalue}; expires=${exp}; path=/;`;
     }
 })();
