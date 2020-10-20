@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.24
+// @version      0.25
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -17,7 +17,7 @@
 
     function main() {
         let link = document.location.href;
-        let title = document.querySelector(`a[href="${link}"]`);
+        let title = document.querySelector("#work_name").querySelector("a");
         let titletext = title.textContent;
         title.style.display = "none";
         title = title.parentNode;
