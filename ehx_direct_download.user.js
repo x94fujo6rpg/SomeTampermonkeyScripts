@@ -2,16 +2,14 @@
 // @name         ehx direct download
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.16
+// @version      0.20
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
-// @exclude      https://e-hentai.org/*.php*
 // @exclude      https://e-hentai.org/mytags
 // @exclude      https://e-hentai.org/g/*
 // @exclude      https://e-hentai.org/mpv/*
 // @match        https://exhentai.org/*
-// @exclude      https://exhentai.org/*.php*
 // @exclude      https://exhentai.org/mytags
 // @exclude      https://exhentai.org/g/*
 // @exclude      https://exhentai.org/mpv/*
@@ -24,10 +22,25 @@
     let api;
     let domain;
     let hid = false;
+    let m = "[ehx direct download]: ";
     window.onload = main();
 
     function main() {
         api = setApi();
+        domain = `https://${document.domain}`;
+
+        if (!domain || !api) return console.log(`${m}domain or api is missing`);
+
+        let link = document.location.href;
+        if (link.indexOf(".php") != -1) {
+            return console.log(`${m}see php, abort`);
+        } else {
+            console.log(`${m}script start`);
+            return setButton();
+        }
+    }
+
+    function setButton() {
         let pos = document.querySelector(".ido");
         let bs = "width: max-content";
 
@@ -52,10 +65,11 @@
         let eh = "https://api.e-hentai.org/api.php";
         let ex = "https://exhentai.org/api.php";
         let link = document.location.href;
-        domain = `https://${link.split("/")[2]}`;
-        if (link.indexOf("exhentai") != -1) {
+        if (link.indexOf("//exhentai") != -1) {
+            console.log(`${m}set api as ${ex}`);
             return ex;
-        } else if (link.indexOf("e-hentai") != -1) {
+        } else if (link.indexOf("//e-hentai") != -1) {
+            console.log(`${m}set api as ${eh}`);
             return eh;
         } else {
             return false;
@@ -93,7 +107,9 @@
 
     function gallerylist() {
         let gallery = document.querySelectorAll(".gl1t");
+        let gc = 0;
         if (gallery) {
+            console.log(`${m}acquire gallery data`);
             let data = { method: "gdata", gidlist: [], };
             let alldata = [];
             let count = 0;
@@ -108,6 +124,7 @@
                     if (gid && gtoken) {
                         glist.push([gid, gtoken]);
                         count++;
+                        gc++;
                         if (count === 25 || index === gallery.length - 1) {
                             count = 0;
                             let newdata = Object.assign({}, data);
@@ -118,22 +135,30 @@
                     }
                 }
             });
-            requestdata(alldata);
+            console.log(`${m}gallery queue length:${alldata.length} ,total gallery count:${gc}`);
+            if (alldata.length != 0) {
+                console.log(`${m}start sending request`);
+                requestdata(alldata);
+            } else {
+                console.log(`${m}gallery queue is empty`);
+            }
         }
     }
 
     function requestdata(datalist) {
         for (let index = 0; index < datalist.length; index++) {
             setTimeout(() => {
+                console.log(`${m}sending request${index + 1}`);
                 let data = datalist[index];
-                if (data) my_api_call(data);
+                if (data) my_api_call(data, index + 1);
             }, 3000 * index);
         }
     }
 
-    function directDL(data) {
+    function directDL(data, index) {
         data = JSON.parse(data);
-        data.gmetadata.forEach(g => {
+        console.log(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
+        data.gmetadata.forEach((g, gindex) => {
             let archivelink = `${domain}/archiver.php?gid=${g.gid}&token=${g.token}&or=${g.archiver_key}`;
             let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
             if (gallery) {
@@ -152,6 +177,7 @@
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
                 pos.insertAdjacentElement("afterend", ele);
+                console.log(`${m}request${index}, data index:${gindex}, gallery:${ele.id}, done`);
             }
         });
     }
@@ -161,15 +187,22 @@
         return false;
     }
 
-    function my_api_call(data) {
+    function my_api_call(data, index) {
         let request = new XMLHttpRequest();
         request.open("POST", api);
         request.setRequestHeader("Content-Type", "application/json");
         request.withCredentials = true;
         request.onreadystatechange = function () {
-            if (request.readyState == 4 && request.status == 200) {
-                let data = request.responseText;
-                directDL(data);
+            if (request.readyState == 4) {
+                if (request.status == 200) {
+                    console.log(`${m}request${index} complete`);
+                    let data = request.responseText;
+                    return directDL(data, index);
+                } else {
+                    console.log(`${m}request${index} failed [status: ${request.status}]`);
+                    console.log(request);
+                    return;
+                }
             }
         };
         request.send(JSON.stringify(data));

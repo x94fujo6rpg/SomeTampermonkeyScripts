@@ -14,7 +14,29 @@ this need some time to process
 now you have to click button to enable it (pervent too many requests)  
 
 [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
-change e-hentai/exhentai unvisited link color
+change e-hentai/exhentai visited & unvisited link color  
+if you don't like default color, change it to any valid CSS color you want  
+```js
+// unvisited link color
+let enable_link = true;
+let ex = "DeepPink";
+let eh = "DeepPink";
+// visited link color
+let enable_visited = true;
+let ex_v = "gray";
+let eh_v = "gray";
+```
+because of the security risk, visited link color many not work in some browser  
+see [https://dbaron.org/mozilla/visited-privacy](https://dbaron.org/mozilla/visited-privacy)  
+
+[[ehx torrent text]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)  
+click to copy torrent name in torrent page  
+event is from first parentheses in the name, may not correct  
+auto close window after copy  
+if you don't want it close, set this value to false  
+```js
+let autoclose = true;
+``` 
 
 [[mangaoh title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)  
 reformat date & title in search result  
