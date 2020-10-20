@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.3
+// @version      0.30
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
