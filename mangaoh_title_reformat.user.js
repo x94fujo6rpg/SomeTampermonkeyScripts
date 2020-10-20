@@ -2,7 +2,8 @@
 // @name         mangaoh title reformat
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js
-// @version      0.1
+// @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js
+// @version      0.11
 // @description  reformat date & title in search result (click button to copy)
 // @author       x94fujo6
 // @match        https://www.mangaoh.co.jp/search/?q=*

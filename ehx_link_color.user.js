@@ -2,7 +2,8 @@
 // @name         ehx link color
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js
-// @version      0.25
+// @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js
+// @version      0.26
 // @description  change link color
 // @author       x94fujo6
 // @match        https://e-hentai.org/*

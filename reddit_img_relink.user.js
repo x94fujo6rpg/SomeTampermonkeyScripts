@@ -2,7 +2,8 @@
 // @name         re-link image in reddit
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
-// @version      0.12
+// @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
+// @version      0.13
 // @description  show images direct link under title
 // @author       x94fujo6
 // @match        https://www.reddit.com/r/*
