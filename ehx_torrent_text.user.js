@@ -2,7 +2,7 @@
 // @name         ehx torrent text
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js
-// @version      0.11
+// @version      0.26
 // @description  copy text in torrent page
 // @author       x94fujo6
 // @match        https://exhentai.org/*
