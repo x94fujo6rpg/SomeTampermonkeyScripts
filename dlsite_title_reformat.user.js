@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.25
+// @version      0.26
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -13,7 +13,9 @@
 
 (function () {
     'use strict';
-    window.onload = main();
+    window.onload = function () {
+        window.document.body.onload = main();
+    };
 
     function main() {
         let link = document.location.href;
@@ -67,9 +69,9 @@
 
         // add copy Number button
         let button_number = document.createElement("button");
-        $(button_number).click(function () {
+        button_number.onclick = function () {
             navigator.clipboard.writeText(RJ);
-        });
+        };
         button_number.textContent = "Copy Number";
         title.append(button_number);
 
@@ -78,17 +80,17 @@
 
         // add copy Original button
         let button_original = document.createElement("button");
-        $(button_original).click(function () {
+        button_original.onclick = function () {
             navigator.clipboard.writeText(originaltext);
-        });
+        };
         button_original.textContent = "Copy Original";
         title.append(button_original);
 
         // add copy Number+Original button
         button_original = document.createElement("button");
-        $(button_original).click(function () {
+        button_original.onclick = function () {
             navigator.clipboard.writeText(`${RJ} ${originaltext}`);
-        });
+        };
         button_original.textContent = "Copy Number+Original";
         title.append(button_original);
 
@@ -97,17 +99,17 @@
 
         // add copy Formatted button
         let button_formatted = document.createElement("button");
-        $(button_formatted).click(function () {
+        button_formatted.onclick = function () {
             navigator.clipboard.writeText(titletext);
-        });
+        };
         button_formatted.textContent = "Copy Formatted";
         title.append(button_formatted);
 
         // add copy Number+Formatted button
         button_formatted = document.createElement("button");
-        $(button_formatted).click(function () {
+        button_formatted.onclick = function () {
             navigator.clipboard.writeText(`${RJ} ${titletext}`);
-        });
+        };
         button_formatted.textContent = "Copy Number+Formatted";
         title.append(button_formatted);
 
@@ -115,7 +117,7 @@
         // creat track list if any
         let list = tracklist();
         if (list) {
-            let pos = document.querySelector(".work_parts.type_text");
+            let pos = document.querySelector("[itemprop='description']").childNodes[2];
             let textbox = document.createElement("textarea");
             let count = 0;
             let maxlength = 0;
@@ -124,7 +126,7 @@
                 count++;
                 if (line.length > maxlength) maxlength = line.length;
             });
-            $(textbox).attr({
+            Object.assign(textbox, {
                 name: "mytracklist",
                 rows: count + 1,
                 cols: maxlength * 2,
@@ -132,11 +134,11 @@
             pos.insertAdjacentElement("afterbegin", textbox);
             let copyall = document.createElement("button");
             copyall.textContent = "Copy All";
-            $(copyall).click(function () {
+            copyall.onclick = function () {
                 textbox.select();
                 textbox.setSelectionRange(0, 99999);
                 document.execCommand("copy");
-            });
+            };
             textbox.insertAdjacentElement("afterend", newline());
             textbox.insertAdjacentElement("afterend", copyall);
             textbox.insertAdjacentElement("afterend", newline());
