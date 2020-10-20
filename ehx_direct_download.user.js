@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.21
+// @version      0.3
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -24,6 +24,7 @@
     let domain;
     let hid = false;
     let m = "[ehx direct download]: ";
+    let ck_key = "exhddl_list";
     window.onload = main();
 
     function main() {
@@ -136,7 +137,7 @@
                     }
                 }
             });
-            console.log(`${m}gallery queue length:${alldata.length} ,total gallery count:${gc}`);
+            console.log(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
             if (alldata.length != 0) {
                 console.log(`${m}start sending request`);
                 requestdata(alldata);
@@ -159,28 +160,44 @@
     function directDL(data, index) {
         data = JSON.parse(data);
         console.log(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
-        data.gmetadata.forEach((g, gindex) => {
+
+        let cklist = getCookie();
+        cklist = cklist[ck_key];
+        cklist = cklist ? cklist.split(",") : [];
+
+        let gidlist = [];
+        data.gmetadata.forEach(g => {
             let archivelink = `${domain}/archiver.php?gid=${g.gid}&token=${g.token}&or=${g.archiver_key}`;
             let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
             if (gallery) {
                 let ele = document.createElement("button");
-                ele.id = g.gid;
+                ele.id = g.gid; // ele.id: string , g.gid: number
                 ele.className = "gdd";
                 ele.href = "#";
                 ele.style = "width: max-content; align-self: center;";
                 ele.onclick = function () {
-                    let s = document.getElementById(g.gid).style;
+                    let s = document.getElementById(ele.id).style;
                     s.color = "gray";
                     s.backgroundColor = "transparent";
+                    updateDownloadedList(ele.id);
                     return my_popUp(archivelink, 480, 320);
                 };
                 ele.textContent = "Archive Download";
+
+                if (cklist.indexOf(ele.id) != -1) {
+                    ele.style.color = "gray";
+                    ele.style.backgroundColor = "transparent";
+                    console.log(`${m}gallery [${ele.id}] is in downloaded list, set as downloaded`);
+                }
+
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
                 pos.insertAdjacentElement("afterend", ele);
-                console.log(`${m}request${index}, data index:${gindex}, gallery:${ele.id}, done`);
+
+                gidlist.push(ele.id);
             }
         });
+        console.log(`${m}request${index} done. gallery list:[${gidlist.join()}]`);
     }
 
     function my_popUp(URL, w, h) {
@@ -197,8 +214,7 @@
             if (request.readyState == 4) {
                 if (request.status == 200) {
                     console.log(`${m}request${index} complete`);
-                    let data = request.responseText;
-                    return directDL(data, index);
+                    return directDL(request.responseText, index);
                 } else {
                     console.log(`${m}request${index} failed [status: ${request.status}]`);
                     console.log(request);
@@ -207,5 +223,55 @@
             }
         };
         request.send(JSON.stringify(data));
+    }
+
+    function updateDownloadedList(gid) {
+        let c = getCookie();
+        let list = c[ck_key];
+        if (list) {
+            let count = 0;
+            list = list.split(",");
+
+            if (list.indexOf(gid) != -1) return console.log(`${m}[${gid}] is already in the list, abort`);
+
+            list.push(gid);
+            console.log(`${m}datasize:${listDataSize(list)}`);
+
+            while (listDataSize(list) > 4080) {
+                let r = list.shift();
+                console.log(`${m}reach limit, remove [${r}], newsize:${listDataSize(list)}`);
+                count++;
+                if (count > 100) return console.log(`${m}unknow error while removing old data, script stop`);
+            }
+        } else {
+            console.log(`${m}no list found, creat new list`);
+            list = [gid];
+        }
+        list = list.join();
+        saveCookie(ck_key, list);
+        console.log(`${m}add [${gid}] to downloaded list`);
+    }
+
+    function listDataSize(list) {
+        return list.join().length;
+    }
+
+    function getCookie() {
+        let cookie = document.cookie;
+        let new_list = {};
+        cookie = cookie.split("; ");
+        cookie.forEach(data => {
+            let [key, value] = data.split("=");
+            new_list[key] = value;
+        });
+        return new_list;
+    }
+
+    function saveCookie(ckey, cvalue, expday = 365) {
+        let time = new Date();
+        let exp = expday * 1000 * 60 * 60 * 24;
+        time.setTime(time.getTime() + exp);
+        exp = time.toUTCString();
+        document.cookie = `${ckey}=${cvalue};`;
     }
 })();
