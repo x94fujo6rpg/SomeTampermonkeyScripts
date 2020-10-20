@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.31
+// @version      0.32
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -14,7 +14,8 @@
 // @exclude      https://exhentai.org/mytags
 // @exclude      https://exhentai.org/g/*
 // @exclude      https://exhentai.org/mpv/*
-// @grant        none
+// @grant        GM_getValue
+// @grant        GM_setValue
 // ==/UserScript==
 
 
@@ -24,7 +25,8 @@
     let domain;
     let hid = false;
     let m = "[ehx direct download]: ";
-    let ck_key = "exhddl_list";
+    let key = "exhddl_list";
+    let defaultValue = [];
     window.onload = main();
 
     function main() {
@@ -161,9 +163,9 @@
         data = JSON.parse(data);
         console.log(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
 
-        let cklist = getCookie();
-        cklist = cklist[ck_key];
-        cklist = cklist ? cklist.split(",") : [];
+        let list = GM_getValue(key, defaultValue);
+        console.log(list);
+        if (list.length != 0) list.split(",");
 
         let gidlist = [];
         data.gmetadata.forEach(g => {
@@ -184,7 +186,7 @@
                 };
                 ele.textContent = "Archive Download";
 
-                if (cklist.indexOf(ele.id) != -1) {
+                if (list.indexOf(ele.id) != -1) {
                     ele.style.color = "gray";
                     ele.style.backgroundColor = "transparent";
                     console.log(`${m}gallery [${ele.id}] is in downloaded list, set as downloaded`);
@@ -226,9 +228,8 @@
     }
 
     function updateDownloadedList(gid) {
-        let c = getCookie();
-        let list = c[ck_key];
-        if (list) {
+        let list = GM_getValue(key, defaultValue);
+        if (list.length != 0) {
             let count = 0;
             list = list.split(",");
 
@@ -248,30 +249,11 @@
             list = [gid];
         }
         list = list.join();
-        saveCookie(ck_key, list);
+        GM_setValue(key, list);
         console.log(`${m}add [${gid}] to downloaded list`);
     }
 
     function listDataSize(list) {
         return list.join().length;
-    }
-
-    function getCookie() {
-        let cookie = document.cookie;
-        let new_list = {};
-        cookie = cookie.split("; ");
-        cookie.forEach(data => {
-            let [key, value] = data.split("=");
-            new_list[key] = value;
-        });
-        return new_list;
-    }
-
-    function saveCookie(ckey, cvalue, expday = 365) {
-        let time = new Date();
-        let exp = expday * 1000 * 60 * 60 * 24;
-        time.setTime(time.getTime() + exp);
-        exp = time.toUTCString();
-        document.cookie = `${ckey}=${cvalue}; expires=${exp}; path=/;`;
     }
 })();
