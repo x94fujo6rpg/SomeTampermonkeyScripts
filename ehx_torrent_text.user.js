@@ -63,7 +63,7 @@
         };
         td = document.createElement("td");
         td.rowSpan = 1;
-        td.style = "width:100px; text-align:center; border-style: outset;";
+        td.style = "width:100px; text-align:center; border-style: outset; height: 1.5rem;";
         td.appendChild(e);
         tr.appendChild(td);
         return tr;
