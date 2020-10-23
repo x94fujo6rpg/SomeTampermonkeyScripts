@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.32
+// @version      0.35
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -32,11 +32,8 @@
     function main() {
         api = setApi();
         domain = `https://${document.domain}`;
-
         if (!domain || !api) return console.log(`${m}domain or api is missing`);
-
-        let link = document.location.href;
-        if (link.indexOf(".php") != -1) {
+        if (document.location.href.indexOf(".php") != -1) {
             return console.log(`${m}see php, abort`);
         } else {
             console.log(`${m}script start`);
@@ -47,22 +44,21 @@
     function setButton() {
         let pos = document.querySelector(".ido");
         let bs = "width: max-content";
-
-        let e = document.createElement("button");
-        e.id = "puretext";
-        e.textContent = "Show Pure Text";
-        e.style = bs;
-        e.onclick = function () { return puretext(); };
+        let e = newButton("puretext", "Show Pure Text", bs, puretext);
         pos.insertAdjacentElement("afterbegin", e);
-
-        e = document.createElement("button");
-        e.id = "ddbutton";
-        e.textContent = "Show Archive Download";
-        e.style = bs;
-        e.onclick = function () { return click2start(); };
+        e = newButton("ddbutton", "Show Archive Download", bs, downloadButton);
         pos.insertAdjacentElement("afterbegin", e);
-
         if (hid) hlexg();
+    }
+
+    function newButton(e_id, e_text, e_style, e_onclick) {
+        let e = document.createElement("button");
+        return Object.assign(e, {
+            id: e_id,
+            textContent: e_text,
+            style: e_style,
+            onclick: e_onclick,
+        });
     }
 
     function setApi() {
@@ -75,9 +71,8 @@
         } else if (link.indexOf("//e-hentai") != -1) {
             console.log(`${m}set api as ${eh}`);
             return eh;
-        } else {
-            return false;
         }
+        return false;
     }
 
     function hlexg() {
@@ -102,14 +97,12 @@
         });
     }
 
-    function click2start() {
-        if (api) {
-            document.getElementById("ddbutton").remove();
-            gallerylist();
-        }
+    function downloadButton() {
+        document.getElementById("ddbutton").remove();
+        galleryList();
     }
 
-    function gallerylist() {
+    function galleryList() {
         let gallery = document.querySelectorAll(".gl1t");
         let gc = 0;
         if (gallery) {
@@ -119,9 +112,7 @@
             let count = 0;
             let glist = [];
             gallery.forEach((ele, index) => {
-                let link = document.location.href.split("/")[2];
-                link = ele.querySelector(`a[href*='${domain}/g/']`).href;
-                link = link.split("/");
+                let link = ele.querySelector(`a[href*='${domain}/g/']`).href.split("/");
                 if (link[3] === "g") {
                     let gid = link[4];
                     let gtoken = link[5];
@@ -142,20 +133,20 @@
             console.log(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
             if (alldata.length != 0) {
                 console.log(`${m}start sending request`);
-                requestdata(alldata);
+                requestData(alldata);
             } else {
                 console.log(`${m}gallery queue is empty`);
             }
         }
     }
 
-    function requestdata(datalist) {
+    function requestData(datalist) {
         for (let index = 0; index < datalist.length; index++) {
             setTimeout(() => {
                 console.log(`${m}sending request${index + 1}`);
                 let data = datalist[index];
-                if (data) my_api_call(data, index + 1);
-            }, 3000 * index);
+                if (data) myApiCall(data, index + 1);
+            }, 1000 * index);
         }
     }
 
@@ -164,7 +155,6 @@
         console.log(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
 
         let list = GM_getValue(key, defaultValue);
-        console.log(list);
         if (list.length != 0) list.split(",");
 
         let gidlist = [];
@@ -173,29 +163,28 @@
             let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
             if (gallery) {
                 let ele = document.createElement("button");
-                ele.id = g.gid; // ele.id: string , g.gid: number
-                ele.className = "gdd";
-                ele.href = "#";
-                ele.style = "width: max-content; align-self: center;";
+                Object.assign(ele, {
+                    id: g.gid,
+                    className: "gdd",
+                    style: "width: max-content; align-self: center;",
+                    textContent: "Archive Download",
+                });
+                // ele.id: string , g.gid: number
                 ele.onclick = function () {
                     let s = document.getElementById(ele.id).style;
                     s.color = "gray";
                     s.backgroundColor = "transparent";
-                    updateDownloadedList(ele.id);
+                    updateList(ele.id);
                     return my_popUp(archivelink, 480, 320);
                 };
-                ele.textContent = "Archive Download";
-
                 if (list.indexOf(ele.id) != -1) {
                     ele.style.color = "gray";
                     ele.style.backgroundColor = "transparent";
                     console.log(`${m}gallery [${ele.id}] is in downloaded list, set as downloaded`);
                 }
-
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
                 pos.insertAdjacentElement("afterend", ele);
-
                 gidlist.push(ele.id);
             }
         });
@@ -203,11 +192,16 @@
     }
 
     function my_popUp(URL, w, h) {
-        window.open(URL, "_pu" + (Math.random() + "").replace(/0\./, ""), "toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0,width=" + w + ",height=" + h + ",left=" + ((screen.width - w) / 2) + ",top=" + ((screen.height - h) / 2));
+        window.open(
+            URL,
+            `_pu${Math.random().toString().replace(/0\./, "")}`,
+            `toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0
+            ,width=${w},height=${h},left=${(screen.width - w) / 2},top=${(screen.height - h) / 2}`
+        );
         return false;
     }
 
-    function my_api_call(data, index) {
+    function myApiCall(data, index) {
         let request = new XMLHttpRequest();
         request.open("POST", api);
         request.setRequestHeader("Content-Type", "application/json");
@@ -227,7 +221,7 @@
         request.send(JSON.stringify(data));
     }
 
-    function updateDownloadedList(gid) {
+    function updateList(gid) {
         let list = GM_getValue(key, defaultValue);
         if (list.length != 0) {
             let count = 0;
@@ -236,11 +230,9 @@
             if (list.indexOf(gid) != -1) return console.log(`${m}[${gid}] is already in the list, abort`);
 
             list.push(gid);
-            console.log(`${m}datasize:${listDataSize(list)}`);
-
-            while (listDataSize(list) > 4000) {
+            while (list.length > 10000) {
                 let r = list.shift();
-                console.log(`${m}reach limit, remove [${r}], newsize:${listDataSize(list)}`);
+                console.log(`${m}reach limit, remove [${r}]`);
                 count++;
                 if (count > 100) return console.log(`${m}unknow error while removing old data, script stop`);
             }
@@ -250,10 +242,6 @@
         }
         list = list.join();
         GM_setValue(key, list);
-        console.log(`${m}add [${gid}] to downloaded list`);
-    }
-
-    function listDataSize(list) {
-        return list.join().length;
+        console.log(`${m}add [${gid}] to list. [list_size:${list.length}, list_length:${list.split(",").length}]`);
     }
 })();

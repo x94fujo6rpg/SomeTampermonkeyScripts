@@ -14,16 +14,18 @@ this need some time to process
 now you have to click button to enable it (pervent too many requests)  
 
 v0.30: now it save recent downloaded gallerys in a list and set button as downloaded if it in list  
-the number of the list can save is about 450  
+the number of the list can save is ~~about 450~~  
 if reach the limit, it will delete the oldest data until lower the limit  
 ~~note: ex and eh cookie is separate~~(see below)  
 
 v0.31: ~~fix cookie path~~  
 ~~if you got [400 Bad request], use cookie editor like EditThisCookie to remove all "exhddl_list"~~  
 
-v0.32 switch from cookie to [Tampermonkey API storage](https://www.tampermonkey.net/documentation.php)  
-if you use any [v0.30] or [v0.31] or you got [400 Bad request] 
+v0.32: switch from cookie to [Tampermonkey API storage](https://www.tampermonkey.net/documentation.php)  
+if you use any [v0.30] or [v0.31] or you got [400 Bad request]  
 use cookie editor like EditThisCookie to remove all "exhddl_list"  
+
+v0.35: list limit up to 10000  
 
 [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change e-hentai/exhentai visited & unvisited link color  
