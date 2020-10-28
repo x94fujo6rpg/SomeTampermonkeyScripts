@@ -3,16 +3,14 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.35
+// @version      0.43
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
 // @exclude      https://e-hentai.org/mytags
-// @exclude      https://e-hentai.org/g/*
 // @exclude      https://e-hentai.org/mpv/*
 // @match        https://exhentai.org/*
 // @exclude      https://exhentai.org/mytags
-// @exclude      https://exhentai.org/g/*
 // @exclude      https://exhentai.org/mpv/*
 // @grant        GM_getValue
 // @grant        GM_setValue
@@ -27,17 +25,46 @@
     let m = "[ehx direct download]: ";
     let key = "exhddl_list";
     let defaultValue = [];
+    let debug = false;
     window.onload = main();
 
     function main() {
         api = setApi();
         domain = `https://${document.domain}`;
-        if (!domain || !api) return console.log(`${m}domain or api is missing`);
-        if (document.location.href.indexOf(".php") != -1) {
-            return console.log(`${m}see php, abort`);
+        if (!domain || !api) return print(`${m}domain or api is missing`);
+        let link = document.location.href;
+        if (link.includes(".php")) {
+            return print(`${m}see php, abort`);
+        } else if (link.includes("/g/")) {
+            print(`${m}gallery page`);
+            return setEvent(link);
         } else {
-            console.log(`${m}script start`);
+            print(`${m}normal start`);
             return setButton();
+        }
+    }
+
+    function setEvent(link) {
+        let la = link.split("/");
+        if (la[3] === "g") {
+            let gid = la[4];
+            let e = findEleByText("a", "Archive Download");
+            e.addEventListener("click", () => {
+                updateList(gid);
+            });
+            print(`${m}set trigger for updateList on gallery:${gid}`);
+        }
+    }
+
+    function findEleByText(type, string) {
+        let es = document.querySelectorAll(type);
+        for (let index in es) {
+            if (!isNaN(index)) {
+                let e = es[index];
+                if (e.textContent.includes(string)) {
+                    return e;
+                }
+            }
         }
     }
 
@@ -66,10 +93,10 @@
         let ex = "https://exhentai.org/api.php";
         let link = document.location.href;
         if (link.indexOf("//exhentai") != -1) {
-            console.log(`${m}set api as ${ex}`);
+            print(`${m}set api as ${ex}`);
             return ex;
         } else if (link.indexOf("//e-hentai") != -1) {
-            console.log(`${m}set api as ${eh}`);
+            print(`${m}set api as ${eh}`);
             return eh;
         }
         return false;
@@ -106,7 +133,7 @@
         let gallery = document.querySelectorAll(".gl1t");
         let gc = 0;
         if (gallery) {
-            console.log(`${m}acquire gallery data`);
+            print(`${m}acquire gallery data`);
             let data = { method: "gdata", gidlist: [], };
             let alldata = [];
             let count = 0;
@@ -130,12 +157,12 @@
                     }
                 }
             });
-            console.log(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
+            print(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
             if (alldata.length != 0) {
-                console.log(`${m}start sending request`);
+                print(`${m}start sending request`);
                 requestData(alldata);
             } else {
-                console.log(`${m}gallery queue is empty`);
+                print(`${m}gallery queue is empty`);
             }
         }
     }
@@ -143,7 +170,7 @@
     function requestData(datalist) {
         for (let index = 0; index < datalist.length; index++) {
             setTimeout(() => {
-                console.log(`${m}sending request${index + 1}`);
+                print(`${m}sending request${index + 1}`);
                 let data = datalist[index];
                 if (data) myApiCall(data, index + 1);
             }, 1000 * index);
@@ -152,7 +179,7 @@
 
     function directDL(data, index) {
         data = JSON.parse(data);
-        console.log(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
+        print(`${m}process data from request${index}, gallery count:${Object.keys(data.gmetadata).length}`);
 
         let list = GM_getValue(key, defaultValue);
         if (list.length != 0) list.split(",");
@@ -160,7 +187,9 @@
         let gidlist = [];
         data.gmetadata.forEach(g => {
             let archivelink = `${domain}/archiver.php?gid=${g.gid}&token=${g.token}&or=${g.archiver_key}`;
-            let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
+            let glink = `${domain}/g/${g.gid}/${g.token}/`;
+            // let gallery = document.querySelector(`a[href="${domain}/g/${g.gid}/${g.token}/"`);
+            let gallery = document.querySelector(`a[href="${glink}`);
             if (gallery) {
                 let ele = document.createElement("button");
                 Object.assign(ele, {
@@ -174,13 +203,14 @@
                     let s = document.getElementById(ele.id).style;
                     s.color = "gray";
                     s.backgroundColor = "transparent";
+                    visitGallery(glink);
                     updateList(ele.id);
                     return my_popUp(archivelink, 480, 320);
                 };
                 if (list.indexOf(ele.id) != -1) {
                     ele.style.color = "gray";
                     ele.style.backgroundColor = "transparent";
-                    console.log(`${m}gallery [${ele.id}] is in downloaded list, set as downloaded`);
+                    print(`${m}gallery [${ele.id}] is in downloaded list, set as downloaded`);
                 }
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
@@ -188,7 +218,7 @@
                 gidlist.push(ele.id);
             }
         });
-        console.log(`${m}request${index} done. gallery list:[${gidlist.join()}]`);
+        print(`${m}request${index} done. gallery list:[${gidlist.join()}]`);
     }
 
     function my_popUp(URL, w, h) {
@@ -209,16 +239,40 @@
         request.onreadystatechange = function () {
             if (request.readyState == 4) {
                 if (request.status == 200) {
-                    console.log(`${m}request${index} complete`);
+                    print(`${m}request${index} complete`);
                     return directDL(request.responseText, index);
                 } else {
-                    console.log(`${m}request${index} failed [status: ${request.status}]`);
-                    console.log(request);
+                    print(`${m}request${index} failed [status: ${request.status}]`);
+                    print(request);
                     return;
                 }
             }
         };
         request.send(JSON.stringify(data));
+    }
+
+    function visitGallery(link) {
+        if (link) {
+            // send request to server, not sure this count or not. (no effect to link states)
+            let r = new XMLHttpRequest();
+            r.open("get", link, true);
+            r.onreadystatechange = function () {
+                if (r.readyState == 4) {
+                    if (r.status == 200) {
+                        print(`${m}server request success, gallery:${link}`);
+                    } else {
+                        print(`${m}server request failed, gallery:${link}`);
+                        print(r);
+                    }
+                }
+            };
+            r.send();
+            // trigger :visited
+            let current = window.location.href;
+            history.pushState({}, "", link); // add link to history. this will change current winodw link.
+            print(`${m}add history, link:${window.location.href}`);
+            history.pushState({}, "", current); // change it back.
+        }
     }
 
     function updateList(gid) {
@@ -227,21 +281,25 @@
             let count = 0;
             list = list.split(",");
 
-            if (list.indexOf(gid) != -1) return console.log(`${m}[${gid}] is already in the list, abort`);
+            if (list.indexOf(gid) != -1) return print(`${m}[${gid}] is already in the list, abort`);
 
             list.push(gid);
             while (list.length > 10000) {
                 let r = list.shift();
-                console.log(`${m}reach limit, remove [${r}]`);
+                print(`${m}reach limit, remove [${r}]`);
                 count++;
-                if (count > 100) return console.log(`${m}unknow error while removing old data, script stop`);
+                if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
             }
         } else {
-            console.log(`${m}no list found, creat new list`);
+            print(`${m}no list found, creat new list`);
             list = [gid];
         }
         list = list.join();
         GM_setValue(key, list);
-        console.log(`${m}add [${gid}] to list. [list_size:${list.length}, list_length:${list.split(",").length}]`);
+        print(`${m}add [${gid}] to list. [list_size:${list.length}, list_length:${list.split(",").length}]`);
+    }
+
+    function print(any) {
+        if (debug) console.log(any);
     }
 })();

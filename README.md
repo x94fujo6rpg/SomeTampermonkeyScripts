@@ -27,8 +27,13 @@ use cookie editor like EditThisCookie to remove all "exhddl_list"
 
 v0.35: list limit up to 10000  
 
+v0.43: now it will update the list when you click archive download in gallery page  
+add new features when click archive download in list view:  
+1.send a request to server as you visited the gallery (not sure if this count)  
+2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) so it now trigger visited css style too  
+
 [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
-change e-hentai/exhentai visited & unvisited link color  
+change visited & unvisited link color  
 if you don't like default color, change it to any valid CSS color you want  
 ```js
 // unvisited link color
