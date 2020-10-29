@@ -71,3 +71,16 @@ click button to copy
 **only work for New UI**  
 show images direct link under title (only resized images)  
 ![](https://i.imgur.com/pw1fW6X.jpg)  
+
+[[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
+pornhub  
+in video page  
+replace [user link] to [user video list], except comment  
+it will try to go to */videos/public first  
+if it doesn't exist, auto redirect to */videos  
+add a button to copy link of current page  
+
+in user video list  
+add checkbox for each video and a textbox on top to select and copy links  
+make upload time visable  
+[effect](https://i.imgur.com/lL6sJZX.png)  
