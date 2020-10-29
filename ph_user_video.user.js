@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.02
+// @version      0.03
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/view_video.php?viewkey=*
@@ -98,6 +98,7 @@
 
         replaceLink("relatedVideosCenter");
         replaceLink("recommendedVideos");
+        replaceLink("p2vVideosVPage");
 
         let button = newButton("myButtonB", "Copy Video link", copyLink);
         let div = document.createElement("div");
@@ -113,13 +114,15 @@
     }
 
     function replaceLink(targetid) {
-        let target = document.getElementById(targetid).querySelectorAll(".usernameWrap");
-        target.forEach(e => {
-            let a = e.querySelector("a");
-            let alink = `${a.href}/videos/public`;
-            a.href = alink;
-            //console.log(alink);
-        });
+        let target = document.getElementById(targetid);
+        if (target) {
+            target = target.querySelectorAll(".usernameWrap");
+            target.forEach(e => {
+                let a = e.querySelector("a");
+                let alink = `${a.href}/videos/public`;
+                a.href = alink;
+            });
+        }
     }
 
     function reDirect(link) {
