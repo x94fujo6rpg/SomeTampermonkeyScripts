@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.01
+// @version      0.02
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/view_video.php?viewkey=*
@@ -90,9 +90,11 @@
     function setLink() {
         let info = document.querySelector(".video-detailed-info");
         info = info.querySelector(".usernameBadgesWrapper");
-        info = info.querySelector("a");
-        let link = `${info.href}/videos/public`;
-        info.setAttribute("href", link);
+        if (info) {
+            info = info.querySelector("a");
+            let link = `${info.href}/videos/public`;
+            info.setAttribute("href", link);
+        }
 
         replaceLink("relatedVideosCenter");
         replaceLink("recommendedVideos");
@@ -116,7 +118,7 @@
             let a = e.querySelector("a");
             let alink = `${a.href}/videos/public`;
             a.href = alink;
-            console.log(alink);
+            //console.log(alink);
         });
     }
 
