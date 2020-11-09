@@ -73,7 +73,7 @@ let separator = "、";
 ```
 automatic convert forbidden characters  
 ```
-<>:"/|?*\\
+<>:"/|?*\
 to
 ＜＞："／｜？＊＼;
 ```
