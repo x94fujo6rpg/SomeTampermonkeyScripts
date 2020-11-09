@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.38
+// @version      0.39
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -14,7 +14,7 @@
 
 (function () {
     'use strict';
-    let debug = false;
+    let debug = true;
     let datalist = [];
     let formatted_data = {
         id: "",
@@ -39,6 +39,7 @@
     let default_format = "%id% %title_formatted%";
     let default_adv = false;
     let separator = "、";
+    let oldUI = true;
 
     let format_setting = GM_getValue(key_format, default_format);
     print(`${key_format}: ${format_setting}`);
@@ -384,6 +385,24 @@
 
         let id = formatted_data.id;
         //------------------------------------------------------
+        let title_original = formatted_data.title_original;
+        // ID + original title
+        if (oldUI) {
+            let original = document.createElement("span");
+            original.textContent = parseFormattedString("%id% %title_original%");
+            pos.append(original);
+            appendNewLine(pos);
+        }
+        //------------------------------------------------------
+        // ID + formatted title
+        let title_formatted = formatted_data.title_formatted;
+        if (title_formatted != title_original && oldUI && false) {
+            let span = document.createElement("span");
+            span.textContent = parseFormattedString("%id% %title_formatted%");
+            pos.append(span);
+            pos.append(newline());
+        }
+        //------------------------------------------------------
         // custom title
         let span = newSpan(parseFormattedString(format_setting));
         span.className = "";
@@ -395,6 +414,24 @@
         custom_button.setAttribute("id", "format_title_custom_button");
         pos.append(custom_button);
         appendNewLine(pos);
+        //------------------------------------------------------
+        // add copy ID button
+        pos.append(newCopyButton(id));
+        appendNewLine(pos);
+        //------------------------------------------------------   
+        // add copy Original / ID+Original button
+        if (oldUI) {
+            pos.append(newCopyButton(title_original));
+            pos.append(newCopyButton(`${id} ${title_original}`));
+            appendNewLine(pos);
+        }
+        //------------------------------------------------------
+        // add copy Formatted / ID+Formatted button
+        if (title_formatted != title_original && oldUI && false) {
+            pos.append(newCopyButton(title_formatted));
+            pos.append(newCopyButton(`${id} ${title_formatted}`));
+            appendNewLine(pos);
+        }
         //------------------------------------------------------
         // creat track list if any
         let list = tracklist();
