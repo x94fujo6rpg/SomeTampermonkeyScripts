@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.41
+// @version      0.43
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -40,14 +40,19 @@
     let default_adv = false;
     let updateid;
 
+    let half = "1234567890()[]{}~!@#$%^&_+-=;':,.()";
+    let full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）";
+    let forbidden = `<>:"/|?*\\`;
+    let replacer = `＜＞："／｜？＊＼`;
+
     let separator = "、"; // separator for data like %tags%
     let oldUI_original_title = true; // Original / ID+Original button
     let oldUI_formatted_title = false; // Formatted / ID+Formatted button
 
     let format_setting = GM_getValue(key_format, default_format);
-    print(`${key_format}: ${format_setting}`);
-
     let adv = GM_getValue(key_adv, default_adv);
+
+    print(`${key_format}: ${format_setting}`);
     print(`${key_adv}: ${adv}`);
 
     window.onload = function () {
@@ -77,7 +82,7 @@
         Object.assign(formatted_data, {
             id: sitedata.id,
             title_original: sitedata.name,
-            title_formatted: repalceForbiddenChar(stringFormatter(sitedata.name)),
+            title_formatted: stringFormatter(sitedata.name),
             circle: circle,
             Year: Y,
             year: Y.slice(2),
@@ -105,19 +110,18 @@
                 if (isInList(text, parselist[key], formatted_data[key])) {
                     all = [];
                     th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
-                    formatted_data[key] = all.join(separator);
+                    formatted_data[key] = stringFormatter(all.join(separator));
                 }
             });
         }
 
         let tagpart = document
-            .getElementById("work_right_inner").querySelector("div.main_genre")
+            .getElementById("work_right_inner")
+            .querySelector("div.main_genre")
             .querySelectorAll("a");
         let tags = [];
-        tagpart.forEach(a => {
-            tags.push(a.textContent);
-        });
-        formatted_data.tags = repalceForbiddenChar(stringFormatter(tags.join(separator)));
+        tagpart.forEach(a => tags.push(a.textContent));
+        formatted_data.tags = stringFormatter(tags.join(separator));
     }
 
     function isInList(text, list, data) {
@@ -128,9 +132,16 @@
     }
 
     function stringFormatter(text) {
+        text = removeExcess(text);
+        text = toHalfWidth(text);
+        text = repalceForbiddenChar(text);
+        return text;
+    }
+
+    function removeExcess(text) {
         // remove excess text 【...】
         let count = 0;
-        while (text.indexOf("【") != -1 && count < 100) {
+        while (text.indexOf("【") != -1 && count < 999) {
             let start = text.indexOf("【");
             let end = text.indexOf("】") + 1;
             let removestr = "";
@@ -142,7 +153,6 @@
             text = text.replace(removestr, "").trim();
             count++;
         }
-
         // remove『』if it at start & end
         if (text.indexOf("『" === 0 && text.indexOf("』") === text.length - 1)) {
             text = text.replace("『", "").replace("』", "").trim();
@@ -150,14 +160,28 @@
         return text;
     }
 
+    function toHalfWidth(text) {
+        for (let index in half) {
+            let h = half[index];
+            let f = full[index];
+            let count = 0;
+            while (text.indexOf(f) != -1 && count < 999) {
+                text = text.replace(f, h);
+                count++;
+            }
+        }
+        return text;
+    }
+
     function repalceForbiddenChar(text) {
-        let forbidden = `<>:"/|?*\\`;
-        let replacer = `＜＞："／｜？＊＼`;
         for (let index in forbidden) {
             let fb = forbidden[index];
             let rp = replacer[index];
-            let rm = text.indexOf(fb);
-            if (rm != -1) text = text.replace(fb, rp);
+            let count = 0;
+            while (text.indexOf(fb) != -1 && count < 999) {
+                text = text.replace(fb, rp);
+                count++;
+            }
         }
         return text;
     }
@@ -254,9 +278,7 @@
         appendNewLine(box);
         appendNewLine(box);
         //------------------------------------------------------
-        datalist.forEach(s => {
-            box.appendChild(newDataButton(`+${s}`, `%${s}%`));
-        });
+        datalist.forEach(s => box.appendChild(newDataButton(`+${s}`, `%${s}%`)));
         appendNewLine(box);
         //------------------------------------------------------
         let textarea;
@@ -292,7 +314,7 @@
             onclick: saveSetting,
         });
         box.appendChild(button);
-        box.appendChild(newseparate());
+        box.appendChild(newSeparate());
 
         button = document.createElement("button");
         Object.assign(button, {
@@ -300,7 +322,7 @@
             onclick: () => document.getElementById("format_title_setting").value = default_format,
         });
         box.appendChild(button);
-        box.appendChild(newseparate());
+        box.appendChild(newSeparate());
 
         button = document.createElement("button");
         Object.assign(button, {
@@ -373,12 +395,12 @@
         textarea.value = textarea.value.trim();
     }
 
-    function makeDateList() {
+    function makeDataList() {
         for (let key in formatted_data) datalist.push(key);
     }
 
     function main() {
-        makeDateList();
+        makeDataList();
         getData();
         myCss();
         setting();
@@ -404,7 +426,7 @@
             let span = document.createElement("span");
             span.textContent = parseFormattedString("%id% %title_formatted%");
             pos.append(span);
-            pos.append(newline());
+            pos.append(newLine());
         }
         //------------------------------------------------------
         // custom title
@@ -463,9 +485,9 @@
                 textbox.setSelectionRange(0, 99999);
                 document.execCommand("copy");
             };
-            textbox.insertAdjacentElement("afterend", newline());
+            textbox.insertAdjacentElement("afterend", newLine());
             textbox.insertAdjacentElement("afterend", copyall);
-            textbox.insertAdjacentElement("afterend", newline());
+            textbox.insertAdjacentElement("afterend", newLine());
         }
     }
 
@@ -487,11 +509,11 @@
         ele.appendChild(document.createElement("br"));
     }
 
-    function newline() {
+    function newLine() {
         return document.createElement("br");
     }
 
-    function newseparate() {
+    function newSeparate() {
         let ele = document.createElement("span");
         ele.textContent = " / ";
         return ele;
