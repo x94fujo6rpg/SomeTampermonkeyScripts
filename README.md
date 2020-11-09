@@ -2,10 +2,10 @@
 some scripts I made  
 click link to install  
 
-[[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
+## [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
 remove bilibili article copy protection  
 
-[[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
+## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
 add button for each gallery in list view to use archive download directly  
 because there is a limit on how many requests you can send at once  
@@ -32,7 +32,7 @@ add new features when click archive download in list view:
 1.send a request to server as you visited the gallery (not sure if this count)  
 2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) so it now trigger visited css style too  
 
-[[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
+## [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change visited & unvisited link color  
 if you don't like default color, change it to any valid CSS color you want  
 ```js
@@ -48,7 +48,7 @@ let eh_v = "gray";
 because of the security risk, visited link color many not work in some browser  
 see [https://dbaron.org/mozilla/visited-privacy](https://dbaron.org/mozilla/visited-privacy)  
 
-[[ehx torrent text]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)  
+## [[ehx torrent text]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)  
 click to copy torrent name in torrent page  
 event is from first parentheses in the name, may not correct  
 auto close window after copy  
@@ -57,12 +57,12 @@ if you don't want it close, set this value to false
 let autoclose = true;
 ``` 
 
-[[mangaoh title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)  
+## [[mangaoh title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)  
 reformat date & title in search result  
 click button to copy  
 ![](https://i.imgur.com/amKQlOX.jpg)  
 
-[[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
+## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text  
 click button to copy  
 
@@ -80,12 +80,12 @@ to
 ![](https://i.imgur.com/CEhDo9A.png)  
 
 
-[[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
+## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
 show images direct link under title (only resized images)  
 ![](https://i.imgur.com/pw1fW6X.jpg)  
 
-[[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
+## [[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
 pornhub  
 in video page  
 replace [user link] to [user video list], except comment  
@@ -99,6 +99,6 @@ make upload time visable
 [effect](https://i.imgur.com/lL6sJZX.png)  
 
 
-[[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
+## [[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
 normalize url in video description  
 remove miniplayer (still activated when you watch in playlist)  
