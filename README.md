@@ -79,6 +79,12 @@ to
 ```
 ![](https://i.imgur.com/CEhDo9A.png)  
 
+v0.41: add old button back  
+edit code to enable / disable  
+```js
+let oldUI_original_title = true; // Original / ID+Original button
+let oldUI_formatted_title = false; // Formatted / ID+Formatted button
+```
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  

@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.39
+// @version      0.41
 // @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -14,7 +14,7 @@
 
 (function () {
     'use strict';
-    let debug = true;
+    let debug = false;
     let datalist = [];
     let formatted_data = {
         id: "",
@@ -38,8 +38,11 @@
     let key_adv = "format_adv";
     let default_format = "%id% %title_formatted%";
     let default_adv = false;
-    let separator = "、";
-    let oldUI = true;
+    let updateid;
+
+    let separator = "、"; // separator for data like %tags%
+    let oldUI_original_title = true; // Original / ID+Original button
+    let oldUI_formatted_title = false; // Formatted / ID+Formatted button
 
     let format_setting = GM_getValue(key_format, default_format);
     print(`${key_format}: ${format_setting}`);
@@ -163,7 +166,6 @@
         let s = document.getElementById("format_title_setting");
         let p = document.getElementById("format_title_preview");
         let cb = document.getElementById("format_title_custom_button");
-
         if (s.value.length > 0) {
             if (format_setting != s.value) {
                 format_setting = s.value;
@@ -202,10 +204,12 @@
                     ele.style.display = "none";
                     this.value = "open";
                     this.textContent = "open format setting";
+                    clearInterval(updateid);
                 } else {
                     ele.style.display = "";
                     this.value = "close";
                     this.textContent = "close format setting";
+                    updateid = setInterval(updateSetting, 100);
                 }
             },
         });
@@ -319,7 +323,7 @@
 
         listAllData();
 
-        setInterval(updateSetting, 100);
+        updateSetting();
     }
 
     function listAllData() {
@@ -387,7 +391,7 @@
         //------------------------------------------------------
         let title_original = formatted_data.title_original;
         // ID + original title
-        if (oldUI) {
+        if (oldUI_original_title) {
             let original = document.createElement("span");
             original.textContent = parseFormattedString("%id% %title_original%");
             pos.append(original);
@@ -396,7 +400,7 @@
         //------------------------------------------------------
         // ID + formatted title
         let title_formatted = formatted_data.title_formatted;
-        if (title_formatted != title_original && oldUI && false) {
+        if (title_formatted != title_original && oldUI_formatted_title) {
             let span = document.createElement("span");
             span.textContent = parseFormattedString("%id% %title_formatted%");
             pos.append(span);
@@ -404,13 +408,14 @@
         }
         //------------------------------------------------------
         // custom title
-        let span = newSpan(parseFormattedString(format_setting));
+        let custom_title = parseFormattedString(format_setting);
+        let span = newSpan(custom_title);
         span.className = "";
         pos.append(span);
         appendNewLine(pos);
         //------------------------------------------------------
         // add copy custom format button
-        let custom_button = newCopyButton(parseFormattedString(format_setting));
+        let custom_button = newCopyButton(custom_title);
         custom_button.setAttribute("id", "format_title_custom_button");
         pos.append(custom_button);
         appendNewLine(pos);
@@ -420,14 +425,14 @@
         appendNewLine(pos);
         //------------------------------------------------------   
         // add copy Original / ID+Original button
-        if (oldUI) {
+        if (oldUI_original_title) {
             pos.append(newCopyButton(title_original));
             pos.append(newCopyButton(`${id} ${title_original}`));
             appendNewLine(pos);
         }
         //------------------------------------------------------
         // add copy Formatted / ID+Formatted button
-        if (title_formatted != title_original && oldUI && false) {
+        if (title_formatted != title_original && oldUI_formatted_title) {
             pos.append(newCopyButton(title_formatted));
             pos.append(newCopyButton(`${id} ${title_formatted}`));
             appendNewLine(pos);
