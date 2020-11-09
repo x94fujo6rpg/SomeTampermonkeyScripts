@@ -91,3 +91,8 @@ in user video list
 add checkbox for each video and a textbox on top to select and copy links  
 make upload time visable  
 [effect](https://i.imgur.com/lL6sJZX.png)  
+
+
+[[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
+normalize url in video description  
+remove miniplayer (still activated when you watch in playlist)  
