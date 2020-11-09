@@ -66,10 +66,16 @@ click button to copy
 remove title link / remove excess text  
 click button to copy  
 
-v0.38: now can be custom to any format you want
-chagne separator in code (I'm too tired to make a new setting for this)
+v0.38: now can be custom to any format you want  
+chagne separator in code (I'm too tired to make a new setting for this)  
 ```js
 let separator = "、";
+```
+automatic convert forbidden characters  
+```
+<>:"/|?*\\
+to
+＜＞："／｜？＊＼;
 ```
 ![](https://i.imgur.com/CEhDo9A.png)  
 
