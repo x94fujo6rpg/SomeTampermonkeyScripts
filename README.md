@@ -1,5 +1,5 @@
 # SomeTampermonkeyScripts  
-some scripts I use  
+some scripts I made  
 click link to install  
 
 [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
@@ -65,7 +65,14 @@ click button to copy
 [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text  
 click button to copy  
-![](https://i.imgur.com/1IEqFnA.jpg)  
+
+v0.38: now can be custom to any format you want
+chagne separator in code (I'm too tired to make a new setting for this)
+```js
+let separator = "、";
+```
+![](https://i.imgur.com/CEhDo9A.png)  
+
 
 [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
