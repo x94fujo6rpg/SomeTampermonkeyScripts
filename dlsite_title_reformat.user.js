@@ -3,8 +3,8 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.43
-// @description  remove title link / remove excess text / click button to copy
+// @version      0.45
+// @description  remove title link / remove excess text / custum title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
 // @match        https://www.dlsite.com/home/work/=/product_id/*
@@ -47,12 +47,12 @@
 
     let separator = "、"; // separator for data like %tags%
     let oldUI_original_title = true; // Original / ID+Original button
-    let oldUI_formatted_title = false; // Formatted / ID+Formatted button
+    let oldUI_default_format_title = true; // DefaultFormat / ID+DefaultFormat button
 
     let format_setting = GM_getValue(key_format, default_format);
-    let adv = GM_getValue(key_adv, default_adv);
-
     print(`${key_format}: ${format_setting}`);
+
+    let adv = GM_getValue(key_adv, default_adv);
     print(`${key_adv}: ${adv}`);
 
     window.onload = function () {
@@ -111,6 +111,7 @@
                     all = [];
                     th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
                     formatted_data[key] = stringFormatter(all.join(separator));
+                    delete parselist[key];
                 }
             });
         }
@@ -189,20 +190,17 @@
     function updateSetting() {
         let s = document.getElementById("format_title_setting");
         let p = document.getElementById("format_title_preview");
-        let cb = document.getElementById("format_title_custom_button");
+        let cs = document.getElementById("format_title_custom_span");
+        // let cb = document.getElementById("format_title_custom_button");
         if (s.value.length > 0) {
             if (format_setting != s.value) {
                 format_setting = s.value;
-                let newformatted = parseFormattedString(format_setting);
-                p.value = newformatted;
-                Object.assign(cb, {
-                    textContent: newformatted,
-                });
+                cs.textContent = p.value = parseFormatString(format_setting);
             }
         }
     }
 
-    function parseFormattedString(string = "") {
+    function parseFormatString(string = "") {
         let formatted_text = string;
         datalist.forEach(key => {
             let count = 0;
@@ -301,36 +299,24 @@
             id: "format_title_preview",
             readOnly: true,
             rows: 1,
-            value: parseFormattedString(format_setting),
+            value: parseFormatString(format_setting),
         });
         box.appendChild(newSpan("format preview:"));
         appendNewLine(box);
         box.appendChild(textarea);
         appendNewLine(box);
         //------------------------------------------------------
-        button = document.createElement("button");
-        Object.assign(button, {
-            textContent: "save",
-            onclick: saveSetting,
-        });
-        box.appendChild(button);
+        box.appendChild(newButton("save", saveSetting));
         box.appendChild(newSeparate());
 
-        button = document.createElement("button");
-        Object.assign(button, {
-            textContent: "default",
-            onclick: () => document.getElementById("format_title_setting").value = default_format,
-        });
-        box.appendChild(button);
+        box.appendChild(newButton("default", () => {
+            document.getElementById("format_title_setting").value = default_format;
+        }));
         box.appendChild(newSeparate());
 
-        button = document.createElement("button");
-        Object.assign(button, {
-            textContent: "clear",
-            onclick: () => document.getElementById("format_title_setting").value = "",
-        });
-        box.appendChild(button);
-
+        box.appendChild(newButton("clear", () => {
+            document.getElementById("format_title_setting").value = "";
+        }));
         appendNewLine(box);
         appendNewLine(box);
         //------------------------------------------------------
@@ -369,13 +355,19 @@
         });
     }
 
-    function newDataButton(btext, format_string) {
-        let newbutton = document.createElement("button");
-        Object.assign(newbutton, {
+    function newButton(btext, onclick) {
+        let _button = document.createElement("button");
+        Object.assign(_button, {
             textContent: btext,
-            onclick: () => updateSettingString("format_title_setting", format_string),
+            onclick: onclick,
         });
-        return newbutton;
+        return _button;
+    }
+
+    function newDataButton(btext, format_string) {
+        return newButton(btext, () => {
+            updateSettingString("format_title_setting", format_string);
+        });
     }
 
     function updateSettingString(id, format_string) {
@@ -410,88 +402,89 @@
         pos = pos.parentNode;
 
         let id = formatted_data.id;
+        let title_o = formatted_data.title_original;
+        let title_f = formatted_data.title_formatted;
+        let title_id_c = parseFormatString(format_setting);
+        let title_id_o = `${id} ${title_o}`;
+        let title_id_f = `${id} ${title_f}`;
+        let notSame_o_c = title_id_o != title_id_c;
+        let notSame_f_c_o = title_id_f != (title_id_c || title_id_o);
         //------------------------------------------------------
-        let title_original = formatted_data.title_original;
         // ID + original title
-        if (oldUI_original_title) {
-            let original = document.createElement("span");
-            original.textContent = parseFormattedString("%id% %title_original%");
-            pos.append(original);
+        if (notSame_o_c && oldUI_original_title) {
+            pos.append(newSpan(title_id_o, ""));
             appendNewLine(pos);
         }
         //------------------------------------------------------
         // ID + formatted title
-        let title_formatted = formatted_data.title_formatted;
-        if (title_formatted != title_original && oldUI_formatted_title) {
-            let span = document.createElement("span");
-            span.textContent = parseFormattedString("%id% %title_formatted%");
-            pos.append(span);
-            pos.append(newLine());
+        if (notSame_f_c_o && oldUI_default_format_title) {
+            pos.append(newSpan(title_id_f, ""));
+            appendNewLine(pos);
         }
         //------------------------------------------------------
         // custom title
-        let custom_title = parseFormattedString(format_setting);
-        let span = newSpan(custom_title);
-        span.className = "";
+        let span = newSpan(title_id_c, "");
+        span.id = "format_title_custom_span";
         pos.append(span);
-        appendNewLine(pos);
-        //------------------------------------------------------
-        // add copy custom format button
-        let custom_button = newCopyButton(custom_title);
-        custom_button.setAttribute("id", "format_title_custom_button");
-        pos.append(custom_button);
         appendNewLine(pos);
         //------------------------------------------------------
         // add copy ID button
         pos.append(newCopyButton(id));
-        appendNewLine(pos);
+        pos.append(newSeparate());
+        //------------------------------------------------------
+        // add copy custom format button
+        let custom_button = newCopyButton(document.getElementById("format_title_custom_span").textContent, "Custom");
+        custom_button.id = "format_title_custom_button";
+        pos.append(custom_button);
+        pos.append(newSeparate());
         //------------------------------------------------------   
         // add copy Original / ID+Original button
-        if (oldUI_original_title) {
-            pos.append(newCopyButton(title_original));
-            pos.append(newCopyButton(`${id} ${title_original}`));
-            appendNewLine(pos);
+        if (notSame_o_c && oldUI_original_title) {
+            pos.append(newCopyButton(title_o, "Original"));
+            pos.append(newCopyButton(title_id_o, "ID+Original"));
         }
         //------------------------------------------------------
         // add copy Formatted / ID+Formatted button
-        if (title_formatted != title_original && oldUI_formatted_title) {
-            pos.append(newCopyButton(title_formatted));
-            pos.append(newCopyButton(`${id} ${title_formatted}`));
-            appendNewLine(pos);
+        if (notSame_f_c_o && oldUI_default_format_title) {
+            pos.append(newSeparate());
+            pos.append(newCopyButton(title_f, "DefaultFormat"));
+            pos.append(newCopyButton(title_id_f, "ID+DefaultFormat"));
         }
         //------------------------------------------------------
         // creat track list if any
-        let list = tracklist();
-        if (list) {
-            let pos = document.querySelector("[itemprop='description']").childNodes[2];
-            let textbox = document.createElement("textarea");
-            let count = 0;
-            let maxlength = 0;
-            list.forEach(line => {
-                textbox.value += `${line}\n`;
-                count++;
-                if (line.length > maxlength) maxlength = line.length;
-            });
-            Object.assign(textbox, {
-                name: "mytracklist",
-                rows: count + 1,
-                cols: maxlength * 2,
-            });
-            pos.insertAdjacentElement("afterbegin", textbox);
-            let copyall = document.createElement("button");
-            copyall.textContent = "Copy All";
-            copyall.onclick = function () {
-                textbox.select();
-                textbox.setSelectionRange(0, 99999);
-                document.execCommand("copy");
-            };
-            textbox.insertAdjacentElement("afterend", newLine());
-            textbox.insertAdjacentElement("afterend", copyall);
-            textbox.insertAdjacentElement("afterend", newLine());
-        }
+        let list = gettracklist();
+        if (list) addTracklist(list);
     }
 
-    function tracklist() {
+    function addTracklist(list) {
+        let pos = document.querySelector("[itemprop='description']").childNodes[2];
+        let textbox = document.createElement("textarea");
+        let count = 0;
+        let maxlength = 0;
+        list.forEach(line => {
+            textbox.value += `${line}\n`;
+            count++;
+            if (line.length > maxlength) maxlength = line.length;
+        });
+        Object.assign(textbox, {
+            name: "mytracklist",
+            rows: count + 1,
+            cols: maxlength * 2,
+        });
+        pos.insertAdjacentElement("afterbegin", textbox);
+        let copyall = document.createElement("button");
+        copyall.textContent = "Copy All";
+        copyall.onclick = function () {
+            textbox.select();
+            textbox.setSelectionRange(0, 99999);
+            document.execCommand("copy");
+        };
+        textbox.insertAdjacentElement("afterend", newLine());
+        textbox.insertAdjacentElement("afterend", copyall);
+        textbox.insertAdjacentElement("afterend", newLine());
+    }
+
+    function gettracklist() {
         let list = document.querySelector(".work_tracklist");
         if (list) {
             let tracklist = [];
@@ -519,19 +512,22 @@
         return ele;
     }
 
-    function newCopyButton(btext) {
-        let newbutton = document.createElement("button");
-        Object.assign(newbutton, {
-            textContent: btext,
-            onclick: () => navigator.clipboard.writeText(newbutton.textContent),
-        });
-        return newbutton;
+    function newCopyButton(copytext, btext = "") {
+        if (btext === "") {
+            return newButton(copytext, () => {
+                navigator.clipboard.writeText(copytext);
+            });
+        } else {
+            return newButton(btext, () => {
+                navigator.clipboard.writeText(copytext);
+            });
+        }
     }
 
-    function newSpan(text) {
+    function newSpan(text, className = "dtr_textsize05") {
         let span = document.createElement("span");
         Object.assign(span, {
-            className: "dtr_textsize05",
+            className: className,
             textContent: text,
         });
         return span;
@@ -558,7 +554,7 @@
         `;
     }
 
-    function print(any) {
-        if (debug) console.log(any);
+    function print(...any) {
+        if (debug) console.log(...any);
     }
 })();

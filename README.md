@@ -13,24 +13,24 @@ this need some time to process
 ~~warning: don't open new page rapidly when you using this, it may trigger api limit protection~~  
 now you have to click button to enable it (pervent too many requests)  
 
-v0.30: now it save recent downloaded gallerys in a list and set button as downloaded if it in list  
-the number of the list can save is ~~about 450~~  
-if reach the limit, it will delete the oldest data until lower the limit  
-~~note: ex and eh cookie is separate~~(see below)  
+v0.43: now it will update the list when you click archive download in gallery page  
+add new features when click archive download in list view:  
+1.send a request to server as you visited the gallery (not sure if this count)  
+2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) so it now trigger visited css style too  
 
-v0.31: ~~fix cookie path~~  
-~~if you got [400 Bad request], use cookie editor like EditThisCookie to remove all "exhddl_list"~~  
+v0.35: list limit up to 10000  
 
 v0.32: switch from cookie to [Tampermonkey API storage](https://www.tampermonkey.net/documentation.php)  
 if you use any [v0.30] or [v0.31] or you got [400 Bad request]  
 use cookie editor like EditThisCookie to remove all "exhddl_list"  
 
-v0.35: list limit up to 10000  
+v0.31: ~~fix cookie path~~  
+~~if you got [400 Bad request], use cookie editor like EditThisCookie to remove all "exhddl_list"~~  
 
-v0.43: now it will update the list when you click archive download in gallery page  
-add new features when click archive download in list view:  
-1.send a request to server as you visited the gallery (not sure if this count)  
-2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) so it now trigger visited css style too  
+v0.30: now it save recent downloaded gallerys in a list and set button as downloaded if it in the list  
+the number of the list can save is ~~about 450~~  
+if reach the limit, it will delete the oldest data until lower the limit  
+~~note: ex and eh cookie is separate~~  
 
 ## [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change visited & unvisited link color  
@@ -63,28 +63,26 @@ click button to copy
 ![](https://i.imgur.com/amKQlOX.jpg)  
 
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
-remove title link / remove excess text  
+remove title link / remove excess text / custum title format  
 click button to copy  
 
+v0.45: rearrange buttons (use less space)  
+now old buttons only appear when:  
+original != custom  
+default_format != (original or custom)  
+
+v0.41: add old button back, edit code to enable / disable  
+```js
+let oldUI_original_title = true; // Original / ID+Original button
+let oldUI_default_format_title = false; // DefaultFormat / ID+DefaultFormat button
+```
 v0.38: now can be custom to any format you want  
 chagne separator in code (I'm too tired to make a new setting for this)  
 ```js
 let separator = "、";
 ```
-automatic convert forbidden characters  
-```
-<>:"/|?*\
-to
-＜＞："／｜？＊＼;
-```
+automatic convert forbidden characters (<>:"/|?*\\) to fullwidth
 ![](https://i.imgur.com/CEhDo9A.png)  
-
-v0.41: add old button back  
-edit code to enable / disable  
-```js
-let oldUI_original_title = true; // Original / ID+Original button
-let oldUI_formatted_title = false; // Formatted / ID+Formatted button
-```
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
@@ -95,12 +93,13 @@ show images direct link under title (only resized images)
 pornhub  
 in video page  
 replace [user link] to [user video list], except comment  
-it will try to go to */videos/public first  
-if it doesn't exist, auto redirect to */videos  
+it will try to go to ```user/videos/public``` first  
+if it doesn't exist, auto redirect to ```user/videos```  
 add a button to copy link of current page  
 
 in user video list  
 add checkbox for each video and a textbox on top to select and copy links  
+
 make upload time visable  
 [effect](https://i.imgur.com/lL6sJZX.png)  
 
