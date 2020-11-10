@@ -196,7 +196,7 @@
             if (format_setting != s.value) {
                 format_setting = s.value;
                 let formatted = parseFormatString(format_setting);
-                cs.textContent = p.value = parseFormatString(format_setting);
+                cs.textContent = p.value = formatted;
                 cb.onclick = () => navigator.clipboard.writeText(formatted);
             }
         }
