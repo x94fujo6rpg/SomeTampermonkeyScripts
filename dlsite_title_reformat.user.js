@@ -3,8 +3,8 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.45
-// @description  remove title link / remove excess text / custum title format / click button to copy
+// @version      0.46
+// @description  remove title link / remove excess text / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
 // @match        https://www.dlsite.com/home/work/=/product_id/*
@@ -14,7 +14,7 @@
 
 (function () {
     'use strict';
-    let debug = false;
+    let debug = true;
     let datalist = [];
     let formatted_data = {
         id: "",
@@ -191,11 +191,13 @@
         let s = document.getElementById("format_title_setting");
         let p = document.getElementById("format_title_preview");
         let cs = document.getElementById("format_title_custom_span");
-        // let cb = document.getElementById("format_title_custom_button");
+        let cb = document.getElementById("format_title_custom_button");
         if (s.value.length > 0) {
             if (format_setting != s.value) {
                 format_setting = s.value;
+                let formatted = parseFormatString(format_setting);
                 cs.textContent = p.value = parseFormatString(format_setting);
+                cb.onclick = () => navigator.clipboard.writeText(formatted);
             }
         }
     }
@@ -433,7 +435,7 @@
         pos.append(newSeparate());
         //------------------------------------------------------
         // add copy custom format button
-        let custom_button = newCopyButton(document.getElementById("format_title_custom_span").textContent, "Custom");
+        let custom_button = newCopyButton(title_id_c, "Custom");
         custom_button.id = "format_title_custom_button";
         pos.append(custom_button);
         pos.append(newSeparate());
