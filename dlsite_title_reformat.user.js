@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.47
+// @version      0.48
 // @description  remove title link / remove excess text / custum title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -14,8 +14,7 @@
 
 (function () {
     'use strict';
-    let debug = false;
-    let datalist = [];
+    let debug = true;
     let formatted_data = {
         id: "",
         title_original: "",
@@ -34,6 +33,7 @@
         type: "",
         tags: "",
     };
+    let data_list = Object.keys(formatted_data);
     let key_format = "format_seting";
     let key_adv = "format_adv";
     let default_format = "%id% %title_formatted%";
@@ -61,14 +61,17 @@
 
     function saveSetting() {
         GM_setValue(key_adv, adv);
-        print(`save ${key_adv}: ${adv}`);
+        print(`saved ${key_adv}: ${adv}`);
         if (format_setting.length > 0) {
             GM_setValue(key_format, format_setting);
-            print(`save ${key_format}: ${format_setting}`);
+            print(`saved ${key_format}: ${format_setting}`);
+        } else {
+            print(`${key_format} not saved cus is empty`);
         }
     }
 
     function getData() {
+        console.time(getData.name);
         let sitedata = contents.detail[0];
 
         let [Y, m, d] = sitedata.regist_date.split("/");
@@ -83,7 +86,7 @@
             id: sitedata.id,
             title_original: sitedata.name,
             title_formatted: stringFormatter(sitedata.name),
-            circle: circle,
+            circle: stringFormatter(circle),
             Year: Y,
             year: Y.slice(2),
             month: m,
@@ -104,19 +107,18 @@
 
         let text;
         let all = [];
-        for (let key in parselist) {
-            for (let index in datapart) {
-                if (isNaN(index)) continue;
-                text = datapart[index].textContent;
+        datapart.forEach(th => {
+            for (let key in parselist) {
+                text = th.textContent;
                 if (isInList(text, parselist[key], formatted_data[key])) {
                     all = [];
-                    datapart[index].parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
+                    th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
                     formatted_data[key] = stringFormatter(all.join(separator));
                     delete parselist[key];
                     break;
                 }
             }
-        }
+        });
 
         let tagpart = document
             .getElementById("work_right_inner")
@@ -125,6 +127,7 @@
         let tags = [];
         tagpart.forEach(a => tags.push(a.textContent));
         formatted_data.tags = stringFormatter(tags.join(separator));
+        console.timeEnd(getData.name);
     }
 
     function isInList(text, list, data) {
@@ -206,7 +209,7 @@
 
     function parseFormatString(string = "") {
         let formatted_text = string;
-        datalist.forEach(key => {
+        data_list.forEach(key => {
             let count = 0;
             while (formatted_text.includes(`%${key}%`) && count < 999) {
                 formatted_text = formatted_text.replace(`%${key}%`, formatted_data[key]);
@@ -218,6 +221,7 @@
     }
 
     function setting() {
+        console.time(setting.name);
         //------------------------------------------------------
         let pos = document.getElementById("work_name");
         let button = document.createElement("button");
@@ -280,7 +284,7 @@
         appendNewLine(box);
         appendNewLine(box);
         //------------------------------------------------------
-        datalist.forEach(s => box.appendChild(newDataButton(`+${s}`, `%${s}%`)));
+        data_list.forEach(s => box.appendChild(newDataButton(`+${s}`, `%${s}%`)));
         appendNewLine(box);
         //------------------------------------------------------
         let textarea;
@@ -336,6 +340,7 @@
         listAllData();
 
         updateSetting();
+        console.timeEnd(setting.name);
     }
 
     function listAllData() {
@@ -391,15 +396,11 @@
         textarea.value = textarea.value.trim();
     }
 
-    function makeDataList() {
-        for (let key in formatted_data) datalist.push(key);
-    }
-
     function main() {
-        makeDataList();
         getData();
         myCss();
         setting();
+        console.time(main.name);
         //------------------------------------------------------
         let pos = document.querySelector("#work_name").querySelector("a");
         pos.style.display = "none";
@@ -458,6 +459,7 @@
         // creat track list if any
         let list = gettracklist();
         if (list) addTracklist(list);
+        console.timeEnd(main.name);
     }
 
     function addTracklist(list) {
@@ -511,9 +513,7 @@
     }
 
     function newSeparate() {
-        let ele = document.createElement("span");
-        ele.textContent = " / ";
-        return ele;
+        return newSpan(" / ");
     }
 
     function newCopyButton(copytext, btext = "") {
@@ -528,7 +528,7 @@
         }
     }
 
-    function newSpan(text, className = "dtr_textsize05") {
+    function newSpan(text = "", className = "dtr_textsize05") {
         let span = document.createElement("span");
         Object.assign(span, {
             className: className,
