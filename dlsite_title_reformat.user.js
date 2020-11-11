@@ -3,8 +3,8 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.46
-// @description  remove title link / remove excess text / click button to copy
+// @version      0.47
+// @description  remove title link / remove excess text / custum title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
 // @match        https://www.dlsite.com/home/work/=/product_id/*
@@ -14,7 +14,7 @@
 
 (function () {
     'use strict';
-    let debug = true;
+    let debug = false;
     let datalist = [];
     let formatted_data = {
         id: "",
@@ -105,15 +105,17 @@
         let text;
         let all = [];
         for (let key in parselist) {
-            datapart.forEach(th => {
-                text = th.textContent;
+            for (let index in datapart) {
+                if (isNaN(index)) continue;
+                text = datapart[index].textContent;
                 if (isInList(text, parselist[key], formatted_data[key])) {
                     all = [];
-                    th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
+                    datapart[index].parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
                     formatted_data[key] = stringFormatter(all.join(separator));
                     delete parselist[key];
+                    break;
                 }
-            });
+            }
         }
 
         let tagpart = document
