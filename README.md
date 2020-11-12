@@ -66,6 +66,8 @@ click button to copy
 remove title link / remove excess text / custum title format  
 click button to copy  
 
+v0.48: fix some issue in getData  
+
 v0.45: rearrange buttons (use less space)  
 now old buttons only appear when:  
 original != custom  
@@ -107,3 +109,7 @@ make upload time visable
 ## [[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
 normalize url in video description  
 remove miniplayer (still activated when you watch in playlist)  
+
+## [[prts redirector]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)
+Arknights Wiki PRTS  
+auto redirect to desktop version  
