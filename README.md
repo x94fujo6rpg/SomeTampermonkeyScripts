@@ -64,6 +64,7 @@ click button to copy
 
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text / custum title format  
+automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
 click button to copy  
 ![](https://i.imgur.com/HfUeFmf.png)  
 
@@ -87,7 +88,6 @@ chagne separator in code (I'm too tired to make a new setting for this)
 ```js
 let separator = "、";
 ```
-automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
@@ -107,7 +107,6 @@ add checkbox for each video and a textbox on top to select and copy links
 
 make upload time visable  
 [effect](https://i.imgur.com/lL6sJZX.png)  
-
 
 ## [[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
 normalize url in video description  
