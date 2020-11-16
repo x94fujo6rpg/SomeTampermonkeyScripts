@@ -110,7 +110,11 @@
                 text = th.textContent;
                 if (isInList(text, parselist[key], formatted_data[key])) {
                     all = [];
-                    th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
+                    if (key == ("age" || "type")) {
+                        th.parentNode.querySelectorAll("span").forEach(span => all.push(span.textContent));
+                    } else {
+                        th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
+                    }
                     formatted_data[key] = stringFormatter(all.join(separator));
                     insertCopyDataButton(th, formatted_data[key]);
                     delete parselist[key];
