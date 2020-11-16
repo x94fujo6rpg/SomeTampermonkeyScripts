@@ -63,7 +63,7 @@ click button to copy
 ![](https://i.imgur.com/amKQlOX.jpg)  
 
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
-remove title link / remove excess text / custum title format  
+remove title link / remove excess text / custom title format  
 automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
 click button to copy  
 ![](https://i.imgur.com/HfUeFmf.png)  
