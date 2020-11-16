@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.48
+// @version      0.51
 // @description  remove title link / remove excess text / custum title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -72,29 +72,27 @@
 
     function getData() {
         console.time(getData.name);
+        //------------------------------------------------------
         let sitedata = contents.detail[0];
-
         let [Y, m, d] = sitedata.regist_date.split("/");
-
+        let y = Y.slice(2);
         let circle = document
             .getElementById("work_maker")
-            .querySelector("span.maker_name[itemprop='brand']")
-            .querySelector("a")
-            .textContent;
-
+            .querySelector("span.maker_name[itemprop='brand']");
+        let circle_text = circle.querySelector("a").textContent;
+        circle.insertAdjacentElement("afterbegin", newCopyButton(circle_text, "Copy"));
         Object.assign(formatted_data, {
             id: sitedata.id,
             title_original: sitedata.name,
             title_formatted: stringFormatter(sitedata.name),
-            circle: stringFormatter(circle),
+            circle: stringFormatter(circle_text),
             Year: Y,
-            year: Y.slice(2),
+            year: y,
             month: m,
             day: d,
         });
-
+        //------------------------------------------------------
         let datapart = document.getElementById("work_right_inner").querySelectorAll("th");
-
         let parselist = {
             series: ["Series name", "シリーズ名", "系列名", "系列名"],
             author: ["Author", "作者", "作者", "作者"],
@@ -104,7 +102,7 @@
             age: ["Age", "年齢指定", "年龄指定", "年齡指定"],
             type: ["Product format", "作品形式", "作品类型", "作品形式"],
         };
-
+        let release = ["Release date", "販売日", "贩卖日", "販賣日"];
         let text;
         let all = [];
         datapart.forEach(th => {
@@ -114,20 +112,53 @@
                     all = [];
                     th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
                     formatted_data[key] = stringFormatter(all.join(separator));
+                    insertCopyDataButton(th, formatted_data[key]);
                     delete parselist[key];
                     break;
+                } else if (release) {
+                    if (release.some(t => text.includes(t))) {
+                        let date = `${Y}${m}${d}`;
+                        insertCopyDataButton(th, date, date);
+                        date = `${y}${m}${d}`;
+                        insertCopyDataButton(th, date, date);
+                        release = false;
+                    }
                 }
             }
         });
-
+        //------------------------------------------------------
         let tagpart = document
             .getElementById("work_right_inner")
-            .querySelector("div.main_genre")
-            .querySelectorAll("a");
+            .querySelector("div.main_genre");
+        let insertpos = tagpart;
+        tagpart = tagpart.querySelectorAll("a");
         let tags = [];
         tagpart.forEach(a => tags.push(a.textContent));
         formatted_data.tags = stringFormatter(tags.join(separator));
+        insertCopyDataButton(insertpos, formatted_data.tags);
         console.timeEnd(getData.name);
+    }
+
+    function insertCopyDataButton(ele, copytext = "", btext = "Copy") {
+        ele = searchNodeNameInParents(ele, "TR");
+        if (!ele) return;
+        let pos = ele.querySelector("div");
+        if (!pos) pos = ele.querySelector("td");
+        if (!pos) return;
+        pos.insertAdjacentElement("afterbegin", newCopyButton(copytext, btext));
+    }
+
+    function searchNodeNameInParents(ele, nodename = "") {
+        if (!ele || !nodename) return false;
+        nodename = nodename.toUpperCase();
+        let count = 0;
+        while (true) {
+            ele = ele.parentNode;
+            count++;
+            if (!ele || count > 100) return false;
+            if (ele.nodeName == nodename) break;
+        }
+        return ele;
     }
 
     function isInList(text, list, data) {

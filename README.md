@@ -66,6 +66,9 @@ click button to copy
 remove title link / remove excess text / custum title format  
 click button to copy  
 
+v0.51: add copy button for each product data  
+![](https://i.imgur.com/PQnD2xg.png)  
+
 v0.48: fix some issue in getData  
 
 v0.45: rearrange buttons (use less space)  
@@ -83,7 +86,7 @@ chagne separator in code (I'm too tired to make a new setting for this)
 ```js
 let separator = "、";
 ```
-automatic convert forbidden characters (<>:"/|?*\\) to fullwidth
+automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
 ![](https://i.imgur.com/CEhDo9A.png)  
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
