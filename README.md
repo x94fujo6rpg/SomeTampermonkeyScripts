@@ -69,12 +69,11 @@ click button to copy
 ![](https://i.imgur.com/HfUeFmf.png)  
 
 v0.53: add support to `search result` / `circle` page  
-![](https://i.imgur.com/jtQLcFu.png)  
+![](https://i.imgur.com/mqfw8Ys.png)  
+![](https://i.imgur.com/0sMDNvC.png)  
 doesn't support custom title because data is incomplete  
 also grid view is too tight to put more buttons  
-
-can't get full CV/Author list in `grid view`  
-if you need it, please switch to `list view` or click into `product page` to use full version  
+![](https://i.imgur.com/MhrRemk.png)  
 
 v0.51: add copy button for each product data  
 ![](https://i.imgur.com/PQnD2xg.png)  
