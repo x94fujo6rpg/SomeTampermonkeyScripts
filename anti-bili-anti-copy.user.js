@@ -3,8 +3,8 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js
-// @version      0.11
-// @description  copy
+// @version      0.12
+// @description  remove bilibili article copy protection
 // @author       x94fujo6
 // @match        https://www.bilibili.com/read/*
 // @grant        none
