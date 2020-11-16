@@ -40,10 +40,10 @@
     let default_adv = false;
     let updateid;
 
-    let half = "1234567890()[]{}~!@#$%^&_+-=;':,.()";
-    let full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）";
+    let half = "1234567890()[]{}~!@#$%^&_+-=;':,.()~";
+    let full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）〜";
     let forbidden = `<>:"/|?*\\`;
-    let replacer = `＜＞："／｜？＊＼`;
+    let replacer = `＜＞：”／｜？＊＼`;
 
     let separator = "、"; // separator for data like %tags%
     let oldUI_original_title = true; // Original / ID+Original button
