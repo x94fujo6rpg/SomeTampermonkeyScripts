@@ -65,6 +65,7 @@ click button to copy
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text / custum title format  
 click button to copy  
+![](https://i.imgur.com/HfUeFmf.png)  
 
 v0.51: add copy button for each product data  
 ![](https://i.imgur.com/PQnD2xg.png)  
@@ -87,7 +88,6 @@ chagne separator in code (I'm too tired to make a new setting for this)
 let separator = "、";
 ```
 automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
-![](https://i.imgur.com/CEhDo9A.png)  
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
