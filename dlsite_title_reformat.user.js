@@ -3,11 +3,15 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.52
+// @version      0.53
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
 // @match        https://www.dlsite.com/home/work/=/product_id/*
+// @match        https://www.dlsite.com/maniax/circle/profile/*
+// @match        https://www.dlsite.com/home/circle/profile/*
+// @match        https://www.dlsite.com/maniax/fsr/*
+// @match        https://www.dlsite.com/home/fsr/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
@@ -58,6 +62,151 @@
     window.onload = function () {
         window.document.body.onload = main();
     };
+
+    function main() {
+        let link = window.location.href;
+        if (link.includes("/product_id/")) {
+            myCss();
+            productHandler();
+        } else if (link.includes("/circle/profile/") || link.includes("/fsr/")) {
+            myCss();
+            searchHandler();
+        }
+    }
+
+    function searchHandler() {
+        let display_list = document.querySelector(".display_normal.on");
+        let display_grid = document.querySelector(".display_block.on");
+        if (display_list) {
+            listHandler();
+        } else if (display_grid) {
+            gridHandler();
+        }
+    }
+
+    function getMutipleDataToList(pos, type = "a") {
+        let list = [];
+        let es = pos.querySelectorAll(type);
+        if (es) {
+            es.forEach(e => list.push(e.textContent));
+            list = stringFormatter(list.join(separator));
+            return list;
+        } else {
+            return "";
+        }
+    }
+
+    function listHandler() {
+        console.time(listHandler.name);
+        let list = document.querySelectorAll("#search_result_list");
+        if (!list) {
+            console.log("list not found");
+        } else {
+            list = list[list.length - 1];
+            list = list.querySelectorAll("tr");
+            list.forEach(tr => {
+                let id,
+                    title_o, title_o_text, title_f,
+                    circle, circle_text,
+                    cv, tags,
+                    pos, newbox;
+                id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
+
+                pos = tr.querySelector("dl");
+                title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
+                circle_text = pos.querySelector(".maker_name a").textContent;
+
+                id = newCopyButton(id);
+                title_o = newCopyButton(title_o_text);
+                title_f = newCopyButton(stringFormatter(title_o_text));
+                circle = newCopyButton(circle_text);
+
+                newbox = appendAll(document.createElement("dd"), [
+                    newLine(),
+                    title_o, newLine(), 
+                    title_f, newLine(), 
+                    id, newSeparate(), circle,
+                ]);
+
+                cv = pos.querySelector(".author");
+                if (cv) {
+                    cv = getMutipleDataToList(cv);
+                } else {
+                    cv = "";
+                }
+
+                tags = pos.querySelector(".search_tag");
+                if (tags) {
+                    tags = getMutipleDataToList(tags);
+                } else {
+                    tags = "";
+                }
+
+                if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
+                if (tags != "") appendAll(newbox, [newSeparate(), newCopyButton(tags, "Tags")]);
+
+                pos.appendChild(newbox);
+            });
+        }
+        console.timeEnd(listHandler.name);
+    }
+
+    function gridHandler() {
+        console.time(gridHandler.name);
+        let list = document.querySelectorAll(".search_result_img_box_inner");
+        if (!list) {
+            console.log("list not found");
+        } else {
+            let w = document.createElement("div");
+            w.appendChild(
+                newSpan("Can't get full CV/Author list in grid view. If you need it, please switch to list view.",
+                    "dtr_list_w_text"));
+            document.querySelector(".sort_box").insertAdjacentElement("afterend", w);
+
+            list.forEach(box => {
+                let id,
+                    title_o, title_o_text, title_f,
+                    circle, circle_text,
+                    cv,
+                    pos, newbox;
+
+                id = box.querySelector(".search_img.work_thumb").id.replace("_link_", "");
+
+                title_o = box.querySelector(".work_name a");
+                title_o_text = title_o.textContent;
+
+                circle = box.querySelector(".maker_name a");
+                circle_text = stringFormatter(circle.textContent);
+
+                cv = box.querySelector(".author");
+                if (cv) {
+                    cv = getMutipleDataToList(cv);
+                } else {
+                    cv = "";
+                }
+
+                id = newCopyButton(id);
+                title_o = newCopyButton(title_o_text, "Original");
+                title_f = newCopyButton(stringFormatter(title_o_text), "Formatted");
+                circle = newCopyButton(circle_text, "Circle");
+
+                pos = box.querySelector(".work_price_wrap");
+                newbox = appendAll(document.createElement("dd"), [
+                    id, newLine(),
+                    title_o, newSeparate(), title_f, newLine(),
+                    circle,
+                ]);
+                if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
+                pos.insertAdjacentElement("beforebegin", newbox);
+            });
+        }
+        console.timeEnd(gridHandler.name);
+    }
+
+    function appendAll(node, nodeList) {
+        nodeList.forEach(e => node.appendChild(e));
+        return node;
+    }
 
     function saveSetting() {
         GM_setValue(key_adv, adv);
@@ -315,7 +464,8 @@
             }
         });
         box.appendChild(button);
-        box.appendChild(newSpan(" (enable this to direct edit format setting. if you don't know what is this, don't touch it.)"));
+        box.appendChild(newSpan(" (enable this to direct edit format setting. if you don't know what is this, don't touch it.)",
+            "dtr_textsize05 dtr_setting_w_text"));
         appendNewLine(box);
         appendNewLine(box);
         //------------------------------------------------------
@@ -399,21 +549,6 @@
         });
     }
 
-    function newButton(btext, onclick) {
-        let _button = document.createElement("button");
-        Object.assign(_button, {
-            textContent: btext,
-            onclick: onclick,
-        });
-        return _button;
-    }
-
-    function newDataButton(btext, format_string) {
-        return newButton(btext, () => {
-            updateSettingString("format_title_setting", format_string);
-        });
-    }
-
     function updateSettingString(id, format_string) {
         let textarea = document.getElementById(id);
         let list = [
@@ -431,11 +566,10 @@
         textarea.value = textarea.value.trim();
     }
 
-    function main() {
+    function productHandler() {
         getData();
-        myCss();
         setting();
-        console.time(main.name);
+        console.time(productHandler.name);
         //------------------------------------------------------
         let pos = document.querySelector("#work_name").querySelector("a");
         pos.style.display = "none";
@@ -494,7 +628,7 @@
         // creat track list if any
         let list = gettracklist();
         if (list) addTracklist(list);
-        console.timeEnd(main.name);
+        console.timeEnd(productHandler.name);
     }
 
     function addTracklist(list) {
@@ -551,6 +685,21 @@
         return newSpan(" / ");
     }
 
+    function newButton(btext, onclick) {
+        let _button = document.createElement("button");
+        Object.assign(_button, {
+            textContent: btext,
+            onclick: onclick,
+        });
+        return _button;
+    }
+
+    function newDataButton(btext, format_string) {
+        return newButton(btext, () => {
+            updateSettingString("format_title_setting", format_string);
+        });
+    }
+
     function newCopyButton(copytext, btext = "") {
         if (btext === "") {
             return newButton(copytext, () => {
@@ -587,8 +736,17 @@
                 padding: 0.5rem;
             }
 
+            .dtr_setting_w_text {
+                color: red;
+            }
+
             .dtr_max_width {
                 width: 100%;
+            }
+
+            .dtr_list_w_text {
+                color: red;
+                float: right;
             }
         `;
     }

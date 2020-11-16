@@ -64,9 +64,17 @@ click button to copy
 
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text / custom title format  
-automatic convert forbidden characters (<>:"/|?*\\) to fullwidth  
+automatic convert forbidden characters `<>:"/|?*\` to fullwidth  
 click button to copy  
 ![](https://i.imgur.com/HfUeFmf.png)  
+
+v0.53: add support to `search result` / `circle` page  
+![](https://i.imgur.com/jtQLcFu.png)  
+doesn't support custom title because data is incomplete  
+also grid view is too tight to put more buttons  
+
+can't get full CV/Author list in `grid view`  
+if you need it, please switch to `list view` or click into `product page` to use full version  
 
 v0.51: add copy button for each product data  
 ![](https://i.imgur.com/PQnD2xg.png)  
@@ -97,7 +105,7 @@ show images direct link under title (only resized images)
 ## [[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
 pornhub  
 in video page  
-replace [user link] to [user video list], except comment  
+replace `user link` to `user video list`, except comment  
 it will try to go to ```user/videos/public``` first  
 if it doesn't exist, auto redirect to ```user/videos```  
 add a button to copy link of current page  
