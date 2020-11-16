@@ -476,10 +476,10 @@
         let custom_button = newCopyButton(title_id_c, "Custom");
         custom_button.id = "format_title_custom_button";
         pos.append(custom_button);
-        pos.append(newSeparate());
         //------------------------------------------------------   
         // add copy Original / ID+Original button
         if (notSame_o_c && oldUI_original_title) {
+            pos.append(newSeparate());
             pos.append(newCopyButton(title_o, "Original"));
             pos.append(newCopyButton(title_id_o, "ID+Original"));
         }
