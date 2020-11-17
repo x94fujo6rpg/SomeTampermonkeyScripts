@@ -122,3 +122,6 @@ remove miniplayer (still activated when you watch in playlist)
 ## [[prts redirector]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)
 Arknights Wiki PRTS  
 auto redirect to desktop version  
+
+## [[sharer.pw auto click]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)  
+auto click and redirect to download link immediately  
