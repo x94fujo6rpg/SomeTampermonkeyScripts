@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.43
+// @version      0.44
 // @description  direct download archive from list (only work in Thumbnail mode)
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -28,10 +28,27 @@
     let debug = false;
     window.onload = main();
 
+    function myCss() {
+        let s = document.createElement("style");
+        s.id = "ehx_direct_download_css";
+        document.head.appendChild(s);
+        s.textContent = `
+            .puretext {
+                overflow: hidden;
+                min-height: 32px;
+                line-height: 16px;
+                margin: 6px 4px 0;
+                font-size: 10pt;
+                text-align: center;
+            }
+        `;
+    }
+
     function main() {
         api = setApi();
         domain = `https://${document.domain}`;
         if (!domain || !api) return print(`${m}domain or api is missing`);
+        myCss()
         let link = document.location.href;
         if (link.includes(".php")) {
             return print(`${m}see php, abort`);
@@ -113,7 +130,7 @@
         gallery.forEach(ele => {
             let e = document.createElement("span");
             e.textContent = ele.querySelector("a[href]").textContent;
-            e.className = "gl4t puretext";
+            e.className = "puretext";
             let pos = ele.querySelector(".gdd");
             if (pos) {
                 pos.insertAdjacentElement("beforebegin", e);
