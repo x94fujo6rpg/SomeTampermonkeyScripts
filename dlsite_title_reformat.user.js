@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.53
+// @version      0.54
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -106,41 +106,37 @@
             list = list.querySelectorAll("tr");
             list.forEach(tr => {
                 let id,
-                    title_o, title_o_text, title_f,
+                    title_o, title_o_text, title_f, title_f_text,
                     circle, circle_text,
                     cv, tags,
-                    pos, newbox;
-                id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
+                    pos, newbox, node_list;
 
                 pos = tr.querySelector("dl");
+
+                id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
                 title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
+                title_f_text = stringFormatter(title_o_text);
                 circle_text = pos.querySelector(".maker_name a").textContent;
 
                 id = newCopyButton(id);
                 title_o = newCopyButton(title_o_text);
-                title_f = newCopyButton(stringFormatter(title_o_text));
+                title_f = newCopyButton(title_f_text);
                 circle = newCopyButton(circle_text);
 
-                newbox = appendAll(document.createElement("dd"), [
+                node_list = [
                     newLine(),
-                    title_o, newLine(), 
-                    title_f, newLine(), 
+                    title_o, newLine(),
+                    title_f, newLine(),
                     id, newSeparate(), circle,
-                ]);
+                ];
+                if (title_o_text == title_f_text) node_list.splice(3, 2);
+                newbox = appendAll(document.createElement("dd"), node_list);
 
                 cv = pos.querySelector(".author");
-                if (cv) {
-                    cv = getMutipleDataToList(cv);
-                } else {
-                    cv = "";
-                }
+                cv = cv ? getMutipleDataToList(cv) : "";
 
                 tags = pos.querySelector(".search_tag");
-                if (tags) {
-                    tags = getMutipleDataToList(tags);
-                } else {
-                    tags = "";
-                }
+                tags = tags ? getMutipleDataToList(tags) : "";
 
                 if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
                 if (tags != "") appendAll(newbox, [newSeparate(), newCopyButton(tags, "Tags")]);
@@ -165,37 +161,38 @@
 
             list.forEach(box => {
                 let id,
-                    title_o, title_o_text, title_f,
+                    title_o, title_o_text, title_f, title_f_text,
                     circle, circle_text,
                     cv,
-                    pos, newbox;
-
+                    pos, newbox, node_list;
+                
+                pos = box.querySelector(".work_price_wrap");
+                
                 id = box.querySelector(".search_img.work_thumb").id.replace("_link_", "");
 
                 title_o = box.querySelector(".work_name a");
                 title_o_text = title_o.textContent;
+                title_f_text = stringFormatter(title_o_text);
 
                 circle = box.querySelector(".maker_name a");
                 circle_text = stringFormatter(circle.textContent);
 
                 cv = box.querySelector(".author");
-                if (cv) {
-                    cv = getMutipleDataToList(cv);
-                } else {
-                    cv = "";
-                }
+                cv = cv ? getMutipleDataToList(cv) : "";
 
                 id = newCopyButton(id);
                 title_o = newCopyButton(title_o_text, "Original");
-                title_f = newCopyButton(stringFormatter(title_o_text), "Formatted");
-                circle = newCopyButton(circle_text, "Circle");
+                title_f = newCopyButton(title_f_text, "Formatted");
+                circle = newCopyButton(circle_text, "Circle");                
 
-                pos = box.querySelector(".work_price_wrap");
-                newbox = appendAll(document.createElement("dd"), [
+                node_list = [
                     id, newLine(),
                     title_o, newSeparate(), title_f, newLine(),
                     circle,
-                ]);
+                ];
+                if (title_o_text == title_f_text) node_list.splice(3, 2);
+                newbox = appendAll(document.createElement("dd"), node_list);
+
                 if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
                 pos.insertAdjacentElement("beforebegin", newbox);
             });
