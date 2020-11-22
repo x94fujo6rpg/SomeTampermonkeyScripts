@@ -69,7 +69,7 @@ click button to copy
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
 v0.56: add more settings  
-script now trigger faster (do't have to wait for the page to fully load)  
+script now trigger faster (don't have to wait for the page to fully load)  
 
 v0.53: add support to `search result` / `circle` page  
 this doesn't support custom title because data is incomplete  
