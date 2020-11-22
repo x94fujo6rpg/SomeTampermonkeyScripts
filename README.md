@@ -66,17 +66,16 @@ click button to copy
 remove title link / remove excess text / custom title format  
 automatic convert forbidden characters `<>:"/|?*\` to fullwidth  
 click button to copy  
-![](https://i.imgur.com/HfUeFmf.png)  
+![](https://i.imgur.com/kdsvTit.jpg)  
+
+v0.56: add more settings  
+script now trigger faster (do't have to wait for the page to fully load)  
 
 v0.53: add support to `search result` / `circle` page  
-![](https://i.imgur.com/mqfw8Ys.png)  
-![](https://i.imgur.com/0sMDNvC.png)  
-doesn't support custom title because data is incomplete  
+this doesn't support custom title because data is incomplete  
 also grid view is too tight to put more buttons  
-![](https://i.imgur.com/MhrRemk.png)  
 
-v0.51: add copy button for each product data  
-![](https://i.imgur.com/PQnD2xg.png)  
+v0.51: add copy button for each data  
 
 v0.48: fix some issue in getData  
 
@@ -85,16 +84,10 @@ now old buttons only appear when:
 original != custom  
 default_format != (original or custom)  
 
-v0.41: add old button back, edit code to enable / disable  
-```js
-let oldUI_original_title = true; // Original / ID+Original button
-let oldUI_default_format_title = false; // DefaultFormat / ID+DefaultFormat button
-```
+v0.41: ~~add old button back, edit code to enable / disable~~ (add setting in v0.56)  
+
 v0.38: now can be custom to any format you want  
-chagne separator in code (I'm too tired to make a new setting for this)  
-```js
-let separator = "、";
-```
+~~chagne separator in code~~ (add setting in v0.56)  
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  

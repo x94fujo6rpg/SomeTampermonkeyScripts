@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.54
+// @version      0.56
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -38,30 +38,50 @@
         tags: "",
     };
     let data_list = Object.keys(formatted_data);
-    let key_format = "format_seting";
-    let key_adv = "format_adv";
-    let default_format = "%id% %title_formatted%";
-    let default_adv = false;
     let updateid;
-
-    let half = "1234567890()[]{}~!@#$%^&_+-=;':,.()~";
-    let full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）〜";
     let forbidden = `<>:"/|?*\\`;
     let replacer = `＜＞：”／｜？＊＼`;
+    //-----------------------------------------------------
+    let key_format = "format_seting";
+    let key_adv = "format_adv";
+    let key_f2h = "format_f2h";
+    let key_half = "format_falf";
+    let key_full = "format_full";
+    let key_show_ot = "format_show_ot";
+    let key_show_ft = "format_show_ft";
+    let key_sep = "format_sep";
+    //-----------------------------------------------------
+    let default_format = "%id% %title_formatted%";
+    let default_adv = false;
+    let default_f2h = true;
+    let default_half = "1234567890()[]{}~!@#$%^&_+-=;':,.()~";
+    let default_full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）〜";
+    let default_show_ot = true;
+    let default_show_ft = true;
+    let default_sep = "、";
+    //-----------------------------------------------------
+    let setting_format = GM_getValue(key_format, default_format);
+    let setting_adv = GM_getValue(key_adv, default_adv);
+    let setting_f2h = GM_getValue(key_f2h, default_f2h);
+    let setting_half = default_half;
+    let setting_full = default_full;
+    let setting_show_ot = GM_getValue(key_show_ot, default_show_ot);
+    let setting_show_ft = GM_getValue(key_show_ft, default_show_ft);
+    let setting_sep = GM_getValue(key_sep, default_sep);
+    //-----------------------------------------------------
+    print("[load setting]");
+    print(`${key_format}: ${setting_format}`);
+    print(`${key_adv}: ${setting_adv}`);
+    print(`${key_f2h}: ${setting_f2h}`);
+    print(`${key_show_ot}: ${setting_show_ot}`);
+    print(`${key_show_ot}: ${setting_show_ft}`);
+    print(`${key_sep}: ${setting_sep}`);
+    print("");
+    //-----------------------------------------------------
 
-    let separator = "、"; // separator for data like %tags%
-    let oldUI_original_title = true; // Original / ID+Original button
-    let oldUI_default_format_title = true; // DefaultFormat / ID+DefaultFormat button
-
-    let format_setting = GM_getValue(key_format, default_format);
-    print(`${key_format}: ${format_setting}`);
-
-    let adv = GM_getValue(key_adv, default_adv);
-    print(`${key_adv}: ${adv}`);
-
-    window.onload = function () {
-        window.document.body.onload = main();
-    };
+    /*window.onload = function () {*/
+    window.document.body.onload = main();
+    /*};*/
 
     function main() {
         let link = window.location.href;
@@ -72,6 +92,26 @@
             myCss();
             searchHandler();
         }
+    }
+
+    function newCheckbox(id, onclick) {
+        let ck = document.createElement("input");
+        Object.assign(ck, {
+            type: "checkbox",
+            id: id,
+            onclick: onclick,
+        });
+        return ck;
+    }
+
+    function newLable(forid = "", text = "", className = "dtr_textsize05") {
+        let lable = document.createElement("label");
+        Object.assign(lable, {
+            className: className,
+            htmlFor: forid,
+            textContent: text,
+        });
+        return lable;
     }
 
     function searchHandler() {
@@ -89,7 +129,7 @@
         let es = pos.querySelectorAll(type);
         if (es) {
             es.forEach(e => list.push(e.textContent));
-            list = stringFormatter(list.join(separator));
+            list = stringFormatter(list.join(setting_sep));
             return list;
         } else {
             return "";
@@ -165,9 +205,9 @@
                     circle, circle_text,
                     cv,
                     pos, newbox, node_list;
-                
+
                 pos = box.querySelector(".work_price_wrap");
-                
+
                 id = box.querySelector(".search_img.work_thumb").id.replace("_link_", "");
 
                 title_o = box.querySelector(".work_name a");
@@ -183,7 +223,7 @@
                 id = newCopyButton(id);
                 title_o = newCopyButton(title_o_text, "Original");
                 title_f = newCopyButton(title_f_text, "Formatted");
-                circle = newCopyButton(circle_text, "Circle");                
+                circle = newCopyButton(circle_text, "Circle");
 
                 node_list = [
                     id, newLine(),
@@ -206,14 +246,29 @@
     }
 
     function saveSetting() {
-        GM_setValue(key_adv, adv);
-        print(`saved ${key_adv}: ${adv}`);
-        if (format_setting.length > 0) {
-            GM_setValue(key_format, format_setting);
-            print(`saved ${key_format}: ${format_setting}`);
+        print("[saveSetting]");
+
+        if (setting_format.length > 0) {
+            GM_setValue(key_format, setting_format);
+            print(`saved ${key_format}: ${setting_format}`);
         } else {
             print(`${key_format} not saved cus is empty`);
         }
+
+        GM_setValue(key_adv, setting_adv);
+        print(`saved ${key_adv}: ${setting_adv}`);
+
+        GM_setValue(key_f2h, setting_f2h);
+        print(`saved ${key_f2h}: ${setting_f2h}`);
+
+        GM_setValue(key_show_ot, setting_show_ot);
+        print(`saved ${key_show_ot}: ${setting_show_ot}`);
+
+        GM_setValue(key_show_ft, setting_show_ft);
+        print(`saved ${key_show_ft}: ${setting_show_ft}`);
+
+        GM_setValue(key_sep, setting_sep);
+        print(`saved ${key_sep}: ${setting_sep}`);
     }
 
     function getData() {
@@ -261,7 +316,7 @@
                     } else {
                         th.parentNode.querySelectorAll("a").forEach(a => all.push(a.textContent));
                     }
-                    formatted_data[key] = stringFormatter(all.join(separator));
+                    formatted_data[key] = stringFormatter(all.join(setting_sep));
                     insertCopyDataButton(th, formatted_data[key]);
                     delete parselist[key];
                     break;
@@ -284,7 +339,7 @@
         tagpart = tagpart.querySelectorAll("a");
         let tags = [];
         tagpart.forEach(a => tags.push(a.textContent));
-        formatted_data.tags = stringFormatter(tags.join(separator));
+        formatted_data.tags = stringFormatter(tags.join(setting_sep));
         insertCopyDataButton(insertpos, formatted_data.tags);
         console.timeEnd(getData.name);
     }
@@ -320,7 +375,7 @@
 
     function stringFormatter(text) {
         text = removeExcess(text);
-        text = toHalfWidth(text);
+        if (setting_f2h) text = toHalfWidth(text);
         text = repalceForbiddenChar(text);
         return text;
     }
@@ -348,9 +403,9 @@
     }
 
     function toHalfWidth(text) {
-        for (let index in half) {
-            let h = half[index];
-            let f = full[index];
+        for (let index in setting_half) {
+            let h = setting_half[index];
+            let f = setting_full[index];
             let count = 0;
             while (text.indexOf(f) != -1 && count < 999) {
                 text = text.replace(f, h);
@@ -379,13 +434,16 @@
         let cs = document.getElementById("format_title_custom_span");
         let cb = document.getElementById("format_title_custom_button");
         if (s.value.length > 0) {
-            if (format_setting != s.value) {
-                format_setting = s.value;
-                let formatted = parseFormatString(format_setting);
+            if (setting_format != s.value) {
+                setting_format = s.value;
+                let formatted = parseFormatString(setting_format);
                 cs.textContent = p.value = formatted;
                 cb.onclick = () => navigator.clipboard.writeText(formatted);
             }
         }
+
+        let sep = document.getElementById(`dtr_${key_sep}`);
+        setting_sep = sep.value;
     }
 
     function parseFormatString(string = "") {
@@ -407,19 +465,19 @@
         let pos = document.getElementById("work_name");
         let button = document.createElement("button");
         Object.assign(button, {
-            textContent: "open format setting",
+            textContent: "Open Setting",
             value: "open",
             onclick: function () {
                 let ele = document.getElementById("format_setting_ui");
                 if (this.value === "close") {
                     ele.style.display = "none";
                     this.value = "open";
-                    this.textContent = "open format setting";
+                    this.textContent = "Open Setting";
                     clearInterval(updateid);
                 } else {
                     ele.style.display = "";
                     this.value = "close";
-                    this.textContent = "close format setting";
+                    this.textContent = "Close Setting";
                     updateid = setInterval(updateSetting, 100);
                 }
             },
@@ -433,52 +491,52 @@
             className: "dtr_setting_box",
         });
         box.style.display = "none";
+        let textarea;
         //------------------------------------------------------
         button = document.createElement("button");
-        let mode = adv ? "on" : "off";
+        let mode = setting_adv ? "on" : "off";
         Object.assign(button, {
             className: "dtr_textsize05",
             id: "format_title_setting_advance_model",
-            textContent: `advance mode: ${mode}`,
+            textContent: `Advance mode: ${mode}`,
             value: mode,
             onclick: function () {
                 let t = document.getElementById("format_title_setting");
                 if (this.value === "off") {
                     Object.assign(this, {
                         value: "on",
-                        textContent: "advance mode: on",
+                        textContent: "Advance mode: on",
                     });
                     t.readOnly = false;
-                    adv = true;
+                    setting_adv = true;
                 } else {
                     Object.assign(this, {
                         value: "off",
-                        textContent: "advance mode: off",
+                        textContent: "Advance mode: off",
                     });
                     t.readOnly = true;
-                    adv = false;
+                    setting_adv = false;
                 }
             }
         });
         box.appendChild(button);
-        box.appendChild(newSpan(" (enable this to direct edit format setting. if you don't know what is this, don't touch it.)",
+        box.appendChild(newSpan(" enable this to direct edit format setting",
             "dtr_textsize05 dtr_setting_w_text"));
         appendNewLine(box);
-        appendNewLine(box);
         //------------------------------------------------------
+        // all data
         data_list.forEach(s => box.appendChild(newDataButton(`+${s}`, `%${s}%`)));
         appendNewLine(box);
         //------------------------------------------------------
-        let textarea;
         textarea = document.createElement("textarea");
         Object.assign(textarea, {
             className: "dtr_textsize05 dtr_max_width",
             id: "format_title_setting",
             rows: 1,
-            value: format_setting,
+            value: setting_format,
         });
-        textarea.readOnly = !adv;
-        box.appendChild(newSpan("format setting:"));
+        textarea.readOnly = !setting_adv;
+        box.appendChild(newSpan("Format setting:"));
         appendNewLine(box);
         box.appendChild(textarea);
         appendNewLine(box);
@@ -489,9 +547,9 @@
             id: "format_title_preview",
             readOnly: true,
             rows: 1,
-            value: parseFormatString(format_setting),
+            value: parseFormatString(setting_format),
         });
-        box.appendChild(newSpan("format preview:"));
+        box.appendChild(newSpan("Preview:"));
         appendNewLine(box);
         box.appendChild(textarea);
         appendNewLine(box);
@@ -510,6 +568,57 @@
         appendNewLine(box);
         appendNewLine(box);
         //------------------------------------------------------
+        let ck_area = document.createElement("div");
+        ck_area.className = "dtr_setting_ck_box";
+        appendAll(ck_area, [
+            newSpan(`Save & Refresh to make these setting work`, ""),
+            newLine(),
+        ]);
+        let checkbox;
+        let lable;
+        checkbox = newCheckbox(`dtr_${key_f2h}`, function () {
+            setting_f2h = this.checked ? true : false;
+            print(`${key_f2h}: ${setting_f2h}`);
+        });
+        lable = newLable(`dtr_${key_f2h}`, "Replace some half-width to full-width");
+        if (setting_f2h) checkbox.checked = true;
+        appendAll(ck_area, [checkbox, lable, newLine()]);
+
+        checkbox = newCheckbox(`dtr_${key_show_ot}`, function () {
+            setting_show_ot = this.checked ? true : false;
+            print(`${key_show_ot}: ${setting_show_ot}`);
+        });
+        lable = newLable(`dtr_${key_show_ot}`, "Show Original / ID+Original");
+        if (setting_show_ot) checkbox.checked = true;
+        appendAll(ck_area, [checkbox, lable, newLine()]);
+
+        checkbox = newCheckbox(`dtr_${key_show_ft}`, function () {
+            setting_show_ft = this.checked ? true : false;
+            print(`${key_show_ft}: ${setting_show_ft}`);
+        });
+        lable = newLable(`dtr_${key_show_ft}`, "Show Formatted / ID+Formatted");
+        if (setting_show_ft) checkbox.checked = true;
+        appendAll(ck_area, [checkbox, lable, newLine()]);
+
+        textarea = document.createElement("textarea");
+        Object.assign(textarea, {
+            className: "dtr_textsize05",
+            id: `dtr_${key_sep}`,
+            rows: 1,
+            cols: 1,
+            value: setting_sep,
+            style: "resize: none;",
+        });
+        lable = newLable(`dtr_${key_sep}`, "Separator: ");
+        appendAll(ck_area, [
+            lable, textarea, newLable(`dtr_${key_sep}`, " for data have muti value like tags"),
+            newLine(),
+        ]);
+        box.appendChild(ck_area);
+        appendNewLine(box);
+        //------------------------------------------------------
+        box.appendChild(newSpan("data list:"));
+        appendNewLine(box);
         textarea = document.createElement("textarea");
         Object.assign(textarea, {
             className: "dtr_textsize05",
@@ -575,20 +684,20 @@
         let id = formatted_data.id;
         let title_o = formatted_data.title_original;
         let title_f = formatted_data.title_formatted;
-        let title_id_c = parseFormatString(format_setting);
+        let title_id_c = parseFormatString(setting_format);
         let title_id_o = `${id} ${title_o}`;
         let title_id_f = `${id} ${title_f}`;
         let notSame_o_c = Boolean(title_id_o != title_id_c);
-        let notSame_f_c_o = Boolean(title_id_f != (title_id_c && title_id_o));
+        let notSame_f_c_o = Boolean(title_id_f != (title_id_c || title_id_o));
         //------------------------------------------------------
         // ID + original title
-        if (notSame_o_c && oldUI_original_title) {
+        if (notSame_o_c && setting_show_ot) {
             pos.append(newSpan(title_id_o, ""));
             appendNewLine(pos);
         }
         //------------------------------------------------------
         // ID + formatted title
-        if (notSame_f_c_o && oldUI_default_format_title) {
+        if (notSame_f_c_o && setting_show_ft) {
             pos.append(newSpan(title_id_f, ""));
             appendNewLine(pos);
         }
@@ -604,19 +713,19 @@
         pos.append(newSeparate());
         //------------------------------------------------------
         // add copy custom format button
-        let custom_button = newCopyButton(title_id_c, "Custom");
+        let custom_button = newCopyButton(title_id_c, "CustomTitle");
         custom_button.id = "format_title_custom_button";
         pos.append(custom_button);
         //------------------------------------------------------   
         // add copy Original / ID+Original button
-        if (notSame_o_c && oldUI_original_title) {
+        if (notSame_o_c && setting_show_ot) {
             pos.append(newSeparate());
             pos.append(newCopyButton(title_o, "Original"));
             pos.append(newCopyButton(title_id_o, "ID+Original"));
         }
         //------------------------------------------------------
         // add copy Formatted / ID+Formatted button
-        if (notSame_f_c_o && oldUI_default_format_title) {
+        if (notSame_f_c_o && setting_show_ft) {
             pos.append(newSeparate());
             pos.append(newCopyButton(title_f, "DefaultFormat"));
             pos.append(newCopyButton(title_id_f, "ID+DefaultFormat"));
@@ -725,6 +834,7 @@
         s.textContent = `
             .dtr_textsize05 {
                 font-size: 0.5rem;
+                vertical-align: middle;
             }
 
             .dtr_setting_box {
@@ -744,6 +854,12 @@
             .dtr_list_w_text {
                 color: red;
                 float: right;
+            }
+
+            .dtr_setting_ck_box {
+                border: black 0.1rem solid;
+                width: max-content;
+                padding: 0.5rem;
             }
         `;
     }
