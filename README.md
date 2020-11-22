@@ -82,7 +82,7 @@ v0.48: fix some issue in getData
 v0.45: rearrange buttons (use less space)  
 now old buttons only appear when:  
 original != custom  
-default_format != (original or custom)  
+default_format != original & default_format != custom  
 
 v0.41: ~~add old button back, edit code to enable / disable~~ (add setting in v0.56)  
 
