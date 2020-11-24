@@ -229,9 +229,9 @@
                 } else {
                     data[tag_key] = "";
                 }
-                data.title_no_event = removePrefix(data.title);
-                data.title_no_event_no_group = removeGroup(data.title_no_event);
             });
+            data.title_no_event = removePrefix(data.title);
+            data.title_no_event_no_group = removeGroup(data.title_no_event);
         });
     }
 
