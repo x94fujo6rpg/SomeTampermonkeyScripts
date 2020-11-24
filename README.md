@@ -10,13 +10,21 @@ remove bilibili article copy protection
 add button for each gallery in list view to use archive download directly  
 because there is a limit on how many requests you can send at once  
 this need some time to process  
-~~warning: don't open new page rapidly when you using this, it may trigger api limit protection~~  
-now you have to click button to enable it (pervent too many requests)  
+click button to enable it (pervent too many requests)  
+
+v0.51: after enable `archive download`  
+you can sort gallery (current page)  
+show gallery's torrent title list in pure text  
+
+make all gallery link open in new tab (pervent click on accident)  
+
+check every few seconds that all gallery (current page) are downloaded  
 
 v0.43: now it will update the list when you click archive download in gallery page  
 add new features when click archive download in list view:  
 1.send a request to server as you visited the gallery (not sure if this count)  
-2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) so it now trigger visited css style too  
+2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History))  
+make it trigger visited css style  
 
 v0.35: list limit up to 10000  
 
@@ -24,13 +32,9 @@ v0.32: switch from cookie to [Tampermonkey API storage](https://www.tampermonkey
 if you use any [v0.30] or [v0.31] or you got [400 Bad request]  
 use cookie editor like EditThisCookie to remove all "exhddl_list"  
 
-v0.31: ~~fix cookie path~~  
-~~if you got [400 Bad request], use cookie editor like EditThisCookie to remove all "exhddl_list"~~  
-
 v0.30: now it save recent downloaded gallerys in a list and set button as downloaded if it in the list  
 the number of the list can save is ~~about 450~~  
 if reach the limit, it will delete the oldest data until lower the limit  
-~~note: ex and eh cookie is separate~~  
 
 ## [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change visited & unvisited link color  
