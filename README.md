@@ -12,6 +12,13 @@ because there is a limit on how many requests you can send at once
 this need some time to process  
 click button to enable it (pervent too many requests)  
 
+v0.53 add more sort option  
+![](https://i.imgur.com/Jc53brD.png)  
+example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
+Sort By Title (ignore Prefix/Group/Circle/Artist) => `cccccccc (dddddddd)`  
+Sort By Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
+Sort By Title → `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
+
 v0.51: after enable `archive download`  
 you can sort gallery (current page)  
 show gallery's torrent title list in pure text  

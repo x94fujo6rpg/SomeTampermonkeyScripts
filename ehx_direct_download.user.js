@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.52
+// @version      0.53
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -154,12 +154,16 @@
             textContent: "Descending",
         });
         let nodelist = [
-            newButton("exhddl_sort_by_title", "Sort By Title", bs, () => { sortGalleryByKey("title"); }),
+            newButton("exhddl_sort_by_title_no_event_no_group", "Sort By Title (ignore Prefix/Group/Circle/Artist)", bs, () => { sortGalleryByKey("title_no_event_no_group"); }),
             newSeparate(),
+            newButton("exhddl_sort_by_title_no_event", "Sort By Title (ignore Prefix)", bs, () => { sortGalleryByKey("title_no_event"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title", "Sort By Title", bs, () => { sortGalleryByKey("title"); }),
+            newLine(),           
             newButton("exhddl_sort_by_artist", "Sort By Artist", bs, () => { sortGalleryByKey("artist"); }),
             newSeparate(),
             newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
-            newLine(),
+            newSeparate(),
             newButton("exhddl_sort_by_date", "Sort By Date", bs, () => { sortGalleryByKey("gid"); }),
             newSeparate(),
             newButton("exhddl_sort_by_category", "Sort By Category", bs, () => { sortGalleryByKey("category"); }),
@@ -225,8 +229,31 @@
                 } else {
                     data[tag_key] = "";
                 }
+                // add no event title
+                data.title_no_event = removePrefix(data.title);
+                data.title_no_event_no_group = removeGroup(data.title_no_event);
             });
         });
+    }
+
+    function removePrefix(string = "") {
+        if (string.indexOf("(") === 0) {
+            let cutat = string.indexOf(")");
+            if (cutat != -1 && cutat != string.length - 1) {
+                string = string.substring(cutat + 1);
+            }
+        }
+        return string.trim();
+    }
+
+    function removeGroup(string = ""){
+        if (string.indexOf("[") === 0) {
+            let cutat = string.indexOf("]");
+            if (cutat != -1 && cutat != string.length - 1) {
+                string = string.substring(cutat + 1);
+            }
+        }
+        return string.trim();
     }
 
     function getAllGalleryNode() {
@@ -245,7 +272,7 @@
                 node: deepcopy,
             };
         });
-        
+
         function copyOnclick(original, copy, css_selector) {
             let o = original.querySelector(css_selector);
             if (o) {
@@ -440,7 +467,7 @@
                 if (list.indexOf(`${g.gid}`) != -1) {
                     dlbutton.style.color = "gray";
                     dlbutton.style.backgroundColor = "transparent";
-                    print(`${m}gallery [${dlbutton.id}] is in downloaded list, set as downloaded`);
+                    print(`${m}gallery [${g.gid}] is in downloaded list, set as downloaded`);
                 }
                 let pos = gallery.parentElement.querySelector(".puretext");
                 if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
@@ -455,6 +482,7 @@
             print(`${m}initializing sorting`);
             print(`${m}process data`);
             processGdata();
+            print(gdata); // delete before push
             print(`${m}setup sorting button`);
             setSortingButton();
             print(`${m}setup show torrent title button`);
