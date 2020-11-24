@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.53
+// @version      0.54
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -34,6 +34,7 @@
     let id_dd = "exhddl_ddbutton";
     let id_puretext = "exhddl_puretext";
     let id_sort_setting = "exhddl_sortsetting";
+    let timer_list = [];
 
     window.onload = main();
 
@@ -57,7 +58,8 @@
         api = setApi();
         domain = `https://${document.domain}`;
         if (!domain || !api) return print(`${m}domain or api is missing`);
-        myCss()
+        myCss();
+        timerMananger();
         let link = document.location.href;
         if (link.includes(".php")) {
             return print(`${m}see php, abort`);
@@ -481,8 +483,36 @@
             setSortingButton();
             print(`${m}setup show torrent title button`);
             setShowTorrent();
-            setInterval(updateGalleryStatus, 3000);
+            addTimer(updateGalleryStatus, 1000);
         }
+    }
+
+    function timerMananger() {
+        document.addEventListener("visibilitychange", () => {
+            if (timer_list.length > 0) {
+                let pause = (document.visibilityState === "visible") ? false : true;
+                for (let index in timer_list) {
+                    let timer = timer_list[index];
+                    if (!pause) {
+                        timer.id = setInterval(timer.handler, timer.delay);
+                        print(`${m}start timer[${timer.note}] id:${timer.id}`);
+                    } else {
+                        clearInterval(timer.id);
+                        print(`${m}stop timer[${timer.note}] id:${timer.id}`);
+                    }
+                }
+            }
+        });
+    }
+
+    function addTimer(handler, delay, note = "") {
+        if (note == "") note = handler.name;
+        timer_list.push({
+            id: setInterval(handler, delay),
+            handler: handler,
+            delay: delay,
+            note: note,
+        });
     }
 
     function my_popUp(URL, w, h) {
