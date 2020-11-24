@@ -159,7 +159,7 @@
             newButton("exhddl_sort_by_title_no_event", "Sort By Title (ignore Prefix)", bs, () => { sortGalleryByKey("title_no_event"); }),
             newSeparate(),
             newButton("exhddl_sort_by_title", "Sort By Title", bs, () => { sortGalleryByKey("title"); }),
-            newLine(),           
+            newLine(),
             newButton("exhddl_sort_by_artist", "Sort By Artist", bs, () => { sortGalleryByKey("artist"); }),
             newSeparate(),
             newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
@@ -229,7 +229,6 @@
                 } else {
                     data[tag_key] = "";
                 }
-                // add no event title
                 data.title_no_event = removePrefix(data.title);
                 data.title_no_event_no_group = removeGroup(data.title_no_event);
             });
@@ -239,19 +238,15 @@
     function removePrefix(string = "") {
         if (string.indexOf("(") === 0) {
             let cutat = string.indexOf(")");
-            if (cutat != -1 && cutat != string.length - 1) {
-                string = string.substring(cutat + 1);
-            }
+            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
         }
         return string.trim();
     }
 
-    function removeGroup(string = ""){
+    function removeGroup(string = "") {
         if (string.indexOf("[") === 0) {
             let cutat = string.indexOf("]");
-            if (cutat != -1 && cutat != string.length - 1) {
-                string = string.substring(cutat + 1);
-            }
+            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
         }
         return string.trim();
     }
@@ -482,7 +477,6 @@
             print(`${m}initializing sorting`);
             print(`${m}process data`);
             processGdata();
-            print(gdata); // delete before push
             print(`${m}setup sorting button`);
             setSortingButton();
             print(`${m}setup show torrent title button`);
