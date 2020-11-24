@@ -18,7 +18,7 @@ show gallery's torrent title list in pure text
 
 make all gallery link open in new tab (pervent click on accident)  
 
-check every few seconds that all gallery (current page) are downloaded  
+check every few seconds that is gallery (current page) downloaded or not and change button status  
 
 v0.43: now it will update the list when you click archive download in gallery page  
 add new features when click archive download in list view:  

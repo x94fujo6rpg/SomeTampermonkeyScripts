@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.51
+// @version      0.52
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -154,21 +154,22 @@
             textContent: "Descending",
         });
         let nodelist = [
-            newButton("exhddl_sort_by_title", "Sort BY Title", bs, () => { sortGalleryByKey("title"); }),
+            newButton("exhddl_sort_by_title", "Sort By Title", bs, () => { sortGalleryByKey("title"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_artist", "Sort BY Artist", bs, () => { sortGalleryByKey("artist"); }),
+            newButton("exhddl_sort_by_artist", "Sort By Artist", bs, () => { sortGalleryByKey("artist"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_group", "Sort BY Group/Circle", bs, () => { sortGalleryByKey("group"); }),
+            newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
             newLine(),
-            newButton("exhddl_sort_by_date", "Sort BY Date", bs, () => { sortGalleryByKey("gid"); }),
+            newButton("exhddl_sort_by_date", "Sort By Date", bs, () => { sortGalleryByKey("gid"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_category", "Sort BY Category", bs, () => { sortGalleryByKey("category"); }),
+            newButton("exhddl_sort_by_category", "Sort By Category", bs, () => { sortGalleryByKey("category"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_ex", "Sort BY ???", bs, () => { sortGalleryByKey("expunged"); }),
+            newButton("exhddl_sort_by_ex", "Sort By ???", bs, () => { sortGalleryByKey("expunged"); }),
             newLine(),
             ck, lable,
         ];
         pos.querySelector("span").remove();
+        pos.querySelector("br").remove();
         appendAll(pos, nodelist);
     }
 
@@ -333,7 +334,6 @@
     function downloadButton() {
         let pos = document.getElementById(id_mainbox);
         document.getElementById(id_dd).remove();
-        pos.querySelector("br").remove();
         pos.insertAdjacentElement("afterbegin", newSpan("Processing... Please Wait"));
         acquireGalleryData();
         setLinkToNewTab();
