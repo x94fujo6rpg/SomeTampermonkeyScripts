@@ -132,6 +132,7 @@
             newButton(id_dd, "Enable: Archive Download & Sorting & Show torrents Title", bs, downloadButton),
             newLine(),
             newButton(id_puretext, "Show Pure Text", bs, pureText),
+            newLine(),
         ];
         box = appendAll(box, nodelist);
         pos.insertAdjacentElement("afterbegin", box);
@@ -153,7 +154,6 @@
             textContent: "Descending",
         });
         let nodelist = [
-            newLine(),
             newButton("exhddl_sort_by_title", "Sort BY Title", bs, () => { sortGalleryByKey("title"); }),
             newSeparate(),
             newButton("exhddl_sort_by_artist", "Sort BY Artist", bs, () => { sortGalleryByKey("artist"); }),
@@ -309,11 +309,12 @@
 
     function hlexg() {
         let w = document.querySelectorAll("s");
-        if (w.length > 0) w.forEach(ele => ele.parentElement.parentElement.parentElement.parentElement.style.backgroundColor = "gold");
+        if (w.length > 0) w.forEach(ele => ele.parentElement.parentElement.parentElement.parentElement.style.backgroundColor = "GoldenRod");
     }
 
     function pureText() {
         document.getElementById(id_puretext).remove();
+        document.getElementById(id_mainbox).querySelector("br").remove();
         let gallery = document.querySelectorAll(".gl1t");
         gallery.forEach(ele => {
             let e = document.createElement("span");
@@ -330,8 +331,9 @@
     }
 
     function downloadButton() {
-        document.getElementById(id_dd).remove();
         let pos = document.getElementById(id_mainbox);
+        document.getElementById(id_dd).remove();
+        pos.querySelector("br").remove();
         pos.insertAdjacentElement("afterbegin", newSpan("Processing... Please Wait"));
         acquireGalleryData();
         setLinkToNewTab();
