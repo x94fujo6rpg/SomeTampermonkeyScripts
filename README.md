@@ -11,13 +11,14 @@ add button for each gallery in list view to use archive download directly
 because there is a limit on how many requests you can send at once  
 this need some time to process  
 click button to enable it (pervent too many requests)  
+![](https://i.imgur.com/9jpsTPl.png)
+![](https://i.imgur.com/xkXzdrS.png)
 
 v0.55 new feature [Jump To Last Downloaded] (if any)  
 mark downloaded gallery color in black  
 disable send request to server when click archive download  
 
 v0.53 add more sort option  
-![](https://i.imgur.com/Jc53brD.png)  
 example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
 Sort By Title (ignore Prefix/Group/Circle/Artist) => `cccccccc (dddddddd)`  
 Sort By Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
