@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.55
+// @version      0.56
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -144,6 +144,7 @@
         pos.insertAdjacentElement("afterbegin", box);
         if (hid) hlexg();
         addIDInfoToAllGallery();
+        setLinkToNewTab();
         addTimer(updateGalleryStatus, 500);
     }
 
@@ -372,7 +373,6 @@
         document.getElementById(id_dd).remove();
         pos.insertAdjacentElement("afterbegin", newSpan("Processing... Please Wait"));
         acquireGalleryData();
-        setLinkToNewTab();
     }
 
     function addIDInfoToAllGallery() {
