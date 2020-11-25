@@ -210,6 +210,7 @@
                     t_list.forEach(e => e.style.display = (e.style.display == "none") ? "" : "none");
                 });
                 pos.insertAdjacentElement("afterend", button);
+                pos.insertAdjacentElement("afterend", newLine());
             }
         });
     }
