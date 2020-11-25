@@ -12,6 +12,10 @@ because there is a limit on how many requests you can send at once
 this need some time to process  
 click button to enable it (pervent too many requests)  
 
+v0.55 new feature [Jump To Last Downloaded] (if any)  
+mark downloaded gallery color in black  
+disable send request to server when click archive download  
+
 v0.53 add more sort option  
 ![](https://i.imgur.com/Jc53brD.png)  
 example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
@@ -29,7 +33,7 @@ check every few seconds that is gallery (current page) downloaded or not and cha
 
 v0.43: now it will update the list when you click archive download in gallery page  
 add new features when click archive download in list view:  
-1.send a request to server as you visited the gallery (not sure if this count)  
+~~1.send a request to server as you visited the gallery (not sure if this count)~~  
 2.add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History))  
 make it trigger visited css style  
 
@@ -58,6 +62,8 @@ let eh_v = "gray";
 ```
 because of the security risk, visited link color many not work in some browser  
 see [https://dbaron.org/mozilla/visited-privacy](https://dbaron.org/mozilla/visited-privacy)  
+
+v0.27 fix visited link color (work on chrome)
 
 ## [[ehx torrent text]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)  
 click to copy torrent name in torrent page  

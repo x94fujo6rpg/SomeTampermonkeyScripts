@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js
-// @version      0.26
+// @version      0.27
 // @description  change link color
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -39,8 +39,18 @@
         let color_v = (link.indexOf("exhentai") != -1) ? ex_v : eh_v;
         let style = document.createElement("style");
         document.head.appendChild(style);
-        if(enable_link) style.sheet.insertRule(`a:link {color: ${color};}`);
-        if(enable_visited) style.sheet.insertRule(`a:visited {color:${color_v} !important;}`); 
+        let csslist = [];
+        if (enable_link) csslist.push(`
+            a:link {
+                color: ${color};
+            }
+        `);
+        if (enable_visited) csslist.push(`
+            a:visited .glink, a:active .glink {
+                color:${color_v} !important;
+            }
+        `);
+        myCss(csslist);
     }
 
     function getdomain() {
@@ -51,8 +61,18 @@
             return ex;
         } else if (link.indexOf("e-hentai") != -1) {
             return eh;
-        } else {
-            return false;
+        }
+        return false;
+    }
+
+    function myCss(innerlist = []) {
+        if (innerlist.length > 0) {
+            let s = document.createElement("style");
+            s.id = "mycss";
+            document.head.appendChild(s);
+            let content = "";
+            innerlist.forEach(inner => content += inner);
+            s.innerHTML = content;
         }
     }
 })();

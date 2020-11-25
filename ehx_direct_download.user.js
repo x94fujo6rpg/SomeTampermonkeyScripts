@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.54
+// @version      0.55
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -34,6 +34,7 @@
     let id_dd = "exhddl_ddbutton";
     let id_puretext = "exhddl_puretext";
     let id_sort_setting = "exhddl_sortsetting";
+    let id_jump_to_last = "exhddl_jump_to_last";
     let timer_list = [];
 
     window.onload = main();
@@ -135,10 +136,19 @@
             newLine(),
             newButton(id_puretext, "Show Pure Text", bs, pureText),
             newLine(),
+            newButton(id_jump_to_last, "Jump To Last Downloaded", bs, jumpToLastDownload),
+            newLine(),
         ];
         box = appendAll(box, nodelist);
         pos.insertAdjacentElement("afterbegin", box);
         if (hid) hlexg();
+        addIDInfoToAllGallery();
+        addTimer(updateGalleryStatus, 500);
+    }
+
+    function jumpToLastDownload() {
+        let last = document.querySelector("[marked='true']");
+        if (last) last.scrollIntoView();
     }
 
     function setSortingButton() {
@@ -166,7 +176,7 @@
             newSeparate(),
             newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_date", "Sort By Date", bs, () => { sortGalleryByKey("gid"); }),
+            newButton("exhddl_sort_by_date", "Sort By Date(Default)", bs, () => { sortGalleryByKey("gid"); }),
             newSeparate(),
             newButton("exhddl_sort_by_category", "Sort By Category", bs, () => { sortGalleryByKey("category"); }),
             newSeparate(),
@@ -363,15 +373,56 @@
         setLinkToNewTab();
     }
 
-    function updateGalleryStatus() {
-        let list = GM_getValue(key, defaultValue).split(",");
-        gdata.forEach(g => {
-            let dl_button = document.querySelector(`#gallery_dl_${g.gid}`);
-            if (list.indexOf(`${g.gid}`) != -1) {
-                dl_button.style.color = "gray";
-                dl_button.style.backgroundColor = "transparent";
-            }
+    function addIDInfoToAllGallery() {
+        let nodelist = document.querySelectorAll(".gl1t");
+        nodelist.forEach(node => {
+            let title = node.querySelector(".glname");
+            let id = title.parentElement.href.split("/g/")[1].split("/")[0];
+            node.setAttribute("gid", id);
         });
+    }
+
+    function updateGalleryStatus() {
+        let list = GM_getValue(key, defaultValue);
+
+        if (list.length <= 0) return;
+        list = list.split(",");
+
+        let find_button = document.querySelector(".itg.gld");
+        if (!find_button) return print(`${m}gallery list not found`);
+
+        find_button = find_button.querySelectorAll("button");
+        if (find_button.length > 0) updateButtonStatus();
+        updateGalleryColor();
+
+        function updateGalleryColor() {
+            let nodelist = document.querySelectorAll(".gl1t");
+            let marked = [];
+            nodelist.forEach(g => {
+                let id = g.getAttribute("gid");
+                if (list.indexOf(id) > 0 && !g.getAttribute("marked")) {
+                    g.style.backgroundColor = "black";
+                    //g.style.opacity = "0.5";
+                    g.setAttribute("marked", true);
+                    marked.push(id);
+                }
+            });
+            if (marked.length > 0) print(`${m} found in list, mark background: ${marked}`);
+        }
+
+        function updateButtonStatus() {
+            let marked = [];
+            gdata.forEach(g => {
+                let dl_button = document.querySelector(`#gallery_dl_${g.gid}`);
+                if (list.indexOf(`${g.gid}`) != -1 && !dl_button.getAttribute("marked")) {
+                    dl_button.style.color = "gray";
+                    dl_button.style.backgroundColor = "transparent";
+                    dl_button.setAttribute("marked", true);
+                    marked.push(g.gid);
+                }
+            });
+            if (marked.length > 0) print(`${m} found in list, mark dl_button: ${marked}`);
+        }
     }
 
     function setLinkToNewTab() {
@@ -454,9 +505,10 @@
                     textContent: "Archive Download",
                 });
                 dlbutton.onclick = function () {
-                    let s = document.getElementById(dlbutton.id).style;
-                    s.color = "gray";
-                    s.backgroundColor = "transparent";
+                    let button = document.getElementById(dlbutton.id);
+                    button.style.color = "gray";
+                    button.style.backgroundColor = "transparent";
+                    button.setAttribute("marked", true);
                     visitGallery(glink);
                     updateList(g.gid);
                     return my_popUp(archivelink, 480, 320);
@@ -483,7 +535,6 @@
             setSortingButton();
             print(`${m}setup show torrent title button`);
             setShowTorrent();
-            addTimer(updateGalleryStatus, 1000);
         }
     }
 
@@ -548,6 +599,7 @@
     function visitGallery(link) {
         if (link) {
             // send request to server, not sure this count or not. (no effect to link states)
+            /*
             let r = new XMLHttpRequest();
             r.open("get", link, true);
             r.onreadystatechange = function () {
@@ -561,6 +613,7 @@
                 }
             };
             r.send();
+            */
             // trigger :visited
             let current = window.location.href;
             history.pushState({}, "", link); // add link to history. this will change current winodw link.
