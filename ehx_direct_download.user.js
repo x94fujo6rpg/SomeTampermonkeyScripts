@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.56
+// @version      0.57
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -178,7 +178,7 @@
             newSeparate(),
             newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_date", "Sort By Date(Default)", bs, () => { sortGalleryByKey("gid"); }),
+            newButton("exhddl_sort_by_date", "Sort By Date(Default)", bs, () => { sortGalleryByKey("posted"); }),
             newSeparate(),
             newButton("exhddl_sort_by_category", "Sort By Category", bs, () => { sortGalleryByKey("category"); }),
             newSeparate(),
