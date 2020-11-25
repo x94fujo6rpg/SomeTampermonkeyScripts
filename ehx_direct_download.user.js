@@ -138,6 +138,7 @@
             newLine(),
             newButton(id_jump_to_last, "Jump To Last Downloaded", bs, jumpToLastDownload),
             newLine(),
+            newLine(),
         ];
         box = appendAll(box, nodelist);
         pos.insertAdjacentElement("afterbegin", box);
