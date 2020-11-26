@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.64
+// @version      0.65
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -93,10 +93,10 @@
                         let timer = timer_list[index];
                         if (!pause) {
                             timer.id = setInterval(timer.handler, timer.delay);
-                            print(`${m}start timer[${timer.note}] id:${timer.id}`);
+                            //print(`${m}start timer[${timer.note}] id:${timer.id}`);
                         } else {
                             clearInterval(timer.id);
-                            print(`${m}stop timer[${timer.note}] id:${timer.id}`);
+                            //print(`${m}stop timer[${timer.note}] id:${timer.id}`);
                         }
                     }
                 }
@@ -400,12 +400,8 @@
                         data[tag_key] = "";
                     }
                 });
-                let newstring = removePrefix(data.title);
-                newstring = removeEnd(newstring);
-                data.title_no_event = newstring;
-
-                newstring = removeGroup(newstring);
-                data.title_no_event_no_group = newstring;
+                data.title_no_event = removePrefix(data.title);
+                data.title_no_event_no_group = removeGroup(data.title_no_event);
             });
         }
 
@@ -624,7 +620,6 @@
                 }
             }
         });
-
         return string;
     }
 
@@ -641,7 +636,7 @@
             "【】",
             "[]",
         ];
-        container_list.forEach(container=>{
+        container_list.forEach(container => {
             if (string.indexOf(container[0]) === 0) {
                 let cutat = string.indexOf(container[1]);
                 if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
@@ -663,16 +658,24 @@
         let newlist = [];
         let descending = document.getElementById(id_list.sort_setting);
         descending = descending.checked ? true : false;
-        newlist = object_list.sort((a, b) => {
-            if (descending) {
-                return a[sort_key] < b[sort_key] ? 1 : -1;
-            } else {
-                return a[sort_key] > b[sort_key] ? 1 : -1;
-            }
+        newlist = object_list.sort((a, b) => { 
+            return descending ? naturalSort(b[sort_key], a[sort_key]) : naturalSort(a[sort_key], b[sort_key]); 
         });
+
         let new_id_list = [];
-        if (newlist) newlist.forEach(item => new_id_list.push(item.gid));
+        print(`${m}sort by: ${sort_key}`);
+        if (debug) console.groupCollapsed();
+        if (newlist) newlist.forEach(data => {
+            new_id_list.push(data.gid);
+            print(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
+        });
+        if (debug) console.groupEnd();
+        
         return new_id_list;
+
+        function naturalSort(a, b) {
+            return a.localeCompare(b, navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true });
+        }
     }
 
     function getAllGalleryNode() {
@@ -694,9 +697,7 @@
 
         function copyOnclick(original, copy, css_selector) {
             let o = original.querySelector(css_selector);
-            if (o) {
-                copy.querySelector(css_selector).onclick = o.onclick;
-            }
+            if (o) copy.querySelector(css_selector).onclick = o.onclick;
         }
     }
 
