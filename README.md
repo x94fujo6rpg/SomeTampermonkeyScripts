@@ -14,7 +14,10 @@ click button to enable it (pervent too many requests)
 ![](https://i.imgur.com/9jpsTPl.png)
 ![](https://i.imgur.com/xkXzdrS.png)
 
-v0.55 new feature [Jump To Last Downloaded] (if any)  
+v0.61 new feature mark/unmark gallery  
+rearrange code  
+
+v0.55 new feature [Jump To Nearest Downloaded] (if any)  
 mark downloaded gallery color in black  
 disable send request to server when click archive download  
 

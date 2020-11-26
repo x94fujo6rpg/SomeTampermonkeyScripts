@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.57
+// @version      0.61
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -30,37 +30,32 @@
     let gdata = [];
     let gcount = 0;
     let pcount = 0;
-    let id_mainbox = "exhddl_activate";
-    let id_dd = "exhddl_ddbutton";
-    let id_puretext = "exhddl_puretext";
-    let id_sort_setting = "exhddl_sortsetting";
-    let id_jump_to_last = "exhddl_jump_to_last";
     let timer_list = [];
+    let id_list = {
+        mainbox: "exhddl_activate",
+        dd: "exhddl_ddbutton",
+        puretext: "exhddl_puretext",
+        sort_setting: "exhddl_sortsetting",
+        jump_to_last: "exhddl_jump_to_last",
+    };
+    let style_list = {
+        top_button: { width: "max-content" },
+        gallery_button: { width: "max-content", alignSelf: "center" },
+        gallery_marked: { backgroundColor: "black" },
+        button_marked: { color: "gray", backgroundColor: "transparent" },
+        ex: {opacity: 0.3},
+    };
+    let status_update_interval = 500;
 
     window.onload = main();
 
-    function myCss() {
-        let s = document.createElement("style");
-        s.id = "ehx_direct_download_css";
-        document.head.appendChild(s);
-        s.textContent = `
-            .puretext {
-                overflow: hidden;
-                min-height: 32px;
-                line-height: 16px;
-                margin: 6px 4px 0;
-                font-size: 10pt;
-                text-align: center;
-            }
-        `;
-    }
-
     function main() {
-        api = setApi();
         domain = `https://${document.domain}`;
-        if (!domain || !api) return print(`${m}domain or api is missing`);
+        api = `${domain}/api.php`;
+
         myCss();
         timerMananger();
+
         let link = document.location.href;
         if (link.includes(".php")) {
             return print(`${m}see php, abort`);
@@ -72,416 +67,191 @@
             if (!checkDisplayMode) return wrongDisplayMode();
             return setButton();
         }
-    }
 
-    function checkDisplayMode() {
-        let setting = document.getElementById("dms");
-        if (!setting) return false;
-        setting = setting.querySelector("option[value='t']");
-        return setting.selected;
-    }
-
-    function wrongDisplayMode() {
-        let pos = document.querySelector(".ido");
-        pos.insertAdjacentElement("afterbegin", newSpan("Display mode is not Thumbnail. Script stop"));
-    }
-
-    function newSpan(text = "") {
-        let span = document.createElement("span");
-        Object.assign(span, {
-            textContent: text,
-        });
-        return span;
-    }
-
-    function newLine() {
-        return document.createElement("br");
-    }
-
-    function newSeparate() {
-        return newSpan(" / ");
-    }
-
-    function setEvent(link) {
-        let la = link.split("/");
-        if (la[3] === "g") {
-            let gid = la[4];
-            let e = findEleByText("a", "Archive Download");
-            e.addEventListener("click", () => {
-                updateList(gid);
-            });
-            print(`${m}set trigger for updateList on gallery:${gid}`);
-        }
-    }
-
-    function findEleByText(type, string) {
-        let es = document.querySelectorAll(type);
-        for (let index in es) {
-            if (!isNaN(index)) {
-                let e = es[index];
-                if (e.textContent.includes(string)) {
-                    return e;
+        function myCss() {
+            let newcss = document.createElement("style");
+            newcss.id = "ehx_direct_download_css";
+            document.head.appendChild(newcss);
+            newcss.textContent = `
+                .puretext {
+                    overflow: hidden;
+                    min-height: 32px;
+                    line-height: 16px;
+                    margin: 6px 4px 0;
+                    font-size: 10pt;
+                    text-align: center;
                 }
-            }
-        }
-    }
-
-    function setButton() {
-        let pos = document.querySelector(".ido");
-        let bs = "width: max-content";
-        let box = document.createElement("div");
-        box.id = id_mainbox;
-        let nodelist = [
-            newButton(id_dd, "Enable: Archive Download & Sorting & Show torrents Title", bs, downloadButton),
-            newLine(),
-            newButton(id_puretext, "Show Pure Text", bs, pureText),
-            newLine(),
-            newButton(id_jump_to_last, "Jump To Last Downloaded", bs, jumpToLastDownload),
-            newLine(),
-            newLine(),
-        ];
-        box = appendAll(box, nodelist);
-        pos.insertAdjacentElement("afterbegin", box);
-        if (hid) hlexg();
-        addIDInfoToAllGallery();
-        setLinkToNewTab();
-        addTimer(updateGalleryStatus, 500);
-    }
-
-    function jumpToLastDownload() {
-        let last = document.querySelector("[marked='true']");
-        if (last) last.scrollIntoView();
-    }
-
-    function setSortingButton() {
-        let pos = document.getElementById(id_mainbox);
-        let bs = "width: max-content";
-        let ck = document.createElement("input");
-        Object.assign(ck, {
-            type: "checkbox",
-            id: id_sort_setting,
-            checked: true,
-        });
-        let lable = document.createElement("label");
-        Object.assign(lable, {
-            htmlFor: id_sort_setting,
-            textContent: "Descending",
-        });
-        let nodelist = [
-            newButton("exhddl_sort_by_title_no_event_no_group", "Sort By Title (ignore Prefix/Group/Circle/Artist)", bs, () => { sortGalleryByKey("title_no_event_no_group"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_title_no_event", "Sort By Title (ignore Prefix)", bs, () => { sortGalleryByKey("title_no_event"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_title", "Sort By Title", bs, () => { sortGalleryByKey("title"); }),
-            newLine(),
-            newButton("exhddl_sort_by_artist", "Sort By Artist", bs, () => { sortGalleryByKey("artist"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_group", "Sort By Group/Circle", bs, () => { sortGalleryByKey("group"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_date", "Sort By Date(Default)", bs, () => { sortGalleryByKey("posted"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_category", "Sort By Category", bs, () => { sortGalleryByKey("category"); }),
-            newSeparate(),
-            newButton("exhddl_sort_by_ex", "Sort By ???", bs, () => { sortGalleryByKey("expunged"); }),
-            newLine(),
-            ck, lable,
-        ];
-        pos.querySelector("span").remove();
-        pos.querySelector("br").remove();
-        appendAll(pos, nodelist);
-    }
-
-    function setShowTorrent() {
-        let nodelist = document.querySelectorAll(".gl1t");
-        nodelist.forEach(g => {
-            let id = g.querySelector("a").href.split("/g/")[1].split("/")[0];
-            let torrent_list = getTorrentList(id);
-            if (torrent_list) {
-                let pos = g.querySelector(`#gallery_dl_${id}`);
-                torrent_list.forEach((t, index) => {
-                    let span = newSpan(t);
-                    span.className = "puretext torrent_title";
-                    span.style.display = "none";
-                    //if (index != 0) pos.insertAdjacentElement("afterend", newLine());
-                    pos.insertAdjacentElement("afterend", span);
-                });
-                let bs = "width: max-content; align-self: center;";
-                let button = newButton(`t_title_${id}`, "Torrent List", bs, function () {
-                    let t_list = this.parentElement.querySelectorAll(".torrent_title");
-                    t_list.forEach(e => e.style.display = (e.style.display == "none") ? "" : "none");
-                });
-                pos.insertAdjacentElement("afterend", button);
-                pos.insertAdjacentElement("afterend", newLine());
-            }
-        });
-    }
-
-    function getTorrentList(gid = "") {
-        let list = [];
-        let torrents = gdata.find(g => g.gid == gid).torrents;
-        if (torrents.length == 0) return false;
-        torrents.forEach(t => {
-            list.push(t.name);
-        });
-        return list.reverse();
-    }
-
-    function appendAll(node, nodeList) {
-        nodeList.forEach(e => node.appendChild(e));
-        return node;
-    }
-
-    function processGdata() {
-        let taglist = [
-            "artist",
-            "group",
-        ];
-        gdata.forEach(data => {
-            taglist.forEach(tag_key => {
-                data[tag_key] = data.tags.find(s => s.includes(`${tag_key}:`));
-                if (data[tag_key]) {
-                    data[tag_key] = data[tag_key].replace(`${tag_key}:`, "");
-                } else {
-                    data[tag_key] = "";
-                }
-            });
-            data.title_no_event = removePrefix(data.title);
-            data.title_no_event_no_group = removeGroup(data.title_no_event);
-        });
-    }
-
-    function removePrefix(string = "") {
-        if (string.indexOf("(") === 0) {
-            let cutat = string.indexOf(")");
-            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
-        }
-        return string.trim();
-    }
-
-    function removeGroup(string = "") {
-        if (string.indexOf("[") === 0) {
-            let cutat = string.indexOf("]");
-            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
-        }
-        return string.trim();
-    }
-
-    function getAllGalleryNode() {
-        gallery_nodes = {};
-        let nodelist = document.querySelectorAll(".gl1t");
-        nodelist.forEach(node => {
-            let title = node.querySelector(".glname");
-            let id = title.parentElement.href.split("/g/")[1].split("/")[0];
-            let deepcopy = node.cloneNode(true);
-            copyOnclick(node, deepcopy, `#gallery_dl_${id}`);
-            copyOnclick(node, deepcopy, `#t_title_${id}`);
-            title = title.textContent;
-            gallery_nodes[id] = {
-                id: id,
-                title: title,
-                node: deepcopy,
-            };
-        });
-
-        function copyOnclick(original, copy, css_selector) {
-            let o = original.querySelector(css_selector);
-            if (o) {
-                copy.querySelector(css_selector).onclick = o.onclick;
-            }
-        }
-    }
-
-    function sortGalleryByKey(key = "") {
-        if (!key) return;
-        let sorted_id = getSortedGalleryID(gdata, key);
-        let container = document.querySelector(".itg.gld");
-        getAllGalleryNode();
-        removeAllGallery();
-        sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
-    }
-
-    function removeAllGallery() {
-        let nodelist = document.querySelectorAll(".gl1t");
-        nodelist.forEach(e => e.remove());
-    }
-
-    function getSortedGalleryID(object_list, sort_key) {
-        let newlist = [];
-        let descending = document.getElementById(id_sort_setting);
-        descending = descending.checked ? true : false;
-        newlist = object_list.sort((a, b) => {
-            if (descending) {
-                return a[sort_key] < b[sort_key] ? 1 : -1;
-            } else {
-                return a[sort_key] > b[sort_key] ? 1 : -1;
-            }
-        });
-        let id_list = [];
-        if (newlist) newlist.forEach(item => id_list.push(item.gid));
-        return id_list;
-    }
-
-    function newButton(e_id, e_text, e_style, e_onclick) {
-        let e = document.createElement("button");
-        return Object.assign(e, {
-            id: e_id,
-            textContent: e_text,
-            style: e_style,
-            onclick: e_onclick,
-        });
-    }
-
-    function setApi() {
-        let eh = "https://api.e-hentai.org/api.php";
-        let ex = "https://exhentai.org/api.php";
-        let link = document.location.href;
-        if (link.indexOf("//exhentai") != -1) {
-            print(`${m}set api as ${ex}`);
-            return ex;
-        } else if (link.indexOf("//e-hentai") != -1) {
-            print(`${m}set api as ${eh}`);
-            return eh;
-        }
-        return false;
-    }
-
-    function hlexg() {
-        let w = document.querySelectorAll("s");
-        if (w.length > 0) w.forEach(ele => ele.parentElement.parentElement.parentElement.parentElement.style.backgroundColor = "GoldenRod");
-    }
-
-    function pureText() {
-        document.getElementById(id_puretext).remove();
-        document.getElementById(id_mainbox).querySelector("br").remove();
-        let gallery = document.querySelectorAll(".gl1t");
-        gallery.forEach(ele => {
-            let e = document.createElement("span");
-            e.textContent = ele.querySelector("a[href]").textContent;
-            e.className = "puretext";
-            let pos = ele.querySelector(".gdd");
-            if (pos) {
-                pos.insertAdjacentElement("beforebegin", e);
-            } else {
-                pos = ele.querySelector(".gl3t");
-                pos.insertAdjacentElement("afterend", e);
-            }
-        });
-    }
-
-    function downloadButton() {
-        let pos = document.getElementById(id_mainbox);
-        document.getElementById(id_dd).remove();
-        pos.insertAdjacentElement("afterbegin", newSpan("Processing... Please Wait"));
-        acquireGalleryData();
-    }
-
-    function addIDInfoToAllGallery() {
-        let nodelist = document.querySelectorAll(".gl1t");
-        nodelist.forEach(node => {
-            let title = node.querySelector(".glname");
-            let id = title.parentElement.href.split("/g/")[1].split("/")[0];
-            node.setAttribute("gid", id);
-        });
-    }
-
-    function updateGalleryStatus() {
-        let list = GM_getValue(key, defaultValue);
-
-        if (list.length <= 0) return;
-        list = list.split(",");
-
-        let find_button = document.querySelector(".itg.gld");
-        if (!find_button) return print(`${m}gallery list not found`);
-
-        find_button = find_button.querySelectorAll("button");
-        if (find_button.length > 0) updateButtonStatus();
-        updateGalleryColor();
-
-        function updateGalleryColor() {
-            let nodelist = document.querySelectorAll(".gl1t");
-            let marked = [];
-            nodelist.forEach(g => {
-                let id = g.getAttribute("gid");
-                if (list.indexOf(id) > 0 && !g.getAttribute("marked")) {
-                    g.style.backgroundColor = "black";
-                    //g.style.opacity = "0.5";
-                    g.setAttribute("marked", true);
-                    marked.push(id);
-                }
-            });
-            if (marked.length > 0) print(`${m} found in list, mark background: ${marked}`);
+            `;
         }
 
-        function updateButtonStatus() {
-            let marked = [];
-            gdata.forEach(g => {
-                let dl_button = document.querySelector(`#gallery_dl_${g.gid}`);
-                if (list.indexOf(`${g.gid}`) != -1 && !dl_button.getAttribute("marked")) {
-                    dl_button.style.color = "gray";
-                    dl_button.style.backgroundColor = "transparent";
-                    dl_button.setAttribute("marked", true);
-                    marked.push(g.gid);
-                }
-            });
-            if (marked.length > 0) print(`${m} found in list, mark dl_button: ${marked}`);
-        }
-    }
-
-    function setLinkToNewTab() {
-        let gallery = document.querySelectorAll(".gl1t");
-        gallery.forEach(g => {
-            g.querySelectorAll("a").forEach(a => {
-                if (a.href.includes("/g/")) a.target = "_blank";
-            });
-        });
-    }
-
-    function acquireGalleryData() {
-        let gallery = document.querySelectorAll(".gl1t");
-        let gc = 0;
-        if (gallery) {
-            print(`${m}acquire gallery data`);
-            let data = { method: "gdata", gidlist: [], namespace: 1 };
-            let alldata = [];
-            let count = 0;
-            let glist = [];
-            gallery.forEach((ele, index) => {
-                let link = ele.querySelector(`a[href*='${domain}/g/']`).href.split("/");
-                if (link[3] === "g") {
-                    let gid = link[4];
-                    let gtoken = link[5];
-                    if (gid && gtoken) {
-                        glist.push([gid, gtoken]);
-                        count++;
-                        gc++;
-                        if (count === 25 || index === gallery.length - 1) {
-                            count = 0;
-                            let newdata = Object.assign({}, data);
-                            newdata.gidlist = Object.assign([], glist);
-                            alldata.push(newdata);
-                            glist = [];
+        function timerMananger() {
+            document.addEventListener("visibilitychange", () => {
+                if (timer_list.length > 0) {
+                    let pause = (document.visibilityState === "visible") ? false : true;
+                    for (let index in timer_list) {
+                        let timer = timer_list[index];
+                        if (!pause) {
+                            timer.id = setInterval(timer.handler, timer.delay);
+                            print(`${m}start timer[${timer.note}] id:${timer.id}`);
+                        } else {
+                            clearInterval(timer.id);
+                            print(`${m}stop timer[${timer.note}] id:${timer.id}`);
                         }
                     }
                 }
             });
-            gcount = gc; // save gallery count
-            print(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
-            if (alldata.length != 0) {
-                print(`${m}start sending request`);
-                requestData(alldata);
-            } else {
-                print(`${m}gallery queue is empty`);
+        }
+
+        function setEvent(link) {
+            let _link = link.split("/");
+            if (_link[3] === "g") {
+                let gid = _link[4];
+                let archive_download = findEleByText("a", "Archive Download");
+                archive_download.addEventListener("click", () => {
+                    addToDownloadedList(gid);
+                });
+                print(`${m}set trigger for updateList on gallery:${gid}`);
             }
         }
-    }
 
-    function requestData(datalist) {
-        for (let index = 0; index < datalist.length; index++) {
-            setTimeout(() => {
-                print(`${m}sending request${index + 1}`);
-                let data = datalist[index];
-                if (data) myApiCall(data, index + 1);
-            }, 1000 * index);
+        function checkDisplayMode() {
+            let setting = document.getElementById("dms");
+            if (!setting) return false;
+            setting = setting.querySelector("option[value='t']");
+            return setting.selected;
+        }
+
+        function wrongDisplayMode() {
+            let pos = document.querySelector(".ido");
+            pos.insertAdjacentElement("afterbegin", newSpan("Display mode is not Thumbnail. Script stop"));
+        }
+
+        function setButton() {
+            let pos = document.querySelector(".ido");
+            let box = document.createElement("div");
+            box.id = id_list.mainbox;
+            let nodelist = [
+                newButton(id_list.dd, "Enable: Archive Download & Sorting & Show torrents Title", style_list.top_button, enableDirectDownload),
+                newLine(),
+                newButton(id_list.puretext, "Show Pure Text", style_list.top_button, pureText),
+                newLine(),
+                newButton(id_list.jump_to_last, "Jump To Nearest Downloaded", style_list.top_button, jumpToLastDownload),
+                newLine(),
+                newLine(),
+            ];
+            box = appendAll(box, nodelist);
+            pos.insertAdjacentElement("afterbegin", box);
+            if (hid) hlexg();
+            addInfoToAllGallery();
+            setAllLinkToNewTab();
+            addTimer(updateGalleryStatus, status_update_interval);
+
+            function enableDirectDownload() {
+                let pos = document.getElementById(id_list.mainbox);
+                document.getElementById(id_list.dd).remove();
+                pos.insertAdjacentElement("afterbegin", newSpan("Processing... Please Wait"));
+                acquireGalleryData();
+
+                function acquireGalleryData() {
+                    let gallery_nodelist = document.querySelectorAll(".gl1t");
+                    let gc = 0;
+                    if (gallery_nodelist) {
+                        print(`${m}acquire gallery data`);
+                        let data = { method: "gdata", gidlist: [], namespace: 1 };
+                        let alldata = [];
+                        let count = 0;
+                        let glist = [];
+                        gallery_nodelist.forEach((gallery, index) => {
+                            let gid = gallery.getAttribute("gid");
+                            let gtoken = gallery.getAttribute("gtoken");
+                            if (gid && gtoken) {
+                                glist.push([gid, gtoken]);
+                                count++;
+                                gc++;
+                                if (count === 25 || index === gallery_nodelist.length - 1) {
+                                    count = 0;
+                                    let newdata = Object.assign({}, data);
+                                    newdata.gidlist = Object.assign([], glist);
+                                    alldata.push(newdata);
+                                    glist = [];
+                                }
+                            }
+                        });
+                        gcount = gc; // save gallery count
+                        print(`${m}gallery queue length:${alldata.length}, total gallery count:${gc}`);
+                        if (alldata.length != 0) {
+                            print(`${m}start sending request`);
+                            requestData(alldata);
+                        } else {
+                            print(`${m}gallery queue is empty`);
+                        }
+                    }
+                }
+
+                function requestData(datalist) {
+                    for (let index = 0; index < datalist.length; index++) {
+                        setTimeout(() => {
+                            print(`${m}sending request${index + 1}`);
+                            let data = datalist[index];
+                            if (data) myApiCall(data, index + 1);
+                        }, 1000 * index);
+                    }
+                }
+
+                function myApiCall(data, index) {
+                    let request = new XMLHttpRequest();
+                    request.open("POST", api);
+                    request.setRequestHeader("Content-Type", "application/json");
+                    request.withCredentials = true;
+                    request.onreadystatechange = function () {
+                        if (request.readyState == 4) {
+                            if (request.status == 200) {
+                                print(`${m}request${index} complete`);
+                                return directDL(request.responseText, index);
+                            } else {
+                                print(`${m}request${index} failed [status: ${request.status}]`);
+                                print(request);
+                                return;
+                            }
+                        }
+                    };
+                    request.send(JSON.stringify(data));
+                }
+            }
+
+            function pureText() {
+                document.getElementById(id_list.puretext).remove();
+                document.getElementById(id_list.mainbox).querySelector("br").remove();
+                let gallery_nodelist = document.querySelectorAll(".gl1t");
+                gallery_nodelist.forEach(gallery => {
+                    let puretext_span = document.createElement("span");
+                    puretext_span.textContent = gallery.querySelector("a[href]").textContent;
+                    puretext_span.className = "puretext";
+                    let pos = gallery.querySelector(".gdd");
+                    if (pos) {
+                        // found dl button
+                        pos.insertAdjacentElement("beforebegin", puretext_span);
+                        pos.parentElement.querySelector("br").remove();
+                    } else {
+                        pos = gallery.querySelector(".gl3t");
+                        pos.insertAdjacentElement("afterend", puretext_span);
+                    }
+                });
+            }
+
+            function jumpToLastDownload() {
+                let last = document.querySelector("[marked='true']");
+                if (last) last.scrollIntoView();
+            }
+
+            function hlexg() {
+                let w = document.querySelectorAll("s");
+                if (w.length > 0) {
+                    w.forEach(ele => {
+                        Object.assign(ele.parentElement.parentElement.parentElement.parentElement.style, style_list.ex);
+                    });
+                }
+            }
         }
     }
 
@@ -489,45 +259,67 @@
         data = JSON.parse(data);
         print(`${m}process data from request batch:${index}, gallery count:${Object.keys(data.gmetadata).length}`);
 
-        let list = GM_getValue(key, defaultValue);
-        if (list.length != 0) list.split(",");
+        let downloaded_list = GM_getValue(key, defaultValue);
+        if (downloaded_list.length != 0) downloaded_list.split(",");
 
         let gidlist = [];
-        data.gmetadata.forEach(g => {
-            gdata.push(g);
-            let archivelink = `${domain}/archiver.php?gid=${g.gid}&token=${g.token}&or=${g.archiver_key}`;
-            let glink = `${domain}/g/${g.gid}/${g.token}/`;
-            let gallery = document.querySelector(`a[href="${glink}`);
+        let mark_list = [];
+        data.gmetadata.forEach(gallery_data => {
+            gdata.push(gallery_data);
+            let gid = gallery_data.gid;
+            let gtoken = gallery_data.token;
+            let archiver_key = gallery_data.archiver_key;
+
+            let archivelink = `${domain}/archiver.php?gid=${gid}&token=${gtoken}&or=${archiver_key}`;
+            let glink = `${domain}/g/${gid}/${gtoken}/`;
+            let gallery = document.querySelector(`.gl1t[gid='${gid}']`);
             if (gallery) {
-                let dlbutton = document.createElement("button");
-                Object.assign(dlbutton, {
-                    id: `gallery_dl_${g.gid}`,
+                let dl_button = document.createElement("button");
+                Object.assign(dl_button, {
+                    id: `gallery_dl_${gid}`,
                     className: "gdd",
-                    style: "width: max-content; align-self: center;",
                     textContent: "Archive Download",
+                    onclick: function () { downloadButton(this, gid, archivelink, glink); },
                 });
-                dlbutton.onclick = function () {
-                    let button = document.getElementById(dlbutton.id);
-                    button.style.color = "gray";
-                    button.style.backgroundColor = "transparent";
-                    button.setAttribute("marked", true);
-                    visitGallery(glink);
-                    updateList(g.gid);
-                    return my_popUp(archivelink, 480, 320);
-                };
-                if (list.indexOf(`${g.gid}`) != -1) {
-                    dlbutton.style.color = "gray";
-                    dlbutton.style.backgroundColor = "transparent";
-                    print(`${m}gallery [${g.gid}] is in downloaded list, set as downloaded`);
+
+                Object.assign(dl_button.style, style_list.gallery_button);
+
+                if (downloaded_list.indexOf(`${gid}`) != -1) {
+                    Object.assign(dl_button.style, style_list.button_marked);
+                    dl_button.setAttribute("marked", true);
+                    mark_list.push(gid);
                 }
-                let pos = gallery.parentElement.querySelector(".puretext");
-                if (!pos) pos = gallery.parentElement.querySelector(".gl3t");
-                pos.insertAdjacentElement("afterend", dlbutton);
-                gidlist.push(dlbutton.id);
+
+                let pos = gallery.querySelector(".puretext");
+                if (!pos) {
+                    // no pure text
+                    pos = gallery.querySelector(".gl3t");
+                    pos.insertAdjacentElement("afterend", dl_button);
+                    pos.insertAdjacentElement("afterend", newLine());
+                } else {
+                    pos.insertAdjacentElement("afterend", dl_button);
+                }
+
+                gidlist.push(dl_button.id);
                 pcount++;
+
+                let set_status_button = document.createElement("button");
+                Object.assign(set_status_button, {
+                    id: `gallery_status_${gid}`,
+                    className: "gstatus",
+                    textContent: "Mark/Unmark This",
+                    onclick: function () { setGalleryStatus(gid); },
+                });
+                Object.assign(set_status_button.style, style_list.gallery_button);
+
+                dl_button.insertAdjacentElement("afterend", set_status_button);
+                dl_button.insertAdjacentElement("afterend", newLine());
             }
         });
+        if (mark_list.length > 0) print(`${m}found in list, set as downloaded: ${mark_list}`);
+
         print(`${m}request batch:${index} done`);
+
         if (gcount === pcount) {
             print(`${m}all request done`);
             print(`${m}initializing sorting`);
@@ -538,24 +330,155 @@
             print(`${m}setup show torrent title button`);
             setShowTorrent();
         }
-    }
 
-    function timerMananger() {
-        document.addEventListener("visibilitychange", () => {
-            if (timer_list.length > 0) {
-                let pause = (document.visibilityState === "visible") ? false : true;
-                for (let index in timer_list) {
-                    let timer = timer_list[index];
-                    if (!pause) {
-                        timer.id = setInterval(timer.handler, timer.delay);
-                        print(`${m}start timer[${timer.note}] id:${timer.id}`);
-                    } else {
-                        clearInterval(timer.id);
-                        print(`${m}stop timer[${timer.note}] id:${timer.id}`);
+        function downloadButton(button, gid, archivelink, glink) {
+            Object.assign(button.style, style_list.button_marked);
+            button.setAttribute("marked", true);
+            visitGallery(glink);
+            addToDownloadedList(gid);
+            my_popUp(archivelink, 480, 320);
+            updateGalleryStatus();
+        }
+
+        function setGalleryStatus(gid) {
+            gid = `${gid}`; // convert to string
+            let downloaded_list = GM_getValue(key, defaultValue);
+
+            if (downloaded_list.length > 0) {
+                downloaded_list = downloaded_list.split(",");
+
+                let index = downloaded_list.indexOf(gid);
+                if (index != -1) {
+                    downloaded_list.splice(index, 1);
+                    print(`${m}gallery:[${gid}] in list, remove from list`);
+                    resetGalleryStatus(gid);
+                } else {
+                    downloaded_list.push(gid);
+                    print(`${m}gallery:[${gid}] not in list, add to list`);
+
+                    let count = 0;
+                    while (downloaded_list.length > 10000) {
+                        let r = downloaded_list.shift();
+                        print(`${m}reach limit, remove [${r}]`);
+                        count++;
+                        if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
                     }
                 }
+            } else {
+                downloaded_list = [gid];
             }
-        });
+            downloaded_list = downloaded_list.join();
+            GM_setValue(key, downloaded_list);
+            print(`${m}save list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
+
+            updateGalleryStatus();
+
+            function resetGalleryStatus(gid) {
+                let gallery = document.querySelector(`[gid="${gid}"]`);
+                gallery.style.removeProperty("background-color");
+                gallery.removeAttribute("marked");
+
+                let dl_button = gallery.querySelector(".gdd");
+                dl_button.style = "";
+                Object.assign(dl_button.style, style_list.gallery_button);
+                dl_button.removeAttribute("marked");
+            }
+        }
+
+        function processGdata() {
+            let taglist = [
+                "artist",
+                "group",
+            ];
+            gdata.forEach(data => {
+                taglist.forEach(tag_key => {
+                    data[tag_key] = data.tags.find(s => s.includes(`${tag_key}:`));
+                    if (data[tag_key]) {
+                        data[tag_key] = data[tag_key].replace(`${tag_key}:`, "");
+                    } else {
+                        data[tag_key] = "";
+                    }
+                });
+                data.title_no_event = removePrefix(data.title);
+                data.title_no_event_no_group = removeGroup(data.title_no_event);
+            });
+        }
+
+        function setSortingButton() {
+            let pos = document.getElementById(id_list.mainbox);
+            let ck = document.createElement("input");
+            Object.assign(ck, {
+                type: "checkbox",
+                id: id_list.sort_setting,
+                checked: true,
+            });
+            let lable = document.createElement("label");
+            Object.assign(lable, {
+                htmlFor: id_list.sort_setting,
+                textContent: "Descending",
+            });
+            let nodelist = [
+                newButton("exhddl_sort_by_title_no_event_no_group", "Sort By Title (ignore Prefix/Group/Circle/Artist)", style_list.top_button, () => { sortGalleryByKey("title_no_event_no_group"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_title_no_event", "Sort By Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_title", "Sort by Title", style_list.top_button, () => { sortGalleryByKey("title"); }),
+                newLine(),
+                newButton("exhddl_sort_by_artist", "Sort by Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_group", "Sort by Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_date", "Sort by Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_category", "Sort by Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
+                newSeparate(),
+                newButton("exhddl_sort_by_ex", "Sort by ???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
+                newLine(),
+                ck, lable,
+            ];
+            // remove loading message
+            pos.querySelector("span").remove();
+            pos.querySelector("br").remove();
+            appendAll(pos, nodelist);
+
+            function sortGalleryByKey(key = "") {
+                if (!key) return;
+                let sorted_id = getSortedGalleryID(gdata, key);
+                let container = document.querySelector(".itg.gld");
+                getAllGalleryNode();
+                removeAllGallery();
+                sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
+            }
+        }
+
+        function setShowTorrent() {
+            let gallery_nodelist = document.querySelectorAll(".gl1t");
+            gallery_nodelist.forEach(gallery => {
+                let id = gallery.getAttribute("gid");
+                let torrent_list = getTorrentList(id);
+                if (torrent_list) {
+                    let pos = gallery.querySelector(`#gallery_dl_${id}`);
+                    torrent_list.forEach(torrent => {
+                        let span = newSpan(torrent);
+                        span.className = "puretext torrent_title";
+                        span.style.display = "none";
+                        pos.insertAdjacentElement("afterend", span);
+                    });
+                    let button = newButton(`t_title_${id}`, "Show torrent List", style_list.gallery_button, function () {
+                        let torrent_list = this.parentElement.querySelectorAll(".torrent_title");
+                        torrent_list.forEach(torrent => {
+                            torrent.style.display = (torrent.style.display == "none") ? "" : "none";
+                        });
+                    });
+                    pos.insertAdjacentElement("afterend", button);
+                    pos.insertAdjacentElement("afterend", newLine());
+                }
+            });
+        }
+    }
+
+    function print(...any) {
+        if (debug) console.log(...any);
     }
 
     function addTimer(handler, delay, note = "") {
@@ -568,34 +491,16 @@
         });
     }
 
-    function my_popUp(URL, w, h) {
-        window.open(
-            URL,
-            `_pu${Math.random().toString().replace(/0\./, "")}`,
-            `toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0
-            ,width=${w},height=${h},left=${(screen.width - w) / 2},top=${(screen.height - h) / 2}`
-        );
-        return false;
-    }
-
-    function myApiCall(data, index) {
-        let request = new XMLHttpRequest();
-        request.open("POST", api);
-        request.setRequestHeader("Content-Type", "application/json");
-        request.withCredentials = true;
-        request.onreadystatechange = function () {
-            if (request.readyState == 4) {
-                if (request.status == 200) {
-                    print(`${m}request${index} complete`);
-                    return directDL(request.responseText, index);
-                } else {
-                    print(`${m}request${index} failed [status: ${request.status}]`);
-                    print(request);
-                    return;
+    function findEleByText(type, string) {
+        let es = document.querySelectorAll(type);
+        for (let index in es) {
+            if (!isNaN(index)) {
+                let e = es[index];
+                if (e.textContent.includes(string)) {
+                    return e;
                 }
             }
-        };
-        request.send(JSON.stringify(data));
+        }
     }
 
     function visitGallery(link) {
@@ -624,32 +529,211 @@
         }
     }
 
-    function updateList(gid) {
+    function addToDownloadedList(gid) {
         gid = `${gid}`; // convert to string
-        let list = GM_getValue(key, defaultValue);
-        if (list.length != 0) {
+        let downloaded_list = GM_getValue(key, defaultValue);
+        if (downloaded_list.length != 0) {
+            downloaded_list = downloaded_list.split(",");
+
+            if (downloaded_list.indexOf(gid) != -1) return print(`${m}[${gid}] is already in the list, abort`);
+
+            downloaded_list.push(gid);
+
             let count = 0;
-            list = list.split(",");
-
-            if (list.indexOf(gid) != -1) return print(`${m}[${gid}] is already in the list, abort`);
-
-            list.push(gid);
-            while (list.length > 10000) {
-                let r = list.shift();
+            while (downloaded_list.length > 10000) {
+                let r = downloaded_list.shift();
                 print(`${m}reach limit, remove [${r}]`);
                 count++;
                 if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
             }
         } else {
             print(`${m}no list found, creat new list`);
-            list = [gid];
+            downloaded_list = [gid];
         }
-        list = list.join();
-        GM_setValue(key, list);
-        print(`${m}add [${gid}] to list. [list_size:${list.length}, list_length:${list.split(",").length}]`);
+        downloaded_list = downloaded_list.join();
+        GM_setValue(key, downloaded_list);
+        print(`${m}add [${gid}] to list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
     }
 
-    function print(...any) {
-        if (debug) console.log(...any);
+    function my_popUp(URL, w, h) {
+        window.open(
+            URL,
+            `_pu${Math.random().toString().replace(/0\./, "")}`,
+            `toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0
+            ,width=${w},height=${h},left=${(screen.width - w) / 2},top=${(screen.height - h) / 2}`
+        );
+        return false;
+    }
+
+    function appendAll(node, nodeList) {
+        nodeList.forEach(e => node.appendChild(e));
+        return node;
+    }
+
+    function newSpan(text = "") {
+        let span = document.createElement("span");
+        Object.assign(span, {
+            textContent: text,
+        });
+        return span;
+    }
+
+    function newLine() {
+        return document.createElement("br");
+    }
+
+    function newSeparate() {
+        return newSpan(" / ");
+    }
+
+    function newButton(button_id, button_text, button_style, button_onclick) {
+        let button = document.createElement("button");
+        Object.assign(button, {
+            id: button_id,
+            textContent: button_text,
+            onclick: button_onclick,
+        });
+        Object.assign(button.style, button_style);
+        return button;
+    }
+
+    function removePrefix(string = "") {
+        if (string.indexOf("(") === 0) {
+            let cutat = string.indexOf(")");
+            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
+        }
+        return string.trim();
+    }
+
+    function removeGroup(string = "") {
+        if (string.indexOf("[") === 0) {
+            let cutat = string.indexOf("]");
+            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
+        }
+        return string.trim();
+    }
+
+    function getSortedGalleryID(object_list, sort_key) {
+        let newlist = [];
+        let descending = document.getElementById(id_list.sort_setting);
+        descending = descending.checked ? true : false;
+        newlist = object_list.sort((a, b) => {
+            if (descending) {
+                return a[sort_key] < b[sort_key] ? 1 : -1;
+            } else {
+                return a[sort_key] > b[sort_key] ? 1 : -1;
+            }
+        });
+        let new_id_list = [];
+        if (newlist) newlist.forEach(item => new_id_list.push(item.gid));
+        return new_id_list;
+    }
+
+    function getAllGalleryNode() {
+        gallery_nodes = {};
+        let gallery_nodelist = document.querySelectorAll(".gl1t");
+        gallery_nodelist.forEach(gallery => {
+            /*
+            let title = gallery.querySelector(".glname");
+            let id = title.parentElement.href.split("/g/")[1].split("/")[0];
+            */
+            let id = gallery.getAttribute("gid");
+            let title = gallery.getAttribute("gtitle");
+            let deepcopy = gallery.cloneNode(true);
+            copyOnclick(gallery, deepcopy, `#gallery_dl_${id}`);
+            copyOnclick(gallery, deepcopy, `#t_title_${id}`);
+            copyOnclick(gallery, deepcopy, `#gallery_status_${id}`);
+            gallery_nodes[id] = {
+                id: id,
+                title: title,
+                node: deepcopy,
+            };
+        });
+
+        function copyOnclick(original, copy, css_selector) {
+            let o = original.querySelector(css_selector);
+            if (o) {
+                copy.querySelector(css_selector).onclick = o.onclick;
+            }
+        }
+    }
+
+    function removeAllGallery() {
+        let gallery_nodelist = document.querySelectorAll(".gl1t");
+        gallery_nodelist.forEach(gallery => gallery.remove());
+    }
+
+    function getTorrentList(gid = "") {
+        let list = [];
+        let torrents = gdata.find(gallery_data => gallery_data.gid == gid).torrents;
+        if (torrents.length == 0) return false;
+        torrents.forEach(torrent => list.push(torrent.name));
+        return list.reverse();
+    }
+
+    function addInfoToAllGallery() {
+        let gallery_nodelist = document.querySelectorAll(".gl1t");
+        gallery_nodelist.forEach(gallery => {
+            let link = gallery.querySelector("a").href;
+            let id = link.split("/g/")[1].split("/")[0];
+            let token = link.split("/g/")[1].split("/")[1];
+            let title = gallery.querySelector(".glname").textContent;
+
+            gallery.setAttribute("gid", id);
+            gallery.setAttribute("gtoken", token);
+            gallery.setAttribute("gtitle", title);
+        });
+    }
+
+    function setAllLinkToNewTab() {
+        let gallery_nodelist = document.querySelectorAll(".gl1t");
+        gallery_nodelist.forEach(gallery => {
+            gallery.querySelectorAll("a").forEach(a => {
+                if (a.href.includes("/g/")) a.target = "_blank";
+            });
+        });
+    }
+
+    function updateGalleryStatus() {
+        let list = GM_getValue(key, defaultValue);
+
+        if (list.length <= 0) return; // no downloaded gallery in list, abort
+        list = list.split(",");
+
+        let find_button = document.querySelector(".itg.gld");
+        if (!find_button) return print(`${m}gallery list not found`);
+
+        find_button = find_button.querySelectorAll("button");
+        if (find_button.length > 0) updateButtonStatus();
+
+        updateGalleryColor();
+
+        function updateGalleryColor() {
+            let gallery_nodelist = document.querySelectorAll(".gl1t");
+            let marked = [];
+            gallery_nodelist.forEach(gallery => {
+                let id = gallery.getAttribute("gid");
+                if (list.indexOf(id) != -1 && !gallery.getAttribute("marked")) {
+                    Object.assign(gallery.style, style_list.gallery_marked);
+                    gallery.setAttribute("marked", true);
+                    marked.push(id);
+                }
+            });
+            if (marked.length > 0) print(`${m}found in list, mark gallery: ${marked}`);
+        }
+
+        function updateButtonStatus() {
+            let marked = [];
+            gdata.forEach(gallery_data => {
+                let gid = gallery_data.gid;
+                let dl_button = document.querySelector(`#gallery_dl_${gid}`);
+                if (list.indexOf(`${gid}`) != -1 && !dl_button.getAttribute("marked")) {
+                    Object.assign(dl_button.style, style_list.button_marked);
+                    dl_button.setAttribute("marked", true);
+                    marked.push(gid);
+                }
+            });
+            if (marked.length > 0) print(`${m}found in list, mark dl_button: ${marked}`);
+        }
     }
 })();
