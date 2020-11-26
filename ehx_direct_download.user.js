@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.62
+// @version      0.63
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -17,6 +17,7 @@
 // ==/UserScript==
 
 // this script only work in Thumbnail mode
+
 (function () {
     'use strict';
     let api;
@@ -43,7 +44,7 @@
         gallery_button: { width: "max-content", alignSelf: "center" },
         gallery_marked: { backgroundColor: "black" },
         button_marked: { color: "gray", backgroundColor: "transparent" },
-        ex: {opacity: 0.3},
+        ex: { opacity: 0.3 },
     };
     let status_update_interval = 500;
 
@@ -399,8 +400,13 @@
                         data[tag_key] = "";
                     }
                 });
-                data.title_no_event = removePrefix(data.title);
-                data.title_no_event_no_group = removeGroup(data.title_no_event);
+                let newstring = removePrefix(data.title);
+                newstring = removeEnd(newstring, "[]");
+                newstring = removeEnd(newstring, "()");
+                data.title_no_event = newstring;
+
+                newstring = removeGroup(newstring);
+                data.title_no_event_no_group = newstring;
             });
         }
 
@@ -443,9 +449,12 @@
 
             function sortGalleryByKey(key = "") {
                 if (!key) return;
+                getAllGalleryNode();
+                sortGdata();
+
                 let sorted_id = getSortedGalleryID(gdata, key);
                 let container = document.querySelector(".itg.gld");
-                getAllGalleryNode();
+                
                 removeAllGallery();
                 sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
             }
@@ -597,6 +606,22 @@
         return button;
     }
 
+    function removeEnd(string = "", container = "") {
+        let count = 0;
+        if (container.length !== 2) return string;
+        while (true) {
+            count++;
+            let start = string.lastIndexOf(container[0]);
+            let end = string.lastIndexOf(container[1]);
+            if (end > 0 && (end == string.length - 1) && start > 0 && count < 100) {
+                string = string.replace(string.slice(start), "").trim();
+            } else {
+                break;
+            }
+        }
+        return string;
+    }
+
     function removePrefix(string = "") {
         if (string.indexOf("(") === 0) {
             let cutat = string.indexOf(")");
@@ -611,6 +636,14 @@
             if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
         }
         return string.trim();
+    }
+
+    function sortGdata() {
+        let newdata = [];
+        for(let gid in gallery_nodes){
+            newdata.push(gdata.find(gallery_data=>gallery_data.gid == gid));
+        }
+        gdata = newdata;
     }
 
     function getSortedGalleryID(object_list, sort_key) {
@@ -633,10 +666,6 @@
         gallery_nodes = {};
         let gallery_nodelist = document.querySelectorAll(".gl1t");
         gallery_nodelist.forEach(gallery => {
-            /*
-            let title = gallery.querySelector(".glname");
-            let id = title.parentElement.href.split("/g/")[1].split("/")[0];
-            */
             let id = gallery.getAttribute("gid");
             let title = gallery.getAttribute("gtitle");
             let deepcopy = gallery.cloneNode(true);
