@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.63
+// @version      0.64
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -401,8 +401,7 @@
                     }
                 });
                 let newstring = removePrefix(data.title);
-                newstring = removeEnd(newstring, "[]");
-                newstring = removeEnd(newstring, "()");
+                newstring = removeEnd(newstring);
                 data.title_no_event = newstring;
 
                 newstring = removeGroup(newstring);
@@ -454,7 +453,7 @@
 
                 let sorted_id = getSortedGalleryID(gdata, key);
                 let container = document.querySelector(".itg.gld");
-                
+
                 removeAllGallery();
                 sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
             }
@@ -606,19 +605,26 @@
         return button;
     }
 
-    function removeEnd(string = "", container = "") {
+    function removeEnd(string = "") {
         let count = 0;
-        if (container.length !== 2) return string;
-        while (true) {
-            count++;
-            let start = string.lastIndexOf(container[0]);
-            let end = string.lastIndexOf(container[1]);
-            if (end > 0 && (end == string.length - 1) && start > 0 && count < 100) {
-                string = string.replace(string.slice(start), "").trim();
-            } else {
-                break;
+        let container_list = [
+            "[]",
+            "()",
+            "【】",
+        ];
+        container_list.forEach(container => {
+            while (true) {
+                count++;
+                let start = string.lastIndexOf(container[0]);
+                let end = string.lastIndexOf(container[1]);
+                if (end > 0 && (end == string.length - 1) && start > 0 && count < 100) {
+                    string = string.replace(string.slice(start), "").trim();
+                } else {
+                    break;
+                }
             }
-        }
+        });
+
         return string;
     }
 
@@ -631,17 +637,24 @@
     }
 
     function removeGroup(string = "") {
-        if (string.indexOf("[") === 0) {
-            let cutat = string.indexOf("]");
-            if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
-        }
-        return string.trim();
+        let container_list = [
+            "【】",
+            "[]",
+        ];
+        container_list.forEach(container=>{
+            if (string.indexOf(container[0]) === 0) {
+                let cutat = string.indexOf(container[1]);
+                if (cutat != -1 && cutat != string.length - 1) string = string.substring(cutat + 1);
+            }
+            string = string.trim();
+        });
+        return string;
     }
 
     function sortGdata() {
         let newdata = [];
-        for(let gid in gallery_nodes){
-            newdata.push(gdata.find(gallery_data=>gallery_data.gid == gid));
+        for (let gid in gallery_nodes) {
+            newdata.push(gdata.find(gallery_data => gallery_data.gid == gid));
         }
         gdata = newdata;
     }

@@ -14,8 +14,8 @@ click button to enable it (pervent too many requests)
 ![](https://i.imgur.com/9jpsTPl.png)
 ![](https://i.imgur.com/xkXzdrS.png)
 
-v0.63 improving sorting
-now sorting is based on previous sort result
+v0.63 improving sorting  
+now sorting is based on previous sort result  
 
 v0.61 new feature mark/unmark gallery  
 rearrange code  
