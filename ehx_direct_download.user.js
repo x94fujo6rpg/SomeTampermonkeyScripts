@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.61
+// @version      0.62
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -457,7 +457,7 @@
                 let id = gallery.getAttribute("gid");
                 let torrent_list = getTorrentList(id);
                 if (torrent_list) {
-                    let pos = gallery.querySelector(`#gallery_dl_${id}`);
+                    let pos = gallery.querySelector(`#gallery_status_${id}`);
                     torrent_list.forEach(torrent => {
                         let span = newSpan(torrent);
                         span.className = "puretext torrent_title";
