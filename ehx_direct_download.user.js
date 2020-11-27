@@ -472,15 +472,17 @@
             });
             let nodelist = [
                 ck, lable, newLine(),
-                newButton("exhddl_sort_by_title_pure", "Sort by Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
+                newButton("exhddl_sort_by_title", "Sort by Title", style_list.top_button, () => { sortGalleryByKey("title"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_no_group", "Sort by Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title_no_event", "Sort by Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+                newButton("exhddl_sort_by_title_pure", "Sort by Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title", "Sort by Title", style_list.top_button, () => { sortGalleryByKey("title"); }),
+                newButton("exhddl_sort_by_title_no_event", "Sort by Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),                
                 newLine(),
 
+                newButton("exhddl_sort_by_prefix", "Sort by Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
+                newSeparate(),
                 newButton("exhddl_sort_by_artist", "Sort by Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_group", "Sort by Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
@@ -488,12 +490,10 @@
                 newButton("exhddl_sort_by_date", "Sort by Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_category", "Sort by Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
-                newLine(),
-
-                newButton("exhddl_sort_by_prefix", "Sort by Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_ex", "Sort by ???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
                 newLine(),
+
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
             ];
             pos.querySelector("span").remove(); // remove loading message
