@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.72
+// @version      0.73
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -86,7 +86,7 @@
             let newcss = document.createElement("style");
             newcss.id = "ehx_direct_download_css";
             document.head.appendChild(newcss);
-            newcss.textContent = `
+            newcss.innerHTML = `
                 .puretext {
                     overflow: hidden;
                     min-height: 32px;
@@ -95,7 +95,18 @@
                     font-size: 10pt;
                     text-align: center;
                 }
+
+                .show_full_title {
+                    overflow: hidden;
+                    min-height: 32px;
+                    line-height: 16px;
+                    margin: 6px 4px 0;
+                    font-size: 10pt;
+                    text-align: center;
+                }
             `;
+            let all = document.querySelectorAll(".gl4t");
+            if (all) all.forEach(t => { t.className = t.className.replace("gl4t", "show_full_title"); });
         }
 
         function timerMananger() {
@@ -478,7 +489,7 @@
                 newSeparate(),
                 newButton("exhddl_sort_by_title_pure", "Sort by Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title_no_event", "Sort by Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),                
+                newButton("exhddl_sort_by_title_no_event", "Sort by Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
                 newLine(),
 
                 newButton("exhddl_sort_by_prefix", "Sort by Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),

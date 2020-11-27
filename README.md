@@ -46,8 +46,12 @@ click button to enable (pervent too many requests)
 - #### Jump To Nearest Downloaded (if any)
 - #### other
   - make all gallery link open in new tab (pervent click on accident) 
+  - make all gallery show entire title
 
 ### updates
+
+- v0.73
+  - show full title
 - v0.72 
   - use jpn prefix first
   - priority: title_jpn > title_en > torrent > same title gallery
@@ -57,7 +61,7 @@ click button to enable (pervent too many requests)
   - new feature `Fix/Unfix Event in Title` 
   - more sort option  
   - improve speed (send next request when current one complete)  
-  - adjust UI
+  - UI adjust
 
 - v0.65 
   - natural sort  
