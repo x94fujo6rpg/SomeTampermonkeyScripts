@@ -19,6 +19,18 @@ v0.71
 - new feature `Fix/Unfix Event in Title` 
   - search event prefix in `torrent / same title gallery` and add to title
   - priority: torrent > same title gallery
+  - some prefix will be ignore: (already categorized)
+    ```
+    "(同人誌)",
+    "(成年コミック)",
+    "(成年コミック・雑誌)",
+    "(一般コミック)",
+    "(一般コミック・雑誌)",
+    "(エロライトノベル)",
+    "(ゲームCG)",
+    "(同人ゲームCG)",
+    "(18禁ゲームCG)",  
+    ```
 - more sort option  
     - example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
     - Sort By Title (ignore Prefix/Group/End) => `cccccccc`
