@@ -48,7 +48,7 @@ click button to enable (pervent too many requests)
 - #### other
   - make all gallery link open in new tab (pervent click on accident) 
 
-###updates
+### updates
 - v0.72 
   - use jpn prefix first
   - priority: title_jpn > title_en > torrent > same title gallery
@@ -87,8 +87,7 @@ click button to enable (pervent too many requests)
   - now it will update the list when you click archive download in gallery page  
     add new features when click archive download in list view:  
     1. ~~send a request to server as you visited the gallery (not sure if this count)~~  
-    2. add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History))  
-    make it trigger visited css style
+    2. add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History)) `trigger visited css style`
 
 - v0.35 
   - list limit up to 10000  
