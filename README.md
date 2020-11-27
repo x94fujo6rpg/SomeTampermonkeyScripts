@@ -12,7 +12,7 @@ click button to enable (pervent too many requests)
 #### Features:
 
 - #### Memory `downloaded / marked` galleries 
-  - (when click `Archive Download` or use `mark button` under gallery)
+  - (when click `Archive Download` or use `mark/unmark gallery` under gallery)
   - change `downloaded / marked` gallery color to black (quick identify in list)
 - ##### Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile
   - add button under gallery:
@@ -52,6 +52,7 @@ click button to enable (pervent too many requests)
 - v0.72 
   - use jpn prefix first
   - priority: title_jpn > title_en > torrent > same title gallery
+  - add `copy title` button
 
 - v0.71  
   - new feature `Fix/Unfix Event in Title` 
