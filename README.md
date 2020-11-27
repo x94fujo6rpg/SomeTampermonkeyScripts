@@ -2,92 +2,105 @@
 some scripts I made  
 click link to install  
 
-## [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
-remove bilibili article copy protection  
-
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
-add button for each gallery in list view to use archive download directly  
-because there is a limit on how many requests you can send at once  
-this need some time to process  
 
-click button to enable it (pervent too many requests)  
+click button to enable (pervent too many requests)  
 ![](https://i.imgur.com/9jpsTPl.png)
 ![](https://i.imgur.com/xkXzdrS.png)
 
-v0.72 
-- use jpn prefix first
-- priority: title_jpn > title_en > torrent > same title gallery
+#### Features:
 
-v0.71  
-- new feature `Fix/Unfix Event in Title` 
-  - search event prefix in `torrent / same title gallery` and add to title
-  - priority: title_jpn > title_en > torrent > same title gallery
-  - some prefix will be ignore: (already categorized)
-    ```
-    "(同人誌)",
-    "(成年コミック)",
-    "(成年コミック・雑誌)",
-    "(一般コミック)",
-    "(一般コミック・雑誌)",
-    "(エロライトノベル)",
-    "(ゲームCG)",
-    "(同人ゲームCG)",
-    "(18禁ゲームCG)",  
-    ```
-- more sort option  
+- #### Memory `downloaded / marked` galleries 
+  - (when click `Archive Download` or use `mark button` under gallery)
+  - change `downloaded / marked` gallery color to black (quick identify in list)
+- ##### Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile
+  - add button under gallery:
+    - archive download
+    - copy title
+    - mark/unmark gallery
+    - show gallery's torrent list in pure text
+  - sorting gallery
     - example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
-    - Sort By Title (ignore Prefix/Group/End) => `cccccccc`
-    - Sort By Title (ignore Prefix/Group) => `cccccccc (dddddddd)`  
-    - Sort By Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
-    - Sort By Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
+    - Sort by Title (ignore Prefix/Group/End) => `cccccccc`
+    - Sort by Title (ignore Prefix/Group) => `cccccccc (dddddddd)`  
+    - Sort by Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
+    - Sort by Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
     - Sort by Event => `(aaaaaaaa)`  
-- improve speed (send next request when current one complete)  
-- adjust UI
+  - fix/unfix event in title
+    - search event prefix in `torrent / same title gallery` and add to title
+    - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
+    - some prefix will be ignore: (already categorized)
+        ```
+        "(同人誌)",
+        "(成年コミック)",
+        "(成年コミック・雑誌)",
+        "(一般コミック)",
+        "(一般コミック・雑誌)",
+        "(エロライトノベル)",
+        "(ゲームCG)",
+        "(同人ゲームCG)",
+        "(18禁ゲームCG)",  
+        ```
+- #### Show Pure Text
+  - add pure text title under gallery (full title)
+- #### Jump To Nearest Downloaded (if any)
+- #### other
+  - make all gallery link open in new tab (pervent click on accident) 
 
-v0.65 
-- natural sort  
+###updates
+- v0.72 
+  - use jpn prefix first
+  - priority: title_jpn > title_en > torrent > same title gallery
 
-v0.63 
-- improve sorting (now sorting is based on previous sort result)  
+- v0.71  
+  - new feature `Fix/Unfix Event in Title` 
+  - more sort option  
+  - improve speed (send next request when current one complete)  
+  - adjust UI
 
-v0.61 
-- new feature `mark/unmark gallery`  
-- rearrange code  
+- v0.65 
+  - natural sort  
 
-v0.55 
-- new feature `Jump To Nearest Downloaded` (if any)  
-- mark downloaded gallery color in black  
-- disable send request to server when click archive download  
+- v0.63 
+  - improve sorting (now sorting is based on previous sort result)  
 
-v0.53 
-- add more sort option  
+- v0.61 
+  - new feature `mark/unmark gallery`  
+  - rearrange code  
 
-v0.51 
-- after enable `archive download`  
-you can sort gallery (current page)  
-show gallery's torrent title list in pure text  
-- make all gallery link open in new tab (pervent click on accident)  
-- check every few seconds that is gallery (current page) downloaded or not and change button status  
+- v0.55 
+  - new feature `Jump To Nearest Downloaded` (if any)  
+  - mark downloaded gallery color in black  
+  - disable send request to server when click archive download  
 
-v0.43 
-- now it will update the list when you click archive download in gallery page  
-add new features when click archive download in list view:  
-  1. ~~send a request to server as you visited the gallery (not sure if this count)~~  
-  2. add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History))  
+- v0.53 
+  - add more sort option  
+
+- v0.51 
+  - after enable `archive download` you can sort gallery (current page)  
+  - show gallery's torrent title list in pure text  
+  - make all gallery link open in new tab (pervent click on accident)  
+  - check every few seconds that is gallery (current page) downloaded or not and change button status  
+
+- v0.43 
+  - now it will update the list when you click archive download in gallery page  
+    add new features when click archive download in list view:  
+    1. ~~send a request to server as you visited the gallery (not sure if this count)~~  
+    2. add gallery link to history ([HTML5 API](https://developer.mozilla.org/en-US/docs/Web/API/History))  
     make it trigger visited css style
 
-v0.35 
-- list limit up to 10000  
+- v0.35 
+  - list limit up to 10000  
 
-v0.32
-- switch from cookie to [Tampermonkey API storage](https://www.tampermonkey.net/documentation.php)  
-- if you use any [v0.30] or [v0.31] or you got [400 Bad request]  
-use cookie editor like EditThisCookie to remove all "exhddl_list"  
+- v0.32
+  - switch from cookie to [Tampermonkey API storage](https://www.tampermonkey.net/documentation.php)  
+  - if you use any [v0.30] or [v0.31] or you got [400 Bad request]  
+    use cookie editor like EditThisCookie to remove all "exhddl_list"  
 
-v0.30 
-- now script save recent downloaded gallerys in a list and set button as downloaded if it in the list  
-- if reach the limit, it will delete the oldest data until lower the limit  
+- v0.30 
+  - now script save recent downloaded gallerys in a list and set button as downloaded if it in the list  
+  - if reach the limit, it will delete the oldest data until lower the limit  
 
 ## [[ehx link color]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)  
 change visited & unvisited link color  
@@ -166,6 +179,9 @@ add checkbox for each video and a textbox on top to select and copy links
 
 make upload time visable  
 [effect](https://i.imgur.com/lL6sJZX.png)  
+
+## [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
+remove bilibili article copy protection  
 
 ## [[youtube url normalizer]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)
 normalize url in video description  
