@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.73
+// @version      0.74
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -27,7 +27,7 @@
     let key = "exhddl_list";
     let defaultValue = [];
     let debug_message = true;
-    let debug_adv = false;
+    let debug_adv = true;
     let gallery_nodes;
     let gdata = [];
     let gcount = 0;
@@ -352,6 +352,8 @@
             setCopyTitle();
             print(`${m}setup show torrent title button`);
             setShowTorrent();
+            print(`${m}fix title`);
+            fixTitlePrefix();
         }
 
         function downloadButton(button, gid, archivelink, glink) {
@@ -424,6 +426,7 @@
                     }
                 });
                 data.title_original = data.title;
+                data.title_jpn_original = data.title_jpn;
                 [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
 
                 // try to found prefix in title_jpn
@@ -483,26 +486,28 @@
             });
             let nodelist = [
                 ck, lable, newLine(),
-                newButton("exhddl_sort_by_title", "Sort by Title", style_list.top_button, () => { sortGalleryByKey("title"); }),
+                newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title_no_group", "Sort by Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
+                newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
+                newSeparate(),                
+                newButton("exhddl_sort_by_title_pure", "Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title_pure", "Sort by Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
+                newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_title_no_event", "Sort by Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+                newButton("exhddl_sort_by_title_no_event", "Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
                 newLine(),
 
-                newButton("exhddl_sort_by_prefix", "Sort by Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
+                newButton("exhddl_sort_by_date", "Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_artist", "Sort by Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
+                newButton("exhddl_sort_by_prefix", "Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_group", "Sort by Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
+                newButton("exhddl_sort_by_artist", "Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_date", "Sort by Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
+                newButton("exhddl_sort_by_group", "Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_category", "Sort by Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
+                newButton("exhddl_sort_by_category", "Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
                 newSeparate(),
-                newButton("exhddl_sort_by_ex", "Sort by ???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
+                newButton("exhddl_sort_by_ex", "???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
                 newLine(),
 
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
@@ -794,14 +799,16 @@
                 if (prefix.length > 0) {
                     let checklist = [
                         title_ele.innerHTML,
+                        data.title,
                         data.title_original,
                         data.title_jpn,
                     ];
                     ignore_prefix.forEach(ignore => checklist.push(ignore));
                     if (checklist.some(title => title.includes(prefix))) return;
                     data.title = `${prefix} ${data.title_original}`;
-                    title_ele.innerHTML = data.title_jpn ? `${prefix} ${data.title_jpn}` : data.title;
-                    print(`${m}add prefix "${prefix}" to [${id}]`);
+                    data.title_jpn = `${prefix} ${data.title_jpn}`;
+                    title_ele.innerHTML = data.title_jpn ? data.title_jpn : data.title;
+                    print(`${m}[${id.padStart(10)}] add prefix "${prefix}"`);
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => (gallery_data.title_pure == data.title_pure) && (gallery_data.title_prefix.length > 0));
@@ -810,12 +817,14 @@
                         data.title_prefix = new_prefix;
 
                         data.title = `${new_prefix} ${data.title_original}`;
-                        title_ele.innerHTML = data.title_jpn ? `${new_prefix} ${data.title_jpn}` : data.title;
-                        print(`${m}found a prefix "${new_prefix}" in [${same_title.gid}] for [${id}]`);
+                        data.title_jpn = `${new_prefix} ${data.title_jpn_original}`;
+                        title_ele.innerHTML = (data.title_jpn.length > 0) ? data.title_jpn : data.title;
+                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${same_title.gid}]`, "color:OrangeRed;");
                     }
                 }
             } else {
                 data.title = data.title_original;
+                data.title_jpn = data.title_jpn_original;
                 title_ele.innerHTML = data.title_jpn ? data.title_jpn : data.title;
             }
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);

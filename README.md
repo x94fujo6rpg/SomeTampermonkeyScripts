@@ -21,11 +21,11 @@ click button to enable (pervent too many requests)
     - show gallery's torrent list in pure text
   - sorting gallery
     - example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
-    - Sort by Title (ignore Prefix/Group/End) => `cccccccc`
-    - Sort by Title (ignore Prefix/Group) => `cccccccc (dddddddd)`  
-    - Sort by Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
-    - Sort by Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
-    - Sort by Event => `(aaaaaaaa)`  
+    - Title (ignore Prefix/Group/End) => `cccccccc`
+    - Title (ignore Prefix/Group) => `cccccccc (dddddddd)`  
+    - Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
+    - Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
+    - Event => `(aaaaaaaa)`  
   - fix/unfix event in title
     - search event prefix in `torrent / same title gallery` and add to title
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
@@ -50,8 +50,12 @@ click button to enable (pervent too many requests)
 
 ### updates
 
-- v0.73
+- v0.74
   - show full title
+  - auto turn on `Fix/Unfix Event in Title`
+  - add sort by `JP(Recommended)` & `EN` title
+    (sort still have some bug...)
+
 - v0.72 
   - use jpn prefix first
   - priority: title_jpn > title_en > torrent > same title gallery
