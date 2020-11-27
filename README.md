@@ -15,10 +15,14 @@ click button to enable it (pervent too many requests)
 ![](https://i.imgur.com/9jpsTPl.png)
 ![](https://i.imgur.com/xkXzdrS.png)
 
+v0.72 
+- use jpn prefix first
+- priority: title_jpn > title_en > torrent > same title gallery
+
 v0.71  
 - new feature `Fix/Unfix Event in Title` 
   - search event prefix in `torrent / same title gallery` and add to title
-  - priority: torrent > same title gallery
+  - priority: title_jpn > title_en > torrent > same title gallery
   - some prefix will be ignore: (already categorized)
     ```
     "(同人誌)",

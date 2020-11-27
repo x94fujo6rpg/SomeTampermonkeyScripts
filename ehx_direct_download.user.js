@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.71
+// @version      0.72
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -58,7 +58,7 @@
         "(エロライトノベル)",
         "(ゲームCG)",
         "(同人ゲームCG)",
-        "(18禁ゲームCG)",        
+        "(18禁ゲームCG)",
     ];
 
     window.onload = main();
@@ -415,8 +415,12 @@
                 data.title_original = data.title;
                 [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
 
+                // try to found prefix in title_jpn
+                let [title_jpn,] = extractPrefix(data.title_jpn);
+                if (title_jpn.length > 0) data.title_prefix = title_jpn;
+
                 let from_torrent = false;
-                if (!data.title_prefix) {
+                if (data.title_prefix.length == 0) {
                     // try to found prefix in torrent
                     let torrent_list = getTorrentList(data.gid);
                     if (torrent_list) {
