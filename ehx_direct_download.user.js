@@ -27,7 +27,7 @@
     let key = "exhddl_list";
     let defaultValue = [];
     let debug_message = true;
-    let debug_adv = true;
+    let debug_adv = false;
     let gallery_nodes;
     let gdata = [];
     let gcount = 0;
