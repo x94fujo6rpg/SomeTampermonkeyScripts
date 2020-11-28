@@ -305,7 +305,7 @@
                         let self = this;
                         let ck = document.getElementById(id_list.dl_copy).checked;
                         if (ck) {
-                            navigator.clipboard.writeText(self.parentElement.querySelector(".glname").textContent)
+                            navigator.clipboard.writeText(self.parentElement.querySelector(".glname").textContent.trim())
                                 .then(() => downloadButton(self, gid, archivelink, glink));
                         } else {
                             downloadButton(self, gid, archivelink, glink);
@@ -553,7 +553,7 @@
                 let gid = gallery.getAttribute("gid");
                 let pos = gallery.querySelector(`#gallery_status_${gid}`);
                 let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
-                    navigator.clipboard.writeText(this.parentElement.querySelector(".glname").textContent);
+                    navigator.clipboard.writeText(this.parentElement.querySelector(".glname").textContent.trim());
                 });
                 pos.insertAdjacentElement("beforebegin", button);
                 pos.insertAdjacentElement("beforebegin", newLine());
