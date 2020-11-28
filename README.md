@@ -6,7 +6,7 @@ click link to install
 **only work in Thumbnail mode**  
 
 click button to enable (pervent too many requests)  
-![](https://i.imgur.com/n5qeECD.png)
+![](https://i.imgur.com/05KQrh6.png)
 
 #### Features:
 
