@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.76
+// @version      0.77
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -58,6 +58,8 @@
         gallery_marked: { backgroundColor: "black" },
         button_marked: { color: "gray", backgroundColor: "transparent" },
         ex: { opacity: 0.3 },
+        mainbox: { textAlign: "center", lineHeight: "2rem" },
+        separator: { color: "transparent" },
     };
     let status_update_interval = 500;
     let prefix_fixed = false;
@@ -166,13 +168,13 @@
         function setButton() {
             let box = document.createElement("div");
             box.id = id_list.mainbox;
+            Object.assign(box.style, style_list.mainbox);
             let nodelist = [
                 newButton(id_list.dd, "Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile", style_list.top_button, enableDirectDownload),
                 newLine(),
                 newButton(id_list.puretext, "Show Pure Text", style_list.top_button, pureText),
                 newLine(),
                 newButton(id_list.jump_to_last, "Jump To Nearest Downloaded", style_list.top_button, jumpToLastDownload),
-                newLine(),
                 newLine(),
             ];
             box = appendAll(box, nodelist);
@@ -186,6 +188,7 @@
             function enableDirectDownload() {
                 let dd = document.getElementById(id_list.dd);
                 dd.disabled = true;
+                dd.removeAttribute("onclick");
                 dd.insertAdjacentElement("afterend", newSpan("Processing... Please Wait"));
                 acquireGalleryData();
 
@@ -253,7 +256,9 @@
             }
 
             function pureText() {
-                document.getElementById(id_list.puretext).disabled = true;
+                let button = document.getElementById(id_list.puretext)
+                button.disabled = true;
+                button.removeAttribute("onclick");
                 let gallery_nodelist = document.querySelectorAll(".gl1t");
                 gallery_nodelist.forEach(gallery => {
                     let puretext_span = document.createElement("span");
@@ -534,7 +539,7 @@
             let nodelist = [
                 ck_sort_setting, lable_sort_setting, newSeparate(),
                 ck_dl_copy, lable_dl_copy, newSeparate(),
-                ck_auto_fix, lable_auto_fix, newLine(), newLine(),
+                ck_auto_fix, lable_auto_fix, newLine(),
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
@@ -731,7 +736,9 @@
     }
 
     function newSeparate() {
-        return newSpan(" / ");
+        let sep = newSpan(" ／ ");
+        Object.assign(sep.style, style_list.separator);
+        return sep;
     }
 
     function newButton(button_id, button_text, button_style, button_onclick) {
