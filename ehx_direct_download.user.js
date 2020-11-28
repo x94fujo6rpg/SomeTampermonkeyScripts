@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.74
+// @version      0.75
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -39,6 +39,7 @@
         puretext: "exhddl_puretext",
         sort_setting: "exhddl_sortsetting",
         jump_to_last: "exhddl_jump_to_last",
+        dl_copy: "exhddl_dl_and_copy",
     };
     let style_list = {
         top_button: { width: "max-content" },
@@ -300,7 +301,16 @@
                     id: `gallery_dl_${gid}`,
                     className: "gdd",
                     textContent: "Archive Download",
-                    onclick: function () { downloadButton(this, gid, archivelink, glink); },
+                    onclick: function () {
+                        let self = this;
+                        let ck = document.getElementById(id_list.dl_copy).checked;
+                        if (ck) {
+                            navigator.clipboard.writeText(self.parentElement.querySelector(".glname").textContent)
+                                .then(() => downloadButton(self, gid, archivelink, glink));
+                        } else {
+                            downloadButton(self, gid, archivelink, glink);
+                        }
+                    },
                 });
 
                 Object.assign(dl_button.style, style_list.gallery_button);
@@ -473,23 +483,34 @@
 
         function setSortingButton() {
             let pos = document.getElementById(id_list.mainbox);
-            let ck = document.createElement("input");
-            Object.assign(ck, {
+            let ck_sort_setting = document.createElement("input");
+            Object.assign(ck_sort_setting, {
                 type: "checkbox",
                 id: id_list.sort_setting,
                 checked: true,
             });
-            let lable = document.createElement("label");
-            Object.assign(lable, {
+            let lable_sort_setting = document.createElement("label");
+            Object.assign(lable_sort_setting, {
                 htmlFor: id_list.sort_setting,
                 textContent: "Descending",
             });
+            let ck_dl_copy = document.createElement("input");
+            Object.assign(ck_dl_copy, {
+                type: "checkbox",
+                id: id_list.dl_copy,
+                checked: false,
+            });
+            let lable_dl_copy = document.createElement("label");
+            Object.assign(lable_dl_copy, {
+                htmlFor: id_list.dl_copy,
+                textContent: "Copy Title When Download",
+            });
             let nodelist = [
-                ck, lable, newLine(),
+                ck_sort_setting, lable_sort_setting, newSeparate(), ck_dl_copy, lable_dl_copy, newLine(),
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
-                newSeparate(),                
+                newSeparate(),
                 newButton("exhddl_sort_by_title_pure", "Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),

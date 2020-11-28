@@ -50,6 +50,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.75
+  - add option: auto copy title when click `Archive Download`
+
 - v0.74
   - show full title
   - auto turn on `Fix/Unfix Event in Title`
