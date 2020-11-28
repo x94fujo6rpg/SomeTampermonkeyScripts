@@ -13,20 +13,20 @@ click button to enable (pervent too many requests)
 - #### Memory `downloaded / marked` galleries 
   - (when click `Archive Download` or use `mark/unmark gallery` under gallery)
   - change `downloaded / marked` gallery color to black (quick identify in list)
-- ##### Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile
-  - add button under gallery:
+- #### Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile
+  - ##### add button under gallery:
     - archive download
     - copy title
     - mark/unmark gallery
     - show gallery's torrent list in pure text
-  - sorting gallery
+  - ##### sorting gallery
     - example: `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
     - Title (ignore Prefix/Group/End) => `cccccccc`
     - Title (ignore Prefix/Group) => `cccccccc (dddddddd)`  
     - Title (ignore Prefix) => `[bbbbbbbb] cccccccc (dddddddd)`  
     - Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
     - Event => `(aaaaaaaa)`  
-  - fix/unfix event in title
+  - ##### fix/unfix event in title (auto enable by default)
     - search event prefix in `torrent / same title gallery` and add to title
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
     - some prefix will be ignore: (already categorized)
@@ -41,6 +41,10 @@ click button to enable (pervent too many requests)
         "(同人ゲームCG)",
         "(18禁ゲームCG)",  
         ```
+  - ##### options
+    - sort order (descending by default)
+    - auto copy title when download (enabled by default)
+    - auto fix event in title (enabled by default)
 - #### Show Pure Text
   - add pure text title under gallery (full title)
 - #### Jump To Nearest Downloaded (if any)
@@ -50,12 +54,16 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.76
+  - add option for auto enable `Fix/Unfix Event in Title`
+  - now script save option settings
+
 - v0.75
   - add option: auto copy title when click `Archive Download`  
 
 - v0.74
   - show full title
-  - auto turn on `Fix/Unfix Event in Title`
+  - ~~auto enable `Fix/Unfix Event in Title`~~ (optional v0.76)
   - add sort by `JP(Recommended)` & `EN` title
     (sort still have some bug...)
 

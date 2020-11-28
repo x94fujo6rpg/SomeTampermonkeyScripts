@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.75
+// @version      0.76
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -24,8 +24,6 @@
     let domain;
     let hid = true;
     let m = "[ehx direct download]: ";
-    let key = "exhddl_list";
-    let defaultValue = [];
     let debug_message = true;
     let debug_adv = false;
     let gallery_nodes;
@@ -33,13 +31,26 @@
     let gcount = 0;
     let pcount = 0;
     let timer_list = [];
+    let key_list = {
+        dl_list: "exhddl_list",
+        sort_setting: "exhddl_sortsetting",
+        dl_and_copy: "exhddl_dl_and_copy",
+        auto_fix_title: "exhddl_auto_fix_title",
+    };
+    let default_value = {
+        dl_list: [],
+        sort_setting: true,
+        dl_and_copy: true,
+        auto_fix_title: true,
+    };
     let id_list = {
         mainbox: "exhddl_activate",
         dd: "exhddl_ddbutton",
         puretext: "exhddl_puretext",
         sort_setting: "exhddl_sortsetting",
         jump_to_last: "exhddl_jump_to_last",
-        dl_copy: "exhddl_dl_and_copy",
+        dl_and_copy: "exhddl_dl_and_copy",
+        auto_fix_title: "exhddl_auto_fix_title",
     };
     let style_list = {
         top_button: { width: "max-content" },
@@ -281,7 +292,7 @@
         data = JSON.parse(data);
         print(`${m}process request[${index}] data, gallery count:[${Object.keys(data.gmetadata).length}]`);
 
-        let downloaded_list = GM_getValue(key, defaultValue);
+        let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
         if (downloaded_list.length != 0) downloaded_list.split(",");
 
         let gidlist = [];
@@ -303,7 +314,7 @@
                     textContent: "Archive Download",
                     onclick: function () {
                         let self = this;
-                        let ck = document.getElementById(id_list.dl_copy).checked;
+                        let ck = document.getElementById(id_list.dl_and_copy).checked;
                         if (ck) {
                             navigator.clipboard.writeText(self.parentElement.querySelector(".glname").textContent.trim())
                                 .then(() => downloadButton(self, gid, archivelink, glink));
@@ -362,8 +373,10 @@
             setCopyTitle();
             print(`${m}setup show torrent title button`);
             setShowTorrent();
-            print(`${m}fix title`);
-            fixTitlePrefix();
+            if (GM_getValue(key_list.auto_fix_title, default_value.auto_fix_title)) {
+                print(`${m}fix title`);
+                fixTitlePrefix();
+            }
         }
 
         function downloadButton(button, gid, archivelink, glink) {
@@ -377,7 +390,7 @@
 
         function setGalleryStatus(gid) {
             gid = `${gid}`; // convert to string
-            let downloaded_list = GM_getValue(key, defaultValue);
+            let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
 
             if (downloaded_list.length > 0) {
                 downloaded_list = downloaded_list.split(",");
@@ -403,7 +416,7 @@
                 downloaded_list = [gid];
             }
             downloaded_list = downloaded_list.join();
-            GM_setValue(key, downloaded_list);
+            GM_setValue(key_list.dl_list, downloaded_list);
             print(`${m}save list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
 
             updateGalleryStatus();
@@ -487,7 +500,7 @@
             Object.assign(ck_sort_setting, {
                 type: "checkbox",
                 id: id_list.sort_setting,
-                checked: true,
+                checked: GM_getValue(key_list.sort_setting, default_value.sort_setting),
             });
             let lable_sort_setting = document.createElement("label");
             Object.assign(lable_sort_setting, {
@@ -497,16 +510,31 @@
             let ck_dl_copy = document.createElement("input");
             Object.assign(ck_dl_copy, {
                 type: "checkbox",
-                id: id_list.dl_copy,
-                checked: false,
+                id: id_list.dl_and_copy,
+                checked: GM_getValue(key_list.dl_and_copy, default_value.dl_and_copy),
             });
             let lable_dl_copy = document.createElement("label");
             Object.assign(lable_dl_copy, {
-                htmlFor: id_list.dl_copy,
+                htmlFor: id_list.dl_and_copy,
                 textContent: "Copy Title When Download",
             });
+            let ck_auto_fix = document.createElement("input");
+            Object.assign(ck_auto_fix, {
+                type: "checkbox",
+                id: id_list.auto_fix_title,
+                checked: GM_getValue(key_list.auto_fix_title, default_value.auto_fix_title),
+            });
+            let lable_auto_fix = document.createElement("label");
+            Object.assign(lable_auto_fix, {
+                htmlFor: id_list.auto_fix_title,
+                textContent: "Auto Fix Title",
+            });
+
+            [ck_sort_setting, ck_dl_copy, ck_auto_fix,].forEach(s => s.addEventListener("change", updateSetting));
             let nodelist = [
-                ck_sort_setting, lable_sort_setting, newSeparate(), ck_dl_copy, lable_dl_copy, newLine(),
+                ck_sort_setting, lable_sort_setting, newSeparate(),
+                ck_dl_copy, lable_dl_copy, newSeparate(),
+                ck_auto_fix, lable_auto_fix, newLine(),
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
@@ -535,6 +563,17 @@
             ];
             pos.querySelector("span").remove(); // remove loading message
             appendAll(pos, nodelist);
+
+            function updateSetting() {
+                let updatelist = ["sort_setting", "dl_and_copy", "auto_fix_title"];
+                let info = [];
+                updatelist.forEach(key => {
+                    let value = document.getElementById(id_list[key]).checked;
+                    GM_setValue(key_list[key], value);
+                    info.push(`[${key}]:${value}`);
+                });
+                print(`${m}updateSetting | ${info.join(" | ")}`);
+            }
 
             function sortGalleryByKey(key = "") {
                 if (!key) return;
@@ -640,7 +679,7 @@
 
     function addToDownloadedList(gid) {
         gid = `${gid}`; // convert to string
-        let downloaded_list = GM_getValue(key, defaultValue);
+        let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
         if (downloaded_list.length != 0) {
             downloaded_list = downloaded_list.split(",");
 
@@ -660,7 +699,7 @@
             downloaded_list = [gid];
         }
         downloaded_list = downloaded_list.join();
-        GM_setValue(key, downloaded_list);
+        GM_setValue(key_list.dl_list, downloaded_list);
         print(`${m}add [${gid}] to list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
     }
 
@@ -890,7 +929,7 @@
     }
 
     function updateGalleryStatus() {
-        let list = GM_getValue(key, defaultValue);
+        let list = GM_getValue(key_list.dl_list, default_value.dl_list);
 
         if (list.length <= 0) return; // no downloaded gallery in list, abort
         list = list.split(",");
