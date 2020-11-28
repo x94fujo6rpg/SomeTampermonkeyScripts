@@ -534,7 +534,7 @@
             let nodelist = [
                 ck_sort_setting, lable_sort_setting, newSeparate(),
                 ck_dl_copy, lable_dl_copy, newSeparate(),
-                ck_auto_fix, lable_auto_fix, newLine(),
+                ck_auto_fix, lable_auto_fix, newLine(), newLine(),
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
