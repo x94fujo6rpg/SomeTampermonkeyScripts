@@ -29,9 +29,9 @@ click button to enable (pervent too many requests)
   - ##### fix/unfix event in title (auto enable by default)
     - search event prefix in `torrent / same title gallery` and add to title
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
-    - highlight prefix
-      - <font color=green>from torrent</font>
-      - <font color=blueviolet>from other gallery</font>
+    - highlight prefix (well...github doesn't support color....)
+      - from torrents (![](https://via.placeholder.com/15/008000/000000?text=+) green)
+      - from other gallery (![](https://via.placeholder.com/15/8A2BE2/000000?text=+) blueviolet)
     - some prefix will be ignore: (already categorized)
         ```
         "(同人誌)",
@@ -60,8 +60,9 @@ click button to enable (pervent too many requests)
 
 - v0.79
   - highlight prefix
-    - <font color=green>from torrent</font>
-    - <font color=blueviolet>from other gallery</font>
+    - from torrents (![](https://via.placeholder.com/15/008000/000000?text=+) green)
+    - from other gallery (![](https://via.placeholder.com/15/8A2BE2/000000?text=+) blueviolet)
+      [(wow...github doesn't support color in 2020...)](https://github.com/github/markup/issues/369)
   - fix text color when at eh
 
 - v0.78
