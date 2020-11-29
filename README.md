@@ -16,7 +16,7 @@ click button to enable (pervent too many requests)
 - #### Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile
   - ##### add button under gallery:
     - archive download
-    - copy title
+    - copy title (auto replace forbidden characters `<>:"/|?*\` to full-width)
     - mark/unmark gallery
     - show gallery's torrent list in pure text
   - ##### sorting gallery
@@ -29,7 +29,7 @@ click button to enable (pervent too many requests)
   - ##### fix/unfix event in title (auto enable by default)
     - search event prefix in `torrent / same title gallery` and add to title
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
-    - highlight prefix (well...github doesn't support color....)
+    - highlight prefix [(github doesn't support color in 2020...okay...)](https://github.com/github/markup/issues/369)
       - from torrents (![](https://via.placeholder.com/15/008000/000000?text=+) green)
       - from other gallery (![](https://via.placeholder.com/15/8A2BE2/000000?text=+) blueviolet)
     - some prefix will be ignore: (already categorized)
@@ -58,11 +58,14 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.81
+  - auto replace forbidden characters `<>:"/|?*\` to full-width when copy title
+
 - v0.79
   - highlight prefix
     - from torrents (![](https://via.placeholder.com/15/008000/000000?text=+) green)
-    - from other gallery (![](https://via.placeholder.com/15/8A2BE2/000000?text=+) blueviolet)
-      [(wow...github doesn't support color in 2020...)](https://github.com/github/markup/issues/369)
+    - from other gallery (![](https://via.placeholder.com/15/8A2BE2/000000?text=+) blueviolet)  
+      [(github doesn't support color in 2020...okay...)](https://github.com/github/markup/issues/369)  
   - fix text color when at eh
 
 - v0.78

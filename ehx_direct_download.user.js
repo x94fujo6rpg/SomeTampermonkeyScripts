@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.79
+// @version      0.81
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -77,6 +77,8 @@
         "(同人ゲームCG)",
         "(18禁ゲームCG)",
     ];
+    let forbidden = `<>:"/|?*\\`;
+    let replacer = `＜＞：”／｜？＊＼`;
 
     window.onload = main();
 
@@ -324,7 +326,7 @@
                         let self = this;
                         let ck = document.getElementById(id_list.dl_and_copy).checked;
                         if (ck) {
-                            navigator.clipboard.writeText(self.parentElement.querySelector(".glname").textContent.trim())
+                            navigator.clipboard.writeText(repalceForbiddenChar(self.parentElement.querySelector(".glname").textContent.trim()))
                                 .then(() => downloadButton(self, gid, archivelink, glink));
                         } else {
                             downloadButton(self, gid, archivelink, glink);
@@ -589,7 +591,7 @@
                 let gid = gallery.getAttribute("gid");
                 let pos = gallery.querySelector(`#gallery_status_${gid}`);
                 let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
-                    navigator.clipboard.writeText(this.parentElement.querySelector(".glname").textContent.trim());
+                    navigator.clipboard.writeText(repalceForbiddenChar(this.parentElement.querySelector(".glname").textContent.trim()));
                 });
                 pos.insertAdjacentElement("beforebegin", button);
                 pos.insertAdjacentElement("beforebegin", newLine());
@@ -930,7 +932,7 @@
         list = list.split(",");
 
         let find_button = document.querySelector(".itg.gld");
-        if (!find_button) return print(`${m}gallery list not found`);
+        if (!find_button) return debug_adv ? print(`${m}gallery list not found`) : null;
 
         find_button = find_button.querySelectorAll("button");
         if (find_button.length > 0) updateButtonStatus();
@@ -972,5 +974,18 @@
             });
             if (marked.length > 0) print(`${m}found in list, mark dl_button: ${marked}`);
         }
+    }
+
+    function repalceForbiddenChar(string = "") {
+        for (let index in forbidden) {
+            let fb = forbidden[index];
+            let rp = replacer[index];
+            let count = 0;
+            while (string.indexOf(fb) != -1 && count < 999) {
+                string = string.replaceAll(fb, rp);
+                count++;
+            }
+        }
+        return string.trim();
     }
 })();
