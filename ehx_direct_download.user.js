@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.78
+// @version      0.79
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -135,10 +135,10 @@
                         let timer = timer_list[index];
                         if (!pause) {
                             timer.id = setInterval(timer.handler, timer.delay);
-                            //print(`${m}start timer[${timer.note}] id:${timer.id}`);
+                            if (debug_adv) print(`${m}start timer[${timer.note}] id:${timer.id}`);
                         } else {
                             clearInterval(timer.id);
-                            //print(`${m}stop timer[${timer.note}] id:${timer.id}`);
+                            if (debug_adv) print(`${m}stop timer[${timer.note}] id:${timer.id}`);
                         }
                     }
                 }
@@ -264,19 +264,19 @@
                 button.removeAttribute("onclick");
                 let gallery_nodelist = document.querySelectorAll(".gl1t");
                 gallery_nodelist.forEach(gallery => {
-                    let puretext_span = Object.assign(document.createElement("span"), {
-                        name: id_list.puretext,
-                        textContent: gallery.querySelector("a[href]").textContent,
+                    let puretext_div = Object.assign(document.createElement("div"), {
+                        innerHTML: gallery.querySelector(".glname").innerHTML,
                         className: "puretext",
                     });
+                    puretext_div.setAttribute("name", id_list.puretext);
                     let pos = gallery.querySelector(".gdd");
                     if (pos) {
                         // found dl button
-                        pos.insertAdjacentElement("beforebegin", puretext_span);
+                        pos.insertAdjacentElement("beforebegin", puretext_div);
                         pos.parentElement.querySelector("br").remove();
                     } else {
                         pos = gallery.querySelector(".gl3t");
-                        pos.insertAdjacentElement("afterend", puretext_span);
+                        pos.insertAdjacentElement("afterend", puretext_div);
                     }
                 });
             }
@@ -861,19 +861,20 @@
                     if (checklist.some(title => title.includes(prefix))) return;
                     data.title = `${prefix} ${data.title_original}`;
                     data.title_jpn = `${prefix} ${data.title_jpn}`;
-                    title_ele.innerHTML = data.title_jpn ? data.title_jpn : data.title;
-                    print(`${m}[${id.padStart(10)}] add prefix "${prefix}"`);
+                    title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: data.from_other_gallery ? "color:blueviolet" : "color:green;" }));
+                    let add = data.from_other_gallery ? ` from [${data.from_other_gallery}]` : "";
+                    print(`${m}[${id.padStart(10)}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => (gallery_data.title_pure == data.title_pure) && (gallery_data.title_prefix.length > 0));
                     if (same_title) {
                         let new_prefix = same_title.title_prefix;
                         data.title_prefix = new_prefix;
-
                         data.title = `${new_prefix} ${data.title_original}`;
                         data.title_jpn = `${new_prefix} ${data.title_jpn_original}`;
-                        title_ele.innerHTML = (data.title_jpn.length > 0) ? data.title_jpn : data.title;
-                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${same_title.gid}]`, "color:OrangeRed;");
+                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
+                        data.from_other_gallery = same_title.gid;
+                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${data.from_other_gallery}]`, "color:OrangeRed;");
                     }
                 }
             } else {
@@ -941,10 +942,18 @@
             let marked = [];
             gallery_nodelist.forEach(gallery => {
                 let id = gallery.getAttribute("gid");
-                if (list.indexOf(id) != -1 && !gallery.getAttribute("marked")) {
-                    Object.assign(gallery.style, style_list.gallery_marked);
-                    gallery.setAttribute("marked", true);
-                    marked.push(id);
+                let puretext = gallery.querySelector(".puretext");
+                if (list.indexOf(id) != -1) {
+                    if (!gallery.getAttribute("marked")) {
+                        Object.assign(gallery.style, style_list.gallery_marked);
+                        gallery.setAttribute("marked", true);
+                        marked.push(id);
+                        gallery.querySelector(".gl5t").style = "color:white;";
+                    }
+                    if (puretext && document.domain == "e-hentai.org") puretext.setAttribute("style", "color:white;");
+                } else {
+                    gallery.querySelector(".gl5t").removeAttribute("style");
+                    if (puretext && document.domain == "e-hentai.org") puretext.removeAttribute("style");
                 }
             });
             if (marked.length > 0) print(`${m}found in list, mark gallery: ${marked}`);

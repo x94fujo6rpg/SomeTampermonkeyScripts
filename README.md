@@ -29,6 +29,9 @@ click button to enable (pervent too many requests)
   - ##### fix/unfix event in title (auto enable by default)
     - search event prefix in `torrent / same title gallery` and add to title
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
+    - highlight prefix
+      - <font color=green>from torrent</font>
+      - <font color=blueviolet>from other gallery</font>
     - some prefix will be ignore: (already categorized)
         ```
         "(同人誌)",
@@ -44,6 +47,7 @@ click button to enable (pervent too many requests)
   - ##### options
     - sort order (descending by default)
     - auto copy title when download (enabled by default)
+    - auto show pure text (enabled by default)
     - auto fix event in title (enabled by default)
 - #### Show Pure Text
   - add pure text title under gallery (full title)
@@ -53,6 +57,12 @@ click button to enable (pervent too many requests)
   - make all gallery show entire title
 
 ### updates
+
+- v0.79
+  - highlight prefix
+    - <font color=green>from torrent</font>
+    - <font color=blueviolet>from other gallery</font>
+  - fix text color when at eh
 
 - v0.78
   - option for auto enable `Show Pure Text`
