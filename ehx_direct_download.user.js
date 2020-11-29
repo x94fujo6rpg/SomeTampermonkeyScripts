@@ -810,7 +810,7 @@
         return new_id_list;
 
         function naturalSort(a, b) {
-            return a.localeCompare(b, navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true });
+            return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true });
         }
     }
 
