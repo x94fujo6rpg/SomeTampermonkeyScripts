@@ -54,6 +54,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.78
+  - option for auto enable `Show Pure Text`
+
 - v0.76
   - add option for auto enable `Fix/Unfix Event in Title`
   - now script save option settings
@@ -76,7 +79,6 @@ click button to enable (pervent too many requests)
   - new feature `Fix/Unfix Event in Title` 
   - more sort option  
   - improve speed (send next request when current one complete)  
-  - UI adjust
 
 - v0.65 
   - natural sort  

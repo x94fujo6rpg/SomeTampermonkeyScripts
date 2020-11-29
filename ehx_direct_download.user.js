@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.77
+// @version      0.78
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -36,12 +36,14 @@
         sort_setting: "exhddl_sortsetting",
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
+        auto_enable_puretext: "exhddl_auto_enable_puretext",
     };
     let default_value = {
         dl_list: [],
         sort_setting: true,
         dl_and_copy: true,
         auto_fix_title: true,
+        auto_enable_puretext: true,
     };
     let id_list = {
         mainbox: "exhddl_activate",
@@ -51,6 +53,7 @@
         jump_to_last: "exhddl_jump_to_last",
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
+        auto_enable_puretext: "exhddl_auto_enable_puretext",
     };
     let style_list = {
         top_button: { width: "max-content" },
@@ -62,7 +65,7 @@
         separator: { color: "transparent" },
     };
     let status_update_interval = 500;
-    let prefix_fixed = false;
+    let fix_prefix = false;
     let ignore_prefix = [
         "(同人誌)",
         "(成年コミック)",
@@ -97,28 +100,29 @@
         }
 
         function myCss() {
-            let newcss = document.createElement("style");
-            newcss.id = "ehx_direct_download_css";
-            document.head.appendChild(newcss);
-            newcss.innerHTML = `
-                .puretext {
-                    overflow: hidden;
-                    min-height: 32px;
-                    line-height: 16px;
-                    margin: 6px 4px 0;
-                    font-size: 10pt;
-                    text-align: center;
-                }
+            let newcss = Object.assign(document.createElement("style"), {
+                id: "ehx_direct_download_css",
+                innerHTML: `
+                    .puretext {
+                        overflow: hidden;
+                        min-height: 32px;
+                        line-height: 16px;
+                        margin: 6px 4px 0;
+                        font-size: 10pt;
+                        text-align: center;
+                    }
 
-                .show_full_title {
-                    overflow: hidden;
-                    min-height: 32px;
-                    line-height: 16px;
-                    margin: 6px 4px 0;
-                    font-size: 10pt;
-                    text-align: center;
-                }
-            `;
+                    .show_full_title {
+                        overflow: hidden;
+                        min-height: 32px;
+                        line-height: 16px;
+                        margin: 6px 4px 0;
+                        font-size: 10pt;
+                        text-align: center;
+                    }
+                `,
+            });
+            document.head.appendChild(newcss);
             let all = document.querySelectorAll(".gl4t");
             if (all) all.forEach(t => { t.className = t.className.replace("gl4t", "show_full_title"); });
         }
@@ -166,8 +170,7 @@
         }
 
         function setButton() {
-            let box = document.createElement("div");
-            box.id = id_list.mainbox;
+            let box = Object.assign(document.createElement("div"), { id: id_list.mainbox });
             Object.assign(box.style, style_list.mainbox);
             let nodelist = [
                 newButton(id_list.dd, "Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile", style_list.top_button, enableDirectDownload),
@@ -256,15 +259,16 @@
             }
 
             function pureText() {
-                let button = document.getElementById(id_list.puretext)
+                let button = document.getElementById(id_list.puretext);
                 button.disabled = true;
                 button.removeAttribute("onclick");
                 let gallery_nodelist = document.querySelectorAll(".gl1t");
                 gallery_nodelist.forEach(gallery => {
-                    let puretext_span = document.createElement("span");
-                    puretext_span.setAttribute("name", id_list.puretext);
-                    puretext_span.textContent = gallery.querySelector("a[href]").textContent;
-                    puretext_span.className = "puretext";
+                    let puretext_span = Object.assign(document.createElement("span"), {
+                        name: id_list.puretext,
+                        textContent: gallery.querySelector("a[href]").textContent,
+                        className: "puretext",
+                    });
                     let pos = gallery.querySelector(".gdd");
                     if (pos) {
                         // found dl button
@@ -312,8 +316,7 @@
             let glink = `${domain}/g/${gid}/${gtoken}/`;
             let gallery = document.querySelector(`.gl1t[gid='${gid}']`);
             if (gallery) {
-                let dl_button = document.createElement("button");
-                Object.assign(dl_button, {
+                let dl_button = Object.assign(document.createElement("button"), {
                     id: `gallery_dl_${gid}`,
                     className: "gdd",
                     textContent: "Archive Download",
@@ -350,8 +353,7 @@
                 gidlist.push(dl_button.id);
                 pcount++;
 
-                let set_status_button = document.createElement("button");
-                Object.assign(set_status_button, {
+                let set_status_button = Object.assign(document.createElement("button"), {
                     id: `gallery_status_${gid}`,
                     className: "gstatus",
                     textContent: "Mark/Unmark This",
@@ -379,8 +381,12 @@
             print(`${m}setup show torrent title button`);
             setShowTorrent();
             if (GM_getValue(key_list.auto_fix_title, default_value.auto_fix_title)) {
-                print(`${m}fix title`);
-                fixTitlePrefix();
+                print(`${m}auto enable fix title`);
+                document.getElementById("exhddl_fix_title").click();
+            }
+            if (GM_getValue(key_list.auto_enable_puretext, default_value.auto_enable_puretext)) {
+                print(`${m}auto enable pure text`);
+                document.getElementById("exhddl_puretext").click();
             }
         }
 
@@ -501,45 +507,14 @@
 
         function setSortingButton() {
             let pos = document.getElementById(id_list.mainbox);
-            let ck_sort_setting = document.createElement("input");
-            Object.assign(ck_sort_setting, {
-                type: "checkbox",
-                id: id_list.sort_setting,
-                checked: GM_getValue(key_list.sort_setting, default_value.sort_setting),
-            });
-            let lable_sort_setting = document.createElement("label");
-            Object.assign(lable_sort_setting, {
-                htmlFor: id_list.sort_setting,
-                textContent: "Descending",
-            });
-            let ck_dl_copy = document.createElement("input");
-            Object.assign(ck_dl_copy, {
-                type: "checkbox",
-                id: id_list.dl_and_copy,
-                checked: GM_getValue(key_list.dl_and_copy, default_value.dl_and_copy),
-            });
-            let lable_dl_copy = document.createElement("label");
-            Object.assign(lable_dl_copy, {
-                htmlFor: id_list.dl_and_copy,
-                textContent: "Copy Title When Download",
-            });
-            let ck_auto_fix = document.createElement("input");
-            Object.assign(ck_auto_fix, {
-                type: "checkbox",
-                id: id_list.auto_fix_title,
-                checked: GM_getValue(key_list.auto_fix_title, default_value.auto_fix_title),
-            });
-            let lable_auto_fix = document.createElement("label");
-            Object.assign(lable_auto_fix, {
-                htmlFor: id_list.auto_fix_title,
-                textContent: "Auto Fix Title",
-            });
-
-            [ck_sort_setting, ck_dl_copy, ck_auto_fix,].forEach(s => s.addEventListener("change", updateSetting));
             let nodelist = [
-                ck_sort_setting, lable_sort_setting, newSeparate(),
-                ck_dl_copy, lable_dl_copy, newSeparate(),
-                ck_auto_fix, lable_auto_fix, newLine(),
+                newSetting("Descending", "sort_setting"), newSeparate(),
+                newSetting("Copy Title When Download", "dl_and_copy"), newSeparate(),
+                newSetting("Auto Enable Pure Text", "auto_enable_puretext"), newSeparate(),
+                newSetting("Auto Enable Fix Title", "auto_fix_title"), newLine(),
+            ].flat();
+            nodelist.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
+            nodelist.push([
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
@@ -565,19 +540,36 @@
                 newLine(),
 
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
-            ];
+            ]);
+            nodelist = nodelist.flat();
             pos.querySelector("span").remove(); // remove loading message
             appendAll(pos, nodelist);
 
+            function newSetting(lable_text, id_key) {
+                return [
+                    Object.assign(document.createElement("input"), {
+                        type: "checkbox",
+                        id: id_list[id_key],
+                        checked: GM_getValue(key_list[id_key], default_value[id_key]),
+                    }),
+                    Object.assign(document.createElement("label"), {
+                        htmlFor: id_list[id_key],
+                        textContent: lable_text,
+                    })
+                ];
+            }
+
             function updateSetting() {
-                let updatelist = ["sort_setting", "dl_and_copy", "auto_fix_title"];
+                let updatelist = Object.keys(key_list).filter(key => key != "dl_list");
                 let info = [];
+                let style = [];
                 updatelist.forEach(key => {
                     let value = document.getElementById(id_list[key]).checked;
                     GM_setValue(key_list[key], value);
-                    info.push(`[${key}]:${value}`);
+                    info.push(`[${key}]:%c${value}`);
+                    style.push("", value ? "color:green" : "color:red");
                 });
-                print(`${m}updateSetting | ${info.join(" | ")}`);
+                print(`${m}updateSetting | %c${info.join(" %c| ")}`, ...style);
             }
 
             function sortGalleryByKey(key = "") {
@@ -724,11 +716,7 @@
     }
 
     function newSpan(text = "") {
-        let span = document.createElement("span");
-        Object.assign(span, {
-            textContent: text,
-        });
-        return span;
+        return Object.assign(document.createElement("span"), { textContent: text, });
     }
 
     function newLine() {
@@ -742,8 +730,7 @@
     }
 
     function newButton(button_id, button_text, button_style, button_onclick) {
-        let button = document.createElement("button");
-        Object.assign(button, {
+        let button = Object.assign(document.createElement("button"), {
             id: button_id,
             textContent: button_text,
             onclick: button_onclick,
@@ -855,14 +842,14 @@
     }
 
     function fixTitlePrefix() {
-        prefix_fixed = prefix_fixed ? false : true;
+        fix_prefix = fix_prefix ? false : true;
         let gallery_nodelist = document.querySelectorAll(".gl1t");
         gallery_nodelist.forEach(gallery => {
             let id = gallery.getAttribute("gid");
             let data = gdata.find(gallery_data => gallery_data.gid == id);
             let title_ele = gallery.querySelector(".glname");
             let prefix = data.title_prefix;
-            if (prefix_fixed) {
+            if (fix_prefix) {
                 if (prefix.length > 0) {
                     let checklist = [
                         title_ele.innerHTML,
