@@ -461,13 +461,16 @@
                         data[tag_key] = "";
                     }
                 });
+
                 data.title_original = data.title;
+                data.title_jpn = data.title_jpn.length > 0 ? data.title_jpn : data.title;
                 data.title_jpn_original = data.title_jpn;
                 [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
+                [, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
 
                 // try to found prefix in title_jpn
-                let [title_jpn,] = extractPrefix(data.title_jpn);
-                if (title_jpn.length > 0) data.title_prefix = title_jpn;
+                let [title_prefix_jpn,] = extractPrefix(data.title_jpn);
+                if (title_prefix_jpn.length > 0) data.title_prefix = title_prefix_jpn;
 
                 let from_torrent = false;
                 if (data.title_prefix.length == 0) {
@@ -486,7 +489,9 @@
                 }
 
                 [data.title_group, data.title_no_group] = extractGroup(data.title_no_event);
+                [data.title_group_jpn, data.title_no_group_jpn] = extractGroup(data.title_no_event_jpn);
                 data.title_pure = removeEnd(data.title_no_group);
+                data.title_pure_jpn = removeEnd(data.title_no_group_jpn);
                 if (debug_message && debug_adv) {
                     print(`${String(data.gid).padStart(10)}|__________`);
                     let title_list = [
@@ -848,41 +853,41 @@
         let gallery_nodelist = document.querySelectorAll(".gl1t");
         gallery_nodelist.forEach(gallery => {
             let id = gallery.getAttribute("gid");
-            let data = gdata.find(gallery_data => gallery_data.gid == id);
+            let tofix = gdata.find(gallery_data => gallery_data.gid == id);
             let title_ele = gallery.querySelector(".glname");
-            let prefix = data.title_prefix;
+            let prefix = tofix.title_prefix;
             if (fix_prefix) {
                 if (prefix.length > 0) {
                     let checklist = [
                         title_ele.innerHTML,
-                        data.title,
-                        data.title_original,
-                        data.title_jpn,
+                        tofix.title,
+                        tofix.title_original,
+                        tofix.title_jpn,
                     ];
                     ignore_prefix.forEach(ignore => checklist.push(ignore));
                     if (checklist.some(title => title.includes(prefix))) return;
-                    data.title = `${prefix} ${data.title_original}`;
-                    data.title_jpn = `${prefix} ${data.title_jpn}`;
-                    title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: data.from_other_gallery ? "color:blueviolet" : "color:green;" }));
-                    let add = data.from_other_gallery ? ` from [${data.from_other_gallery}]` : "";
+                    tofix.title = `${prefix} ${tofix.title_original}`;
+                    tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
+                    title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
+                    let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery}]` : "";
                     print(`${m}[${id.padStart(10)}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
                 } else {
                     // search in same title gallery
-                    let same_title = gdata.find(gallery_data => (gallery_data.title_pure == data.title_pure) && (gallery_data.title_prefix.length > 0));
+                    let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
                     if (same_title) {
                         let new_prefix = same_title.title_prefix;
-                        data.title_prefix = new_prefix;
-                        data.title = `${new_prefix} ${data.title_original}`;
-                        data.title_jpn = `${new_prefix} ${data.title_jpn_original}`;
+                        tofix.title_prefix = new_prefix;
+                        tofix.title = `${new_prefix} ${tofix.title_original}`;
+                        tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
-                        data.from_other_gallery = same_title.gid;
-                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${data.from_other_gallery}]`, "color:OrangeRed;");
+                        tofix.from_other_gallery = same_title.gid;
+                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}]`, "color:OrangeRed;");
                     }
                 }
             } else {
-                data.title = data.title_original;
-                data.title_jpn = data.title_jpn_original;
-                title_ele.innerHTML = data.title_jpn ? data.title_jpn : data.title;
+                tofix.title = tofix.title_original;
+                tofix.title_jpn = tofix.title_jpn_original;
+                title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
             }
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
