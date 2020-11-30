@@ -49,6 +49,9 @@ click button to enable (pervent too many requests)
     - auto copy title when download (enabled by default)
     - auto show pure text (enabled by default)
     - auto fix event in title (enabled by default)
+  - ##### sort options
+    - Numeric `Whether numeric collation should be used, such that "1" < "2" < "10"`
+    - Ignore Punctuation
 - #### Show Pure Text
   - add pure text title under gallery (full title)
 - #### Jump To Nearest Downloaded (if any)
@@ -57,6 +60,9 @@ click button to enable (pervent too many requests)
   - make all gallery show entire title
 
 ### updates
+
+- v0.84
+  - add option for sorting
 
 - v0.83
   - better event search (search in same en or same jpn title)

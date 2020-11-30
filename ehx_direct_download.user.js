@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.83
+// @version      0.84
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -37,6 +37,8 @@
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
         auto_enable_puretext: "exhddl_auto_enable_puretext",
+        sort_numeric: "exhddl_sort_numeric",
+        sort_ignore_punctuation: "exhddl_sort_ignore_punctuation",
     };
     let default_value = {
         dl_list: [],
@@ -44,6 +46,8 @@
         dl_and_copy: true,
         auto_fix_title: true,
         auto_enable_puretext: true,
+        sort_numeric: true,
+        sort_ignore_punctuation: false,
     };
     let id_list = {
         mainbox: "exhddl_activate",
@@ -54,6 +58,8 @@
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
         auto_enable_puretext: "exhddl_auto_enable_puretext",
+        sort_numeric: "exhddl_sort_numeric",
+        sort_ignore_punctuation: "exhddl_sort_ignore_punctuation",
     };
     let style_list = {
         top_button: { width: "max-content" },
@@ -176,9 +182,9 @@
             Object.assign(box.style, style_list.mainbox);
             let nodelist = [
                 newButton(id_list.dd, "Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile", style_list.top_button, enableDirectDownload),
-                newLine(),
+                newSeparate(),
                 newButton(id_list.puretext, "Show Pure Text", style_list.top_button, pureText),
-                newLine(),
+                newSeparate(),
                 newButton(id_list.jump_to_last, "Jump To Nearest Downloaded", style_list.top_button, jumpToLastDownload),
                 newLine(),
             ];
@@ -518,7 +524,9 @@
                 newSetting("Descending", "sort_setting"), newSeparate(),
                 newSetting("Copy Title When Download", "dl_and_copy"), newSeparate(),
                 newSetting("Auto Enable Pure Text", "auto_enable_puretext"), newSeparate(),
-                newSetting("Auto Enable Fix Title", "auto_fix_title"), newLine(),
+                newSetting("Auto Enable Fix Title", "auto_fix_title"), newSeparate(),
+                newSetting("(Sort) Numeric", "sort_numeric"), newSeparate(),
+                newSetting("(Sort) Ignore Punctuation", "sort_ignore_punctuation"), newLine(),
             ].flat();
             nodelist.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
             nodelist.push([
@@ -531,7 +539,7 @@
                 newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
                 newSeparate(),
                 newButton("exhddl_sort_by_title_no_event", "Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
-                newLine(),
+                newSeparate(),
 
                 newButton("exhddl_sort_by_date", "Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
                 newSeparate(),
@@ -574,7 +582,7 @@
                     let value = document.getElementById(id_list[key]).checked;
                     GM_setValue(key_list[key], value);
                     info.push(`[${key}]:%c${value}`);
-                    style.push("", value ? "color:green" : "color:red");
+                    style.push("", value ? "color:DeepSkyBlue" : "color:DeepPink");
                 });
                 print(`${m}updateSetting | %c${info.join(" %c| ")}`, ...style);
             }
@@ -731,7 +739,7 @@
     }
 
     function newSeparate() {
-        let sep = newSpan(" ／ ");
+        let sep = newSpan("／");
         Object.assign(sep.style, style_list.separator);
         return sep;
     }
@@ -806,16 +814,20 @@
         let new_id_list = [];
         print(`${m}sort by: ${sort_key}`);
         if (debug_message && debug_adv) console.groupCollapsed();
-        if (newlist) newlist.forEach(data => {
-            new_id_list.push(data.gid);
-            if (debug_message && debug_adv) print(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
-        });
+        if (newlist) {
+            newlist.forEach(data => {
+                new_id_list.push(data.gid);
+                if (debug_message && debug_adv) print(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
+            });
+        }
         if (debug_message && debug_adv) console.groupEnd();
 
         return new_id_list;
 
         function naturalSort(a, b) {
-            return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: true, ignorePunctuation: true });
+            let numeric = document.getElementById(id_list.sort_numeric).checked;
+            let ignore_punctuation = document.getElementById(id_list.sort_ignore_punctuation).checked;
+            return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: numeric, ignorePunctuation: ignore_punctuation });
         }
     }
 
