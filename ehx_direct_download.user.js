@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.81
+// @version      0.82
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -60,7 +60,7 @@
         gallery_button: { width: "max-content", alignSelf: "center" },
         gallery_marked: { backgroundColor: "black" },
         button_marked: { color: "gray", backgroundColor: "transparent" },
-        ex: { opacity: 0.3 },
+        ex: { backgroundColor: "goldenrod" },
         mainbox: { textAlign: "center", lineHeight: "2rem" },
         separator: { color: "transparent" },
     };
@@ -436,7 +436,7 @@
 
             function resetGalleryStatus(gid) {
                 let gallery = document.querySelector(`[gid="${gid}"]`);
-                gallery.style.removeProperty("background-color");
+                if (!gallery.querySelector("s")) gallery.style.removeProperty("background-color");
                 gallery.removeAttribute("marked");
 
                 let dl_button = gallery.querySelector(".gdd");
@@ -947,18 +947,24 @@
                 let puretext = gallery.querySelector(".puretext");
                 if (list.indexOf(id) != -1) {
                     if (!gallery.getAttribute("marked")) {
-                        Object.assign(gallery.style, style_list.gallery_marked);
+                        if (!gallery.querySelector("s")) Object.assign(gallery.style, style_list.gallery_marked);
                         gallery.setAttribute("marked", true);
                         marked.push(id);
-                        gallery.querySelector(".gl5t").style = "color:white;";
+                        if (isEH()) gallery.querySelector(".gl5t").style = "color:white;";
                     }
-                    if (puretext && document.domain == "e-hentai.org") puretext.setAttribute("style", "color:white;");
+                    if (puretext && isEH()) puretext.setAttribute("style", "color:white;");
                 } else {
-                    gallery.querySelector(".gl5t").removeAttribute("style");
-                    if (puretext && document.domain == "e-hentai.org") puretext.removeAttribute("style");
+                    if (isEH()) {
+                        gallery.querySelector(".gl5t").removeAttribute("style");
+                        if (puretext) puretext.removeAttribute("style");
+                    }
                 }
             });
             if (marked.length > 0) print(`${m}found in list, mark gallery: ${marked}`);
+
+            function isEH() {
+                return document.domain == "e-hentai.org" ? true : false;
+            }
         }
 
         function updateButtonStatus() {
