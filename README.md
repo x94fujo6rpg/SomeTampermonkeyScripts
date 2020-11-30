@@ -58,6 +58,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.83
+  - better event search (search in same en or same jpn title)
+
 - v0.81
   - auto replace forbidden characters `<>:"/|?*\` to full-width when copy title
 
