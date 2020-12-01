@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.84
+// @version      0.85
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -33,7 +33,8 @@
     let timer_list = [];
     let key_list = {
         dl_list: "exhddl_list",
-        exclude_list: "exhddl_exclude_list",
+        exclude_tag: "exhddl_exclude_tag_list",
+        exclude_uploader: "exhddl_exclude_uploader_list",
         sort_setting: "exhddl_sortsetting",
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
@@ -43,7 +44,8 @@
     };
     let default_value = {
         dl_list: [],
-        exclude_list: [],
+        exclude_tag: [],
+        exclude_uploader: [],
         sort_setting: true,
         dl_and_copy: true,
         auto_fix_title: true,
@@ -183,14 +185,14 @@
             let box = Object.assign(document.createElement("div"), { id: id_list.mainbox });
             Object.assign(box.style, style_list.mainbox);
             let nodelist = [
-                newButton(id_list.dd, "Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile", style_list.top_button, enableDirectDownload),
+                newButton(id_list.dd, "Enable Archive Download / Sorting / Show torrents Title / Fix Event in Ttile / Exclude Gallery", style_list.top_button, enableDirectDownload),
                 newSeparate(),
                 newButton(id_list.puretext, "Show Pure Text", style_list.top_button, pureText),
                 newSeparate(),
                 newButton(id_list.jump_to_last, "Jump To Nearest Downloaded", style_list.top_button, jumpToLastDownload),
                 newLine(),
             ];
-            box = appendAll(box, nodelist);
+            box = appendAllChild(box, nodelist);
 
             document.getElementById("toppane").insertAdjacentElement("afterend", box);
             if (hid) hlexg();
@@ -311,7 +313,7 @@
         print(`${m}process request[${index}] data, gallery count:[${Object.keys(data.gmetadata).length}]`);
 
         let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-        if (downloaded_list.length != 0) downloaded_list.split(",");
+        downloaded_list = downloaded_list.length > 0 ? downloaded_list.split(",") : [];
 
         let gidlist = [];
         let mark_list = [];
@@ -411,10 +413,9 @@
         function setGalleryStatus(gid) {
             gid = `${gid}`; // convert to string
             let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
+            downloaded_list = downloaded_list.length > 0 ? downloaded_list.split(",") : [];
 
             if (downloaded_list.length > 0) {
-                downloaded_list = downloaded_list.split(",");
-
                 let index = downloaded_list.indexOf(gid);
                 if (index != -1) {
                     downloaded_list.splice(index, 1);
@@ -435,9 +436,10 @@
             } else {
                 downloaded_list = [gid];
             }
+            let list_length = downloaded_list.length;
             downloaded_list = downloaded_list.join();
             GM_setValue(key_list.dl_list, downloaded_list);
-            print(`${m}save list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
+            print(`${m}save list. [list_size:${downloaded_list.length}, list_length:${list_length}]`);
 
             updateGalleryStatus();
 
@@ -460,7 +462,8 @@
                 "female:",
                 "male:",
                 "parody:",
-                "character:"
+                "character:",
+                "language:",
             ];
             if (debug_message && debug_adv) console.groupCollapsed();
             gdata.forEach(data => {
@@ -469,9 +472,9 @@
                 tag_key_list.forEach(tag_key => {
                     let data_key = tag_key.replace(":", "");
                     data[data_key] = [];
-                    copy_tags.forEach(tag => { if (tag.includes(tag_key)) data[data_key].push(String(tag).replace(tag_key, "").trim()); });
+                    copy_tags.forEach(tag => { if (tag.includes(tag_key)) data[data_key].push(tag); });
                     // remove used
-                    copy_tags = copy_tags.filter(tag => data[data_key].indexOf(String(tag).replace(tag_key, "").trim()) == -1);
+                    copy_tags = copy_tags.filter(tag => data[data_key].indexOf(tag) == -1);
                 });
                 data.misc = copy_tags; // unused list
 
@@ -562,12 +565,12 @@
                 newLine(),
 
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
-                //newSeparate(),
-                //newButton("exhddl_exclude_buttons", "Show Exclude Buttons", style_list.top_button, () => { setExcludeButtons(); }),
+                newLine(),
+                newButton("exhddl_exclude_buttons", "Show Exclude List", style_list.top_button, () => { setExclude(); }),
             ]);
             nodelist = nodelist.flat();
             pos.querySelector("span").remove(); // remove loading message
-            appendAll(pos, nodelist);
+            appendAllChild(pos, nodelist);
 
             function newSetting(lable_text, id_key) {
                 return [
@@ -587,6 +590,8 @@
                 let skip_list = [
                     "dl_list",
                     "exclude_list",
+                    "exclude_tag",
+                    "exclude_uploader",
                 ];
                 let updatelist = Object.keys(key_list).filter(key => skip_list.every(skip => key != skip));
                 let info = [];
@@ -647,22 +652,68 @@
             });
         }
 
-        function setExcludeButtons() {
+        function setExclude() {
+            let self = document.getElementById("exhddl_exclude_buttons");
+            self.disabled = true;
+            self.removeAttribute("onclick");
             selectAllGallery().forEach(gallery => {
-                let gid = getAttribute("gid");
+                let gid = gallery.getAttribute("gid");
                 let data = gdata.find(gallery_data => gallery_data.gid == gid);
-                let artist = data.artist;
-                let group = data.group;
-                let uploader = data.uploader;
                 let pos = gallery.querySelector("button:last-of-type"); //last button
-                let nodelist = [
-                    newSpan("Add/Remove Exclude List"),
-                    newButton("", "Artist", style_list.gallery_button, updateExcludeList(artist)),
-                ];
+                let tag_list = [
+                    `uploader:${data.uploader.trim()}`,
+                    data.language,
+                    data.artist,
+                    data.group,
+                    data.female,
+                    data.male,
+                    data.parody,
+                    data.character,
+                ].flat();
+                let select = newSelect(tag_list);
+                Object.assign(select.style, style_list.gallery_button);
+                let span = newSpan("Exclude");
+                Object.assign(span.style, style_list.gallery_button);
+                pos.insertAdjacentElement("afterend", newButton(`exhddl_exclude_${gid}`, "Add/Remove", style_list.gallery_button, () => { updateExcludeList(gid); }));
+                pos.insertAdjacentElement("afterend", select);
+                pos.insertAdjacentElement("afterend", span);
+                pos.insertAdjacentElement("afterend", newLine());
             });
 
-            function updateExcludeList(target = "") {
+            function newSelect(data_list) {
+                let select = document.createElement("select");
+                if (data_list.length == 0) return select;
+                data_list.forEach(data => { if (data.length > 0) select.appendChild(newOption(data)); });
+                return select;
+            }
 
+            function newOption(text) {
+                return Object.assign(document.createElement("option"), { textContent: text });
+            }
+
+            function updateExcludeList(gid) {
+                let gallery = document.querySelector(`[gid="${gid}"]`);
+                if (!gallery) return;
+                let up = "uploader:";
+                let exclude = gallery.querySelector("select").selectedOptions[0].textContent;
+                let update_key = exclude.includes(up) ? "exclude_uploader" : "exclude_tag";
+
+                if (exclude.includes(up)) exclude = exclude.replace(up, "");
+                updateByKey(update_key, exclude);
+
+                function updateByKey(key, value) {
+                    let list = GM_getValue(key_list[key], default_value[key]);
+                    list = list.length > 0 ? list.split(",") : [];
+                    let index = list.indexOf(value);
+                    if (index == -1) {
+                        list.push(value);
+                        print(`${m}add [${value}] to list [${key}]`);
+                    } else {
+                        list.splice(index, 1);
+                        print(`${m}remove [${value}] from list [${key}]`);
+                    }
+                    GM_setValue(key_list[key], list.join());
+                }
             }
         }
     }
@@ -759,7 +810,7 @@
         return false;
     }
 
-    function appendAll(node, nodeList) {
+    function appendAllChild(node, nodeList) {
         nodeList.forEach(e => node.appendChild(e));
         return node;
     }
@@ -875,6 +926,7 @@
             copyOnclick(gallery, deepcopy, `#t_title_${id}`);
             copyOnclick(gallery, deepcopy, `#copy_title_${id}`);
             copyOnclick(gallery, deepcopy, `#gallery_status_${id}`);
+            copyOnclick(gallery, deepcopy, `#exhddl_exclude_${id}`);
             gallery_nodes[id] = {
                 id: id,
                 title: title,
@@ -973,19 +1025,30 @@
 
     function updateGalleryStatus() {
         let dl_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-        //let ex_list = GM_getValue(key_list.exclude_list, default_value.exclude_list);
-
-        if (dl_list.length <= 0) return; // no downloaded gallery in list, abort
-        dl_list = dl_list.split(",");
-        //ex_list = ex_list.split(",");
+        dl_list = dl_list.length > 0 ? dl_list.split(",") : [];
 
         let find_button = document.querySelector(".itg.gld");
         if (!find_button) return debug_adv ? print(`${m}gallery list not found`) : null;
 
         find_button = find_button.querySelectorAll("button");
-        if (find_button.length > 0) updateButtonStatus();
-
+        if (find_button.length > 0) { updateButtonStatus(); updateExclude(); }
         updateGalleryColor();
+
+        function updateExclude() {
+            if (gdata.length == 0) return;
+            let ex_uploader = GM_getValue(key_list.exclude_uploader, default_value.exclude_uploader);
+            let ex_tag = GM_getValue(key_list.exclude_tag, default_value.exclude_tag);
+            ex_uploader = ex_uploader.length > 0 ? ex_uploader.split(",") : [];
+            ex_tag = ex_tag.length > 0 ? ex_tag.split(",") : [];
+            gdata.forEach(gallery_data => {
+                let match_uploader = ex_uploader.includes(gallery_data.uploader);
+                let match_tag = gallery_data.tags.some(tag => ex_tag.includes(tag));
+                let gallery = document.querySelector(`[gid="${gallery_data.gid}"]`);
+                gallery.style.opacity = (match_uploader || match_tag) ? 0.1 : 1;
+                let options = gallery.querySelectorAll("option");
+                if (options) options.forEach(o => o.style.color = (ex_tag.includes(o.textContent) || ex_uploader.includes(o.textContent.replace("uploader:", ""))) ? "red" : "");
+            });
+        }
 
         function updateGalleryColor() {
             let marked = [];

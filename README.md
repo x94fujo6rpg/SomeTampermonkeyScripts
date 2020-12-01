@@ -61,6 +61,11 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.85
+  - new feature `exclude gallery` (opacity = 0.1) by tag 
+  - add/remove tag from exclude list under gallery (after enable `Show Exclude List`)
+  - tag that already in the list will be red
+
 - v0.84
   - add options for sorting
 
