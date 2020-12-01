@@ -1045,6 +1045,7 @@
                 let match_tag = gallery_data.tags.some(tag => ex_tag.includes(tag));
                 let gallery = document.querySelector(`[gid="${gallery_data.gid}"]`);
                 gallery.style.opacity = (match_uploader || match_tag) ? 0.1 : 1;
+                gallery.querySelector("img").style.display = (match_uploader || match_tag) ? "none" : "";
                 let options = gallery.querySelectorAll("option");
                 if (options) options.forEach(o => o.style.color = (ex_tag.includes(o.textContent) || ex_uploader.includes(o.textContent.replace("uploader:", ""))) ? "red" : "");
             });
