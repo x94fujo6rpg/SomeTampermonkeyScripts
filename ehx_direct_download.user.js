@@ -33,6 +33,7 @@
     let timer_list = [];
     let key_list = {
         dl_list: "exhddl_list",
+        exclude_list: "exhddl_exclude_list",
         sort_setting: "exhddl_sortsetting",
         dl_and_copy: "exhddl_dl_and_copy",
         auto_fix_title: "exhddl_auto_fix_title",
@@ -42,6 +43,7 @@
     };
     let default_value = {
         dl_list: [],
+        exclude_list: [],
         sort_setting: true,
         dl_and_copy: true,
         auto_fix_title: true,
@@ -204,7 +206,7 @@
                 acquireGalleryData();
 
                 function acquireGalleryData() {
-                    let gallery_nodelist = document.querySelectorAll(".gl1t");
+                    let gallery_nodelist = selectAllGallery();
                     let gc = 0;
                     if (gallery_nodelist) {
                         print(`${m}acquire gallery data`);
@@ -270,8 +272,7 @@
                 let button = document.getElementById(id_list.puretext);
                 button.disabled = true;
                 button.removeAttribute("onclick");
-                let gallery_nodelist = document.querySelectorAll(".gl1t");
-                gallery_nodelist.forEach(gallery => {
+                selectAllGallery().forEach(gallery => {
                     let puretext_div = Object.assign(document.createElement("div"), {
                         innerHTML: gallery.querySelector(".glname").innerHTML,
                         className: "puretext",
@@ -453,20 +454,26 @@
         }
 
         function processGdata() {
-            let taglist = [
-                "artist",
-                "group",
+            let tag_key_list = [
+                "artist:",
+                "group:",
+                "female:",
+                "male:",
+                "parody:",
+                "character:"
             ];
             if (debug_message && debug_adv) console.groupCollapsed();
             gdata.forEach(data => {
-                taglist.forEach(tag_key => {
-                    data[tag_key] = data.tags.find(s => s.includes(`${tag_key}:`));
-                    if (data[tag_key]) {
-                        data[tag_key] = data[tag_key].replace(`${tag_key}:`, "");
-                    } else {
-                        data[tag_key] = "";
-                    }
+                // extract tags
+                let copy_tags = Object.assign([], data.tags);
+                tag_key_list.forEach(tag_key => {
+                    let data_key = tag_key.replace(":", "");
+                    data[data_key] = [];
+                    copy_tags.forEach(tag => { if (tag.includes(tag_key)) data[data_key].push(String(tag).replace(tag_key, "").trim()); });
+                    // remove used
+                    copy_tags = copy_tags.filter(tag => data[data_key].indexOf(String(tag).replace(tag_key, "").trim()) == -1);
                 });
+                data.misc = copy_tags; // unused list
 
                 data.title_original = data.title;
                 data.title_jpn = data.title_jpn.length > 0 ? data.title_jpn : data.title;
@@ -555,6 +562,8 @@
                 newLine(),
 
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
+                //newSeparate(),
+                //newButton("exhddl_exclude_buttons", "Show Exclude Buttons", style_list.top_button, () => { setExcludeButtons(); }),
             ]);
             nodelist = nodelist.flat();
             pos.querySelector("span").remove(); // remove loading message
@@ -575,7 +584,11 @@
             }
 
             function updateSetting() {
-                let updatelist = Object.keys(key_list).filter(key => key != "dl_list");
+                let skip_list = [
+                    "dl_list",
+                    "exclude_list",
+                ];
+                let updatelist = Object.keys(key_list).filter(key => skip_list.every(skip => key != skip));
                 let info = [];
                 let style = [];
                 updatelist.forEach(key => {
@@ -599,8 +612,7 @@
         }
 
         function setCopyTitle() {
-            let gallery_nodelist = document.querySelectorAll(".gl1t");
-            gallery_nodelist.forEach(gallery => {
+            selectAllGallery().forEach(gallery => {
                 let gid = gallery.getAttribute("gid");
                 let pos = gallery.querySelector(`#gallery_status_${gid}`);
                 let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
@@ -612,8 +624,7 @@
         }
 
         function setShowTorrent() {
-            let gallery_nodelist = document.querySelectorAll(".gl1t");
-            gallery_nodelist.forEach(gallery => {
+            selectAllGallery().forEach(gallery => {
                 let gid = gallery.getAttribute("gid");
                 let torrent_list = getTorrentList(gid);
                 if (torrent_list) {
@@ -635,6 +646,29 @@
                 }
             });
         }
+
+        function setExcludeButtons() {
+            selectAllGallery().forEach(gallery => {
+                let gid = getAttribute("gid");
+                let data = gdata.find(gallery_data => gallery_data.gid == gid);
+                let artist = data.artist;
+                let group = data.group;
+                let uploader = data.uploader;
+                let pos = gallery.querySelector("button:last-of-type"); //last button
+                let nodelist = [
+                    newSpan("Add/Remove Exclude List"),
+                    newButton("", "Artist", style_list.gallery_button, updateExcludeList(artist)),
+                ];
+            });
+
+            function updateExcludeList(target = "") {
+
+            }
+        }
+    }
+
+    function selectAllGallery() {
+        return document.querySelectorAll(".gl1t");
     }
 
     function print(...any) {
@@ -833,8 +867,7 @@
 
     function getAllGalleryNode() {
         gallery_nodes = {};
-        let gallery_nodelist = document.querySelectorAll(".gl1t");
-        gallery_nodelist.forEach(gallery => {
+        selectAllGallery().forEach(gallery => {
             let id = gallery.getAttribute("gid");
             let title = gallery.getAttribute("gtitle");
             let deepcopy = gallery.cloneNode(true);
@@ -856,14 +889,12 @@
     }
 
     function removeAllGallery() {
-        let gallery_nodelist = document.querySelectorAll(".gl1t");
-        gallery_nodelist.forEach(gallery => gallery.remove());
+        selectAllGallery().forEach(gallery => gallery.remove());
     }
 
     function fixTitlePrefix() {
         fix_prefix = fix_prefix ? false : true;
-        let gallery_nodelist = document.querySelectorAll(".gl1t");
-        gallery_nodelist.forEach(gallery => {
+        selectAllGallery().forEach(gallery => {
             let id = gallery.getAttribute("gid");
             let tofix = gdata.find(gallery_data => gallery_data.gid == id);
             let title_ele = gallery.querySelector(".glname");
@@ -920,8 +951,7 @@
     }
 
     function addInfoToAllGallery() {
-        let gallery_nodelist = document.querySelectorAll(".gl1t");
-        gallery_nodelist.forEach(gallery => {
+        selectAllGallery().forEach(gallery => {
             let link = gallery.querySelector("a").href;
             let id = link.split("/g/")[1].split("/")[0];
             let token = link.split("/g/")[1].split("/")[1];
@@ -934,8 +964,7 @@
     }
 
     function setAllLinkToNewTab() {
-        let gallery_nodelist = document.querySelectorAll(".gl1t");
-        gallery_nodelist.forEach(gallery => {
+        selectAllGallery().forEach(gallery => {
             gallery.querySelectorAll("a").forEach(a => {
                 if (a.href.includes("/g/")) a.target = "_blank";
             });
@@ -943,10 +972,12 @@
     }
 
     function updateGalleryStatus() {
-        let list = GM_getValue(key_list.dl_list, default_value.dl_list);
+        let dl_list = GM_getValue(key_list.dl_list, default_value.dl_list);
+        //let ex_list = GM_getValue(key_list.exclude_list, default_value.exclude_list);
 
-        if (list.length <= 0) return; // no downloaded gallery in list, abort
-        list = list.split(",");
+        if (dl_list.length <= 0) return; // no downloaded gallery in list, abort
+        dl_list = dl_list.split(",");
+        //ex_list = ex_list.split(",");
 
         let find_button = document.querySelector(".itg.gld");
         if (!find_button) return debug_adv ? print(`${m}gallery list not found`) : null;
@@ -957,12 +988,11 @@
         updateGalleryColor();
 
         function updateGalleryColor() {
-            let gallery_nodelist = document.querySelectorAll(".gl1t");
             let marked = [];
-            gallery_nodelist.forEach(gallery => {
+            selectAllGallery().forEach(gallery => {
                 let id = gallery.getAttribute("gid");
                 let puretext = gallery.querySelector(".puretext");
-                if (list.indexOf(id) != -1) {
+                if (dl_list.indexOf(id) != -1) {
                     if (!gallery.getAttribute("marked")) {
                         if (!gallery.querySelector("s")) Object.assign(gallery.style, style_list.gallery_marked);
                         gallery.setAttribute("marked", true);
@@ -989,7 +1019,7 @@
             gdata.forEach(gallery_data => {
                 let gid = gallery_data.gid;
                 let dl_button = document.querySelector(`#gallery_dl_${gid}`);
-                if (list.indexOf(`${gid}`) != -1 && !dl_button.getAttribute("marked")) {
+                if (dl_list.indexOf(`${gid}`) != -1 && !dl_button.getAttribute("marked")) {
                     Object.assign(dl_button.style, style_list.button_marked);
                     dl_button.setAttribute("marked", true);
                     marked.push(gid);

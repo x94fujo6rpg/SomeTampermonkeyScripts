@@ -3,32 +3,35 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js
-// @version      0.1
+// @version      0.2
 // @description  auto redirect to desktop version 
 // @author       x94fujo6
 // @match        http://prts.wiki/*
-// @exclude      http://prts.wiki/index.php?title=*&mobileaction=toggle_view_desktop
 // @grant        none
 // ==/UserScript==
 
 (function () {
     'use strict';
-
     let link = window.location.href;
+    let reg;
+    if (link.includes("toggle_view_desktop")) return replaceAllLink();
+    reg = link.includes("toggle_view_mobile") ? /title=(.*)&/ : /\/w\/(.[^\&\#]*)/;
+    redirect();
 
-    if (!link.includes("prts.wiki/w/")) return;
-    if (link.includes("toggle_view_desktop")) return;
-
-    link = link.replace("http://prts.wiki/w/", "").split("/");
-
-    let title = "";
-    for (let index in link) {
-        if (index == 0) {
-            title += link[index];
-        } else {
-            title += `/${link[index]}`;
-        }
+    function redirect() {
+        if (!reg) return;
+        let extract = reg.exec(link);
+        if (extract) window.location.href = `http://prts.wiki/index.php?title=${extract[1]}&mobileaction=toggle_view_desktop`;
     }
 
-    window.location.href = `http://prts.wiki/index.php?title=${title}&mobileaction=toggle_view_desktop`;
+    function replaceAllLink() {
+        let all = document.querySelectorAll("a");
+        all.forEach(a => {
+            let alink = a.href;
+            if (!alink.includes("prts.wiki")) return;
+            reg = alink.includes("title=") ? /title=(.*)&/ : /\/w\/(.[^\&\#]*)/;
+            let extract = reg.exec(alink);
+            if (extract) a.href = `http://prts.wiki/index.php?title=${extract[1]}&mobileaction=toggle_view_desktop`;
+        });
+    }
 })();

@@ -62,7 +62,7 @@ click button to enable (pervent too many requests)
 ### updates
 
 - v0.84
-  - add option for sorting
+  - add options for sorting
 
 - v0.83
   - better event search (search in same en or same jpn title)
