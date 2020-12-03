@@ -6,7 +6,7 @@ click link to install
 **only work in Thumbnail mode**  
 
 click button to enable (pervent too many requests)  
-![](https://i.imgur.com/05KQrh6.png)
+![](https://i.imgur.com/P3ZWFR8.png)
 
 #### Features:
 
@@ -177,37 +177,40 @@ if you don't want it close, set this value to false
 let autoclose = true;
 ``` 
 
-## [[mangaoh title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)  
-reformat date & title in search result  
-click button to copy  
-![](https://i.imgur.com/amKQlOX.jpg)  
-
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
 remove title link / remove excess text / custom title format  
 automatic convert forbidden characters `<>:"/|?*\` to fullwidth  
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
-v0.56: add more settings  
-script now trigger faster (don't have to wait for the page to fully load)  
+- v0.56
+  - add more settings  
+  - script now trigger faster (don't have to wait for the page to fully load)  
 
-v0.53: add support to `search result` / `circle` page  
-this doesn't support custom title because data is incomplete  
-also grid view is too tight to put more buttons  
+- v0.53
+  - add support to `search result` / `circle` page  
+  - this doesn't support custom title because data is incomplete  
+  - also grid view is too tight to put more buttons  
 
-v0.51: add copy button for each data  
+- v0.51 
+  - add copy button for each data  
 
-v0.48: fix some issue in getData  
+- v0.48 
+  - fix some issue in getData  
 
-v0.45: rearrange buttons (use less space)  
-now old buttons only appear when:  
-original != custom  
-default_format != original & default_format != custom  
+- v0.45 
+  - rearrange buttons (use less space)  
+  - now old buttons only appear when:  
+    original != custom  
+    default_format != original & default_format != custom  
 
-v0.41: ~~add old button back, edit code to enable / disable~~ (add setting in v0.56)  
+- v0.38 
+  - now title can be custom to any format you want  
 
-v0.38: now can be custom to any format you want  
-~~chagne separator in code~~ (add setting in v0.56)  
+## [[mangaoh title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)  
+reformat date & title in search result  
+click button to copy  
+![](https://i.imgur.com/amKQlOX.jpg)  
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
@@ -216,17 +219,16 @@ show images direct link under title (only resized images)
 
 ## [[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
 pornhub  
-in video page  
-replace `user link` to `user video list`, except comment  
-it will try to go to ```user/videos/public``` first  
-if it doesn't exist, auto redirect to ```user/videos```  
-add a button to copy link of current page  
+- video page  
+  - replace `user link` to `user video list`, except comment  
+    it will try to go to ```user/videos/public``` first  
+    if it doesn't exist, auto redirect to ```user/videos```  
+  - add a button to copy link of current page  
 
-in user video list  
-add checkbox for each video and a textbox on top to select and copy links  
-
-make upload time visable  
-[effect](https://i.imgur.com/lL6sJZX.png)  
+- user video list  
+  - add checkbox for each video and a textbox on top to select and copy links  
+  - make upload time visable  
+  - [effect](https://i.imgur.com/lL6sJZX.png)  
 
 ## [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
 remove bilibili article copy protection  
@@ -235,12 +237,16 @@ remove bilibili article copy protection
 normalize url in video description  
 remove miniplayer (still activated when you watch in playlist)  
 
+- v0.02 fixed
+
 ## [[prts redirector]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)
 Arknights Wiki PRTS  
 auto redirect & replace all link to desktop version  
 
-- v0.2
-  - replace all link too
+- v0.2 replace all link too
 
 ## [[sharer.pw auto click]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)  
 auto click and redirect to download link immediately  
+
+## [[google drive auto click]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)
+auto skip & click download
