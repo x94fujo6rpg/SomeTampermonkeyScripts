@@ -2,6 +2,21 @@
 some scripts I made  
 click link to install  
 
+|script|install|
+|-|-|
+|[ehx direct download](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-direct-download)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)|
+|[ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-link-color)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)|
+|[ehx torrent text](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-torrent-text)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)|
+|[dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)|
+|[mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)|
+|[pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/pornhub-user-video.user.js)|
+|[youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)|
+|[prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)|
+|[sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)|
+|[google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)|
+|[reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)|
+|[anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)|
+
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
 
@@ -217,8 +232,7 @@ click button to copy
 show images direct link under title (only resized images)  
 ![](https://i.imgur.com/pw1fW6X.jpg)  
 
-## [[ph_user_video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)
-pornhub  
+## [[pornhub user video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)  
 - video page  
   - replace `user link` to `user video list`, except comment  
     it will try to go to ```user/videos/public``` first  
