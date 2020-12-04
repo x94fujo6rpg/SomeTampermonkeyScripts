@@ -251,13 +251,9 @@ remove bilibili article copy protection
 normalize url in video description  
 remove miniplayer (still activated when you watch in playlist)  
 
-- v0.02 fixed
-
 ## [[prts redirector]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)
 Arknights Wiki PRTS  
 auto redirect & replace all link to desktop version  
-
-- v0.2 replace all link too
 
 ## [[sharer.pw auto click]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)  
 auto click and redirect to download link immediately  
