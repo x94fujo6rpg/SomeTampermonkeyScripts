@@ -656,7 +656,7 @@
             selectAllGallery().forEach(gallery => {
                 let gid = gallery.getAttribute("gid");
                 let data = gdata.find(gallery_data => gallery_data.gid == gid);
-                let pos = gallery.querySelector("button:last-of-type"); //last button
+                let pos = gallery.querySelector(".gallery_box");
                 let tag_list = [
                     `uploader:${data.uploader.trim()}`,
                     data.language,
@@ -671,10 +671,12 @@
                 Object.assign(select.style, style_list.gallery_button);
                 let span = newSpan("Exclude");
                 Object.assign(span.style, style_list.gallery_button);
-                pos.insertAdjacentElement("afterend", newButton(`exhddl_exclude_${gid}`, "Add/Remove", style_list.gallery_button, () => { updateExcludeList(gid); }));
-                pos.insertAdjacentElement("afterend", select);
-                pos.insertAdjacentElement("afterend", span);
-                pos.insertAdjacentElement("afterend", newLine());
+                appendAllChild(pos, [
+                    newLine(),
+                    span, newLine(),
+                    select, newLine(),
+                    newButton(`exhddl_exclude_${gid}`, "Add/Remove", style_list.gallery_button, () => { updateExcludeList(gid); }),
+                ]);
             });
 
             function newSelect(data_list) {
