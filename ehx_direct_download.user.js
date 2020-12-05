@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.85
+// @version      0.86
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -67,7 +67,7 @@
     };
     let style_list = {
         top_button: { width: "max-content" },
-        gallery_button: { width: "max-content", alignSelf: "center" },
+        gallery_button: { width: "max-content", alignSelf: "center", },
         gallery_marked: { backgroundColor: "black" },
         button_marked: { color: "gray", backgroundColor: "transparent" },
         ex: { backgroundColor: "goldenrod" },
@@ -124,19 +124,28 @@
                         text-align: center;
                     }
 
-                    .show_full_title {
-                        overflow: hidden;
-                        min-height: 32px;
-                        line-height: 16px;
-                        margin: 6px 4px 0;
-                        font-size: 10pt;
+                    .gallery_box {
                         text-align: center;
+                        line-height: 2rem;
+                        margin: auto auto 0rem auto;
+                        max-height: max-content;
+                    }
+
+                    .torrent_title {
+                        line-height: 1rem;
+                        text-align: center;
+                        margin: 0.2rem;
+                        border: 0.1rem solid;
+                        padding: 0.2rem;
                     }
                 `,
             });
             document.head.appendChild(newcss);
-            let all = document.querySelectorAll(".gl4t");
-            if (all) all.forEach(t => { t.className = t.className.replace("gl4t", "show_full_title"); });
+            setTitleStyle();
+        }
+
+        function setTitleStyle() {
+            [...document.styleSheets[0].cssRules].find(s => s.selectorText == ".gl4t").style.removeProperty("max-height");
         }
 
         function timerMananger() {
@@ -206,6 +215,11 @@
                 dd.removeAttribute("onclick");
                 dd.insertAdjacentElement("afterend", newSpan("Processing... Please Wait"));
                 acquireGalleryData();
+                setBottomStyle();
+
+                function setBottomStyle() {
+                    [...document.styleSheets[0].cssRules].find(s => s.selectorText == ".gl5t").style.removeProperty("margin");
+                }
 
                 function acquireGalleryData() {
                     let gallery_nodelist = selectAllGallery();
@@ -280,15 +294,8 @@
                         className: "puretext",
                     });
                     puretext_div.setAttribute("name", id_list.puretext);
-                    let pos = gallery.querySelector(".gdd");
-                    if (pos) {
-                        // found dl button
-                        pos.insertAdjacentElement("beforebegin", puretext_div);
-                        pos.parentElement.querySelector("br").remove();
-                    } else {
-                        pos = gallery.querySelector(".gl3t");
-                        pos.insertAdjacentElement("afterend", puretext_div);
-                    }
+                    let pos = gallery.querySelector(".gl3t");
+                    pos.insertAdjacentElement("afterend", puretext_div);
                 });
             }
 
@@ -298,12 +305,7 @@
             }
 
             function hlexg() {
-                let w = document.querySelectorAll("s");
-                if (w.length > 0) {
-                    w.forEach(ele => {
-                        Object.assign(ele.parentElement.parentElement.parentElement.parentElement.style, style_list.ex);
-                    });
-                }
+                selectAllGallery().forEach(gallery => { if (gallery.querySelector("s")) Object.assign(gallery.style, style_list.ex); });
             }
         }
     }
@@ -335,7 +337,7 @@
                         let self = this;
                         let ck = document.getElementById(id_list.dl_and_copy).checked;
                         if (ck) {
-                            navigator.clipboard.writeText(repalceForbiddenChar(self.parentElement.querySelector(".glname").textContent.trim()))
+                            navigator.clipboard.writeText(repalceForbiddenChar(self.parentElement.parentElement.querySelector(".glname").textContent.trim()))
                                 .then(() => downloadButton(self, gid, archivelink, glink));
                         } else {
                             downloadButton(self, gid, archivelink, glink);
@@ -351,15 +353,11 @@
                     mark_list.push(gid);
                 }
 
-                let pos = gallery.querySelector(".puretext");
-                if (!pos) {
-                    // no pure text
-                    pos = gallery.querySelector(".gl3t");
-                    pos.insertAdjacentElement("afterend", dl_button);
-                    pos.insertAdjacentElement("afterend", newLine());
-                } else {
-                    pos.insertAdjacentElement("afterend", dl_button);
-                }
+                let box = Object.assign(document.createElement("div"), { className: "gallery_box" });
+                box.insertAdjacentElement("afterbegin", dl_button);
+
+                let pos = gallery.querySelector(".gl5t");
+                pos.insertAdjacentElement("beforebegin", box);
 
                 gidlist.push(dl_button.id);
                 pcount++;
@@ -621,7 +619,7 @@
                 let gid = gallery.getAttribute("gid");
                 let pos = gallery.querySelector(`#gallery_status_${gid}`);
                 let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
-                    navigator.clipboard.writeText(repalceForbiddenChar(this.parentElement.querySelector(".glname").textContent.trim()));
+                    navigator.clipboard.writeText(repalceForbiddenChar(document.querySelector(`[gid="${gid}"] .glname`).textContent.trim()));
                 });
                 pos.insertAdjacentElement("beforebegin", button);
                 pos.insertAdjacentElement("beforebegin", newLine());
@@ -632,22 +630,21 @@
             selectAllGallery().forEach(gallery => {
                 let gid = gallery.getAttribute("gid");
                 let torrent_list = getTorrentList(gid);
+                let pos = gallery.querySelector(".gallery_box");
+                let button = newButton(`t_title_${gid}`, "Show torrent List", style_list.gallery_button, function () {
+                    let torrent_list = document.querySelector(`[gid="${gid}"] .torrent_title`);
+                    torrent_list.style.display = (torrent_list.style.display == "none") ? "" : "none";
+                });
+                pos.insertAdjacentElement("beforeend", newLine());
+                pos.insertAdjacentElement("beforeend", button);
+
                 if (torrent_list) {
-                    let pos = gallery.querySelector(`#gallery_status_${gid}`);
-                    torrent_list.forEach(torrent => {
-                        let span = newSpan(torrent);
-                        span.className = "puretext torrent_title";
-                        span.style.display = "none";
-                        pos.insertAdjacentElement("afterend", span);
-                    });
-                    let button = newButton(`t_title_${gid}`, "Show torrent List", style_list.gallery_button, function () {
-                        let torrent_list = this.parentElement.querySelectorAll(".torrent_title");
-                        torrent_list.forEach(torrent => {
-                            torrent.style.display = (torrent.style.display == "none") ? "" : "none";
-                        });
-                    });
-                    pos.insertAdjacentElement("afterend", button);
-                    pos.insertAdjacentElement("afterend", newLine());
+                    let box = Object.assign(document.createElement("div"), { className: "torrent_title", style: "display:none" });
+                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(torrent), { className: "puretext", })); });
+                    pos.insertAdjacentElement("beforebegin", box);
+                } else {
+                    button.disabled = true;
+                    button.removeAttribute("onclick");
                 }
             });
         }
@@ -1047,7 +1044,7 @@
                 gallery.style.opacity = (match_uploader || match_tag) ? 0.1 : 1;
                 gallery.querySelector("img").style.display = (match_uploader || match_tag) ? "none" : "";
                 let options = gallery.querySelectorAll("option");
-                if (options) options.forEach(o => o.style.color = (ex_tag.includes(o.textContent) || ex_uploader.includes(o.textContent.replace("uploader:", ""))) ? "red" : "");
+                if (options) { options.forEach(o => { o.style.color = (ex_tag.includes(o.textContent) || ex_uploader.includes(o.textContent.replace("uploader:", ""))) ? "red" : ""; }); }
             });
         }
 

@@ -76,6 +76,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.86
+  - fixed buttons position, now they all line up
+
 - v0.85
   - new feature `exclude gallery` (opacity = 0.1) by tag 
   - add/remove tag from exclude list under gallery (after enable `Show Exclude List`)
