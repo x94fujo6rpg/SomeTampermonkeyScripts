@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js
-// @version      0.1
+// @version      0.2
 // @description  auto click and redirect to download link immediately
 // @author       x94fujo6
 // @match        https://sharer.pw/file/*
@@ -13,9 +13,7 @@
 (function () {
     'use strict';
 
-    window.onload = function () {
-        window.document.body.onload = main();
-    };
+    window.onload = main();
 
     function main() {
         let idButton = setInterval(() => { watcherButton(idButton); }, 100);
