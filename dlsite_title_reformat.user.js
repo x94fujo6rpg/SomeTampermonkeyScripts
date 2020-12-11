@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.56
+// @version      0.57
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -381,24 +381,37 @@
     }
 
     function removeExcess(text) {
-        // remove excess text 【...】
+        // remove excess text
+        let reg = /[\[【].[^\[\]【】]*[\]】]/;
         let count = 0;
-        while (text.indexOf("【") != -1 && count < 999) {
-            let start = text.indexOf("【");
-            let end = text.indexOf("】") + 1;
-            let removestr = "";
-            if (end) {
-                removestr = text.substring(start, end);
-            } else {
-                removestr = text.slice(start);
-            }
-            text = text.replace(removestr, "").trim();
+        while (count < 100) {
             count++;
+            let extract = reg.exec(text);
+            if (extract) {
+                if (extract[0] != text) {
+                    text = text.replace(reg, "").trim();
+                    continue;
+                }
+            }
+            break;
         }
-        // remove『』if it at start & end
-        if (text.indexOf("『" === 0 && text.indexOf("』") === text.length - 1)) {
-            text = text.replace("『", "").replace("』", "").trim();
+        // remove if it at start or end
+        let container_start = "([【『";
+        let container_end = ")]】』";
+        count = 0;
+        while (count < 100) {
+            count++;
+            let start = [...container_start].find(t => text[0] == t);
+            if (!start) break;
+
+            let end = text[text.length - 1];
+            end = (end == container_end[container_start.indexOf(start)]) ? end : false;
+            if (!end) break;
+            text = text.replace(start, "").replace(end, "").trim();
         }
+
+        let blankreg = /\s{2,}/g;
+        text = text.replace(blankreg, " ");
         return text;
     }
 
@@ -734,11 +747,12 @@
         // creat track list if any
         let list = gettracklist();
         if (list) addTracklist(list);
+        //------------------------------------------------------
         console.timeEnd(productHandler.name);
     }
 
     function addTracklist(list) {
-        let pos = document.querySelector("[itemprop='description']").childNodes[2];
+        let pos = document.querySelector("[itemprop='description']");
         let textbox = document.createElement("textarea");
         let count = 0;
         let maxlength = 0;
