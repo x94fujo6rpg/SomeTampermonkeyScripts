@@ -201,6 +201,10 @@ automatic convert forbidden characters `<>:"/|?*\` to fullwidth
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.58
+  - improved excess string removal
+  - fix track list position
+
 - v0.56
   - add more settings  
   - script now trigger faster (don't have to wait for the page to fully load)  

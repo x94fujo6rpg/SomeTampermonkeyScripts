@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         dlsite title reformat
+// @name         dlsite title reformat(dev)
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.57
+// @version      0.58
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -78,10 +78,10 @@
     print(`${key_sep}: ${setting_sep}`);
     print("");
     //-----------------------------------------------------
+    let excess_reg = /\[[^\[\]]*\]|\([^\(\)]*\)|【[^【】]*】|『[^『』]*』|（[^（）]*）|［[^［］]*］|｛[^｛｝]*｝/;
+    let blank_reg = /\s{2,}/g;
 
-    /*window.onload = function () {*/
     window.document.body.onload = main();
-    /*};*/
 
     function main() {
         let link = window.location.href;
@@ -382,14 +382,13 @@
 
     function removeExcess(text) {
         // remove excess text
-        let reg = /[\[【].[^\[\]【】]*[\]】]/;
         let count = 0;
         while (count < 100) {
             count++;
-            let extract = reg.exec(text);
+            let extract = excess_reg.exec(text);
             if (extract) {
                 if (extract[0] != text) {
-                    text = text.replace(reg, "").trim();
+                    text = text.replace(excess_reg, "").trim();
                     continue;
                 }
             }
@@ -401,17 +400,16 @@
         count = 0;
         while (count < 100) {
             count++;
-            let start = [...container_start].find(t => text[0] == t);
-            if (!start) break;
+            let index = container_start.indexOf(text[0]);
+            if (index == -1) break;
 
             let end = text[text.length - 1];
-            end = (end == container_end[container_start.indexOf(start)]) ? end : false;
+            end = (end == container_end[index]) ? end : false;
             if (!end) break;
-            text = text.replace(start, "").replace(end, "").trim();
+            text = text.replace(container_start[index], "").replace(end, "").trim();
         }
 
-        let blankreg = /\s{2,}/g;
-        text = text.replace(blankreg, " ");
+        text = text.replace(blank_reg, " ");
         return text;
     }
 
