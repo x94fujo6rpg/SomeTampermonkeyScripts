@@ -903,8 +903,6 @@
             break;
         }
         // remove container if it at start or end
-        let container_start = "([【『";
-        let container_end = ")]】』";
         count = 0;
         while (count < 100) {
             count++;
