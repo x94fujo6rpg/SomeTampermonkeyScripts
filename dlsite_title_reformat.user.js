@@ -996,7 +996,7 @@
         newlist.forEach((line, index) => {
             textlist.push(line.match(/^\d+/) ? `${line}` : `${index + 1}. ${line}`);
             row_count++;
-            if (line.length > maxlength) maxlength = getTrueLength(line);
+            if (getTrueLength(line) > maxlength) maxlength = getTrueLength(line);
         });
         if (textlist.every(line => line.match(/^\d+/))) {
             textlist = textlist.sort((a, b) =>
