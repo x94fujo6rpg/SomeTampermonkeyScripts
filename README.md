@@ -203,14 +203,37 @@ let autoclose = true;
   - custom title format
   - auto convert forbidden characters `<>:"/|?*\` to fullwidth 
   - add copy button for data
-  - try to extract track list
+  - extract track list (experimental)
+    - #### Still have many bugs
+    - official (example: RJ298079)
+    - search offset line
+    - remove time info
+    - remove excess white space
+    - sort (only if official list is out of order and have 2nd index in title)
+    - example: RJ237403
+      ```
+      1.track3 cccc
+      2.track1 aaaa
+      3.track2 bbbb
+
+      convert to
+
+      1 aaaa
+      2 bbbb
+      3 cccc
+      ```
 
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
+
+- v0.62
+  - improved track list extract
+  - list now use natural sort
   
 - v0.61
-  - now script will try to extract track list form article
-    (Less accurate. Can't get the track that has no number.)
+  - now script will try to extract track list form entire page  
+    Less accurate.  
+    Can't get the track that has no number.  
 
 - v0.58
   - improved excess string removal
