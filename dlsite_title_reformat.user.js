@@ -801,6 +801,7 @@
     function extractTrackListFromText() {
         let raw_text = document.querySelector(".work_parts_container");
         if (!raw_text) return false;
+        if(debug) console.groupCollapsed();
         //------------------------------------------------------
         let extract_result = [];
         let reg_number = /[\d１２３４５６７８９０]+/;
@@ -826,12 +827,17 @@
             let not_add = 0;
             print(extract);
             let extract_copy = Object.assign([], extract);
-
+            let skip = 0;
             for (let index = 1; index < extract_copy.length; index += offset) {
-                print("====================");
+                if (offset == -1) offset = 1;
+                print("");
                 let this_n = extract_copy[index].number;
                 let previous_n = extract_copy[index - offset].number;
-                print(`this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | this: ${extract[index].text}`);
+                print(`index:${index} | this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | skip:${skip} | this:${extract[index].text}`);
+                if (skip != 0 && skip == index) {
+                    skip = 0;
+                    continue;
+                }
                 if (offset == 1) {
                     if (this_n == previous_n) {
                         // see same number as previous, skip this one
@@ -844,7 +850,6 @@
                         }
                         track_list.push(extract[index].text);
                         print(`add | ${extract[index].text}`);
-                        print(track_list);
                         not_add = 0;
                         continue;
                     } else if (index >= 2) {
@@ -855,8 +860,7 @@
                                 print(`add | ${extract[index - 2].text}`);
                             }
                             track_list.push(extract[index].text);
-                            print(`add | ${extract[index].text}`);
-                            print(track_list);
+                            print(`add | ${extract[index].text}, offset: 2`);
                             not_add = 0;
                             continue;
                         }
@@ -869,7 +873,13 @@
                     } else if (this_n == previous_n + 1) {
                         track_list.push(extract[index].text);
                         print(`add | ${extract[index].text}`);
-                        print(track_list);
+                        not_add = 0;
+                        continue;
+                    } else if (this_n == extract[index - 1].number + 1) {
+                        offset = -1;
+                        skip = index;
+                        track_list.push(extract[index].text);
+                        print(`add | ${extract[index].text}, offset: 1`);
                         not_add = 0;
                         continue;
                     }
@@ -883,9 +893,11 @@
                 }
             }
             if (track_list.length > 0) extract_result.push(track_list);
-            print("====================");
+            print("");
         }
+        if(debug) console.groupEnd();
         //------------------------------------------------------
+        if(debug) console.groupCollapsed();
         print("extract_result | ", extract_result);
         if (extract_result) {
             extract_result.forEach((result, result_index) => {
@@ -925,6 +937,7 @@
                 }
             });
         }
+        if(debug) console.groupEnd();
         return extract_result.length > 0 ? extract_result.sort((a, b) => b.length - a.length) : false;
     }
 
@@ -945,11 +958,11 @@
         if (list.every(line => line.match(have2index))) reglist.splice(1, 0, /^\d+/);
         list.forEach(line => {
             print("====================");
-            print(line);
             if (line.match(/[総].[^時間]*時間/)) return;
             let new_line = line.replace(reg_time, "");
-            print(new_line);
             if (!new_line.match(/\d+/)) return print("no number left, abort");
+            print(line);
+            print(new_line);
             let c_index = container_start.indexOf(new_line[0]);
             if (c_index != -1 && new_line[new_line.length - 1] == container_end[c_index]) {
                 new_line = new_line.slice(1, line.length - 1);
@@ -972,7 +985,6 @@
             }
             new_list.push(new_line);
         });
-
         return new_list;
     }
 
@@ -985,6 +997,7 @@
             print("processed | ", newlist);
         }
         if (newlist.some(line => line == "")) return print("found empty line, abort");
+
         let pos = document.querySelector("[itemprop='description']");
         let textbox = document.createElement("textarea");
         let row_count = 0;
