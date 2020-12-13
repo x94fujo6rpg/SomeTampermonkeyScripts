@@ -196,10 +196,21 @@ let autoclose = true;
 ``` 
 
 ## [[dlsite title reformat]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  
-remove title link / remove excess text / custom title format  
-automatic convert forbidden characters `<>:"/|?*\` to fullwidth  
+
+#### Features:
+  - remove title link
+  - remove excess text
+  - custom title format
+  - auto convert forbidden characters `<>:"/|?*\` to fullwidth 
+  - add copy button for data
+  - try to extract track list
+
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
+  
+- v0.61
+  - now script will try to extract track list form article
+    (Less accurate. Can't get the track that has no number.)
 
 - v0.58
   - improved excess string removal

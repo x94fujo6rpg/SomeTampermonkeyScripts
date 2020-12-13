@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.59
+// @version      0.61
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -81,10 +81,12 @@
         "()", "[]", "{}", "（）",
         "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
     ];
+    let reg_esc = /[-\/\\^$*+?.()|[\]{}]/g;
+    let add_esc = "\\$&";
     let [container_start, container_end] = extracContainer();
-    let container_reg = containerRegexGenerator();
-    let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
-    let blank_reg = /\s{2,}/g;
+    let reg_container = containerRegexGenerator();
+    let reg_excess = new RegExp(`\\s*${reg_container}\\s*`);
+    let reg_blank = /[\s　]{2,}/g;
 
     window.document.body.onload = main();
 
@@ -99,6 +101,10 @@
         }
     }
 
+    function regesc(text) {
+        return text.replace(reg_esc, add_esc);
+    }
+
     function extracContainer() {
         let [start, end] = ["", ""];
         container_list.forEach(c => {
@@ -110,9 +116,8 @@
 
     function containerRegexGenerator() {
         let reg = [];
-        let esc_reg = /[-\/\\^$*+?.()|[\]{}]/g;
         container_list.forEach(c => {
-            let esc = c.replace(esc_reg, "\\$&");
+            let esc = regesc(c);
             let end = esc.slice(esc.length / 2);
             let start = esc.replace(end, "");
             reg.push(`${start}[^${esc}]*${end}`);
@@ -166,7 +171,7 @@
         console.time(listHandler.name);
         let list = document.querySelectorAll("#search_result_list");
         if (!list) {
-            console.log("list not found");
+            print("list not found");
         } else {
             list = list[list.length - 1];
             list = list.querySelectorAll("tr");
@@ -217,7 +222,7 @@
         console.time(gridHandler.name);
         let list = document.querySelectorAll(".search_result_img_box_inner");
         if (!list) {
-            console.log("list not found");
+            print("list not found");
         } else {
             let w = document.createElement("div");
             w.appendChild(
@@ -411,7 +416,7 @@
         let count = 0;
         while (count < 100) {
             count++;
-            let extract = excess_reg.exec(text);
+            let extract = reg_excess.exec(text);
             if (extract) {
                 if (extract[0] != text) {
                     text = text.replace(extract[0], "");
@@ -430,7 +435,7 @@
             if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
         }
 
-        text = text.replace(blank_reg, " ");
+        text = text.replace(reg_blank, " ");
         return text;
     }
 
@@ -765,37 +770,91 @@
         //------------------------------------------------------
         // creat track list if any
         let list = gettracklist();
-        if (list) addTracklist(list);
+        if (list) {
+            addTracklist(list, "Original list");
+        } else {
+            list = removeExcessInTrackList(extractTrackListFromText());
+            if (list) addTracklist(list, "Extract from article (Less accurate. Can't get the track that has no number.)");
+        }
         //------------------------------------------------------
         console.timeEnd(productHandler.name);
     }
 
-    function addTracklist(list) {
+    function removeExcessInTrackList(list) {
+        if (!list) return false;
+        let reg_unwanted = new RegExp(`[${regesc(container_start)}]*\\d+:\\d+[${regesc(container_end)}]*|約\\d+分`);
+        let newlist = [];
+        list.forEach(line => { newlist.push(line.replace(reg_unwanted, "").replace(/　+/g, " ")); });
+        return newlist;
+    }
+
+    function extractTrackListFromText() {
+        let text = document.querySelector(".work_parts_container");
+        let extract_result = [];
+        if (text) {
+            let reg_number = /[\d１２３４５６７８９０]+/;
+            let reg_fullwidth_code = /[\uFF10-\uFF19]/g;
+            let reg_muti_blank = /\s*|　*/g;
+            let extract = [];
+            text = text.textContent.split("\n");
+            // get all line with number
+            text.forEach(line => {
+                line = line.trim().toLowerCase();
+                if (line.replace(reg_muti_blank, "") != "") {
+                    let number = reg_number.exec(line);
+                    if (number) extract.push({
+                        number: parseInt(number[0].replace(reg_fullwidth_code, shiftCharCode()), 10),
+                        text: line,
+                    });
+                }
+            });
+            // extract lines that numbers are continuous
+            if (extract.length > 0) {
+                let track_list = [];
+                for (let index in extract) {
+                    if (index == 0) continue;
+                    if (extract[index].number == extract[index - 1].number + 1) {
+                        if (track_list.length == 0) track_list.push(extract[index - 1].text);
+                        track_list.push(extract[index].text);
+                    } else {
+                        if (track_list.length > 0) extract_result.push(track_list);
+                        track_list = [];
+                    }
+                }
+            }
+        }
+        return extract_result.length > 0 ? extract_result.sort((a, b) => b.length - a.length)[0] : false;
+
+        function shiftCharCode(char = "") {
+            return String.fromCharCode(char.charCodeAt(0) - 0xfee0);
+        }
+    }
+
+    function addTracklist(list, from = "") {
         let pos = document.querySelector("[itemprop='description']");
         let textbox = document.createElement("textarea");
         let count = 0;
         let maxlength = 0;
-        list.forEach(line => {
-            textbox.value += `${line}\n`;
+        let have_index = /^\d/.test(list[0]);
+        let box = Object.assign(document.createElement("div"), { className: "dtr_tracklist" });
+
+        list.forEach((line, index) => {
+            textbox.value += have_index ? `${line}\n` : `${index}.${line}\n`;
             count++;
             if (line.length > maxlength) maxlength = line.length;
         });
-        Object.assign(textbox, {
-            name: "mytracklist",
-            rows: count + 1,
-            cols: maxlength * 2,
+        Object.assign(textbox, { id: "dtr_tracklist", rows: count + 1, cols: maxlength * 2, });
+
+        let copyall = Object.assign(document.createElement("button"), {
+            textContent: "Copy All",
+            onclick: () => { navigator.clipboard.writeText(document.getElementById("dtr_tracklist").value); },
         });
-        pos.insertAdjacentElement("afterbegin", textbox);
-        let copyall = document.createElement("button");
-        copyall.textContent = "Copy All";
-        copyall.onclick = function () {
-            textbox.select();
-            textbox.setSelectionRange(0, 99999);
-            document.execCommand("copy");
-        };
-        textbox.insertAdjacentElement("afterend", newLine());
-        textbox.insertAdjacentElement("afterend", copyall);
-        textbox.insertAdjacentElement("afterend", newLine());
+
+        let span = newSpan(from);
+        if (from != "Original list") span.className = "dtr_setting_w_text";
+
+        pos.insertAdjacentElement("afterbegin", box);
+        appendAll(box, [textbox, newLine(), copyall, newLine(), span]);
     }
 
     function gettracklist() {
@@ -803,9 +862,7 @@
         if (list) {
             let tracklist = [];
             list = list.querySelectorAll(".work_tracklist_item");
-            list.forEach((ele, index) => {
-                tracklist.push(`${index + 1}. ${ele.querySelector(".title").textContent}`);
-            });
+            list.forEach(ele => { tracklist.push(`${ele.querySelector(".title").textContent}`); });
             return tracklist;
         } else {
             return false;
@@ -893,6 +950,11 @@
                 border: black 0.1rem solid;
                 width: max-content;
                 padding: 0.5rem;
+            }
+
+            .dtr_tracklist{
+                display: inline-grid;
+                margin: 1rem;
             }
         `;
     }

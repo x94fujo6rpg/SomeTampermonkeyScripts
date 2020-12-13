@@ -98,7 +98,7 @@
     let container_reg = containerRegexGenerator();
     let group_reg = new RegExp(`^${container_reg}`);
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
-    let blank_reg = /\s{2,}/g;
+    let blank_reg = /[\s　]{2,}/g;
 
     window.onload = main();
 
