@@ -1,9 +1,9 @@
 // ==UserScript==
-// @name         dlsite title reformat(dev)
+// @name         dlsite title reformat
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.58
+// @version      0.59
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -76,9 +76,14 @@
     print(`${key_show_ot}: ${setting_show_ot}`);
     print(`${key_show_ot}: ${setting_show_ft}`);
     print(`${key_sep}: ${setting_sep}`);
-    print("");
     //-----------------------------------------------------
-    let excess_reg = /\[[^\[\]]*\]|\([^\(\)]*\)|【[^【】]*】|『[^『』]*』|（[^（）]*）|［[^［］]*］|｛[^｛｝]*｝/;
+    let container_list = [
+        "()", "[]", "{}", "（）",
+        "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
+    ];
+    let [container_start, container_end] = extracContainer();
+    let container_reg = containerRegexGenerator();
+    let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /\s{2,}/g;
 
     window.document.body.onload = main();
@@ -92,6 +97,27 @@
             myCss();
             searchHandler();
         }
+    }
+
+    function extracContainer() {
+        let [start, end] = ["", ""];
+        container_list.forEach(c => {
+            start += c[0];
+            end += c[1];
+        });
+        return [start, end];
+    }
+
+    function containerRegexGenerator() {
+        let reg = [];
+        let esc_reg = /[-\/\\^$*+?.()|[\]{}]/g;
+        container_list.forEach(c => {
+            let esc = c.replace(esc_reg, "\\$&");
+            let end = esc.slice(esc.length / 2);
+            let start = esc.replace(end, "");
+            reg.push(`${start}[^${esc}]*${end}`);
+        });
+        return `(${reg.join("|")})`;
     }
 
     function newCheckbox(id, onclick) {
@@ -388,25 +414,20 @@
             let extract = excess_reg.exec(text);
             if (extract) {
                 if (extract[0] != text) {
-                    text = text.replace(excess_reg, "").trim();
+                    text = text.replace(extract[0], "");
                     continue;
                 }
             }
             break;
         }
         // remove if it at start or end
-        let container_start = "([【『";
-        let container_end = ")]】』";
         count = 0;
         while (count < 100) {
             count++;
             let index = container_start.indexOf(text[0]);
             if (index == -1) break;
-
-            let end = text[text.length - 1];
-            end = (end == container_end[index]) ? end : false;
-            if (!end) break;
-            text = text.replace(container_start[index], "").replace(end, "").trim();
+            text = text.slice(1).trim();
+            if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
         }
 
         text = text.replace(blank_reg, " ");

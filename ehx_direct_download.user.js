@@ -90,6 +90,15 @@
     ];
     let forbidden = `<>:"/|?*\\`;
     let replacer = `＜＞：”／｜？＊＼`;
+    let container_list = [
+        "()", "[]", "{}", "（）",
+        "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
+    ];
+    let [container_start, container_end] = extracContainer();
+    let container_reg = containerRegexGenerator();
+    let group_reg = new RegExp(`^${container_reg}`);
+    let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
+    let blank_reg = /\s{2,}/g;
 
     window.onload = main();
 
@@ -485,7 +494,7 @@
 
                 // try to found prefix in title_jpn
                 let [title_prefix_jpn,] = extractPrefix(data.title_jpn);
-                if (title_prefix_jpn.length > 0) data.title_prefix = title_prefix_jpn;
+                if (title_prefix_jpn) data.title_prefix = title_prefix_jpn;
 
                 let from_torrent = false;
                 if (data.title_prefix.length == 0) {
@@ -505,18 +514,22 @@
 
                 [data.title_group, data.title_no_group] = extractGroup(data.title_no_event);
                 [data.title_group_jpn, data.title_no_group_jpn] = extractGroup(data.title_no_event_jpn);
-                data.title_pure = removeEnd(data.title_no_group);
-                data.title_pure_jpn = removeEnd(data.title_no_group_jpn);
+                data.title_pure = removeExcess(data.title_no_group);
+                data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
                 if (debug_message && debug_adv) {
                     print(`${String(data.gid).padStart(10)}|__________`);
                     let title_list = [
-                        "title_jpn",
                         "title_original",
                         "title_no_event",
                         "title_no_group",
                         "title_pure",
                         "title_prefix",
-                        //"title_group",
+                        "title_group",
+                        "title_jpn",
+                        "title_no_event_jpn",
+                        "title_no_group_jpn",
+                        "title_pure_jpn",
+                        "title_group_jpn"
                     ];
                     title_list.forEach(key => {
                         let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
@@ -718,6 +731,27 @@
         }
     }
 
+    function extracContainer() {
+        let [start, end] = ["", ""];
+        container_list.forEach(c => {
+            start += c[0];
+            end += c[1];
+        });
+        return [start, end];
+    }
+
+    function containerRegexGenerator() {
+        let reg = [];
+        let esc_reg = /[-\/\\^$*+?.()|[\]{}]/g;
+        container_list.forEach(c => {
+            let esc = c.replace(esc_reg, "\\$&");
+            let end = esc.slice(esc.length / 2);
+            let start = esc.replace(end, "");
+            reg.push(`${start}[^${esc}]*${end}`);
+        });
+        return `(${reg.join("|")})`;
+    }
+
     function selectAllGallery() {
         return document.querySelectorAll(".gl1t");
     }
@@ -840,7 +874,7 @@
     }
 
     function extractPrefix(string = "") {
-        let reg = /^[\(][^\)]*.[\)]/;
+        let reg = /^\([^\(\)]*\)/;
         let prefix = reg.exec(string);
         if (prefix) {
             prefix = prefix[0];
@@ -850,34 +884,38 @@
     }
 
     function extractGroup(string = "") {
-        let reg = /^[\[【][^\]】]*.[\]】]/;
-        let group = reg.exec(string);
+        let group = group_reg.exec(string);
         return group ? [group[0], (string.replace(group[0], "")).trim()] : ["", string];
     }
 
-    function removeEnd(string = "") {
+    function removeExcess(text = "") {
+        // remove excess text
         let count = 0;
-        let container_list = ["[]", "()", "【】",];
-        let container_start = [];
-        let container_end = [];
-        container_list.forEach(text => { container_start.push(text[0]); container_end.push(text[1]); });
-
         while (count < 100) {
-            let type = container_end.find(end => string.lastIndexOf(end) == string.length - 1);
-            if (!type) break;
             count++;
-            let start = container_start[container_end.indexOf(type)];
-            let cut = string.lastIndexOf(start);
-            if (cut > 0) {
-                cut = string.slice(cut);
-                string = string.replace(cut, "").trim();
-                //print(`left: "${string}" | removed: "${cut}"`);
-            } else {
-                print(`incomplete container, abort | "${string}"`);
-                break;
+            let extract = excess_reg.exec(text);
+            if (extract) {
+                if (extract[0] != text) {
+                    text = text.replace(extract[0], "");
+                    continue;
+                }
             }
+            break;
         }
-        return string;
+        // remove container if it at start or end
+        let container_start = "([【『";
+        let container_end = ")]】』";
+        count = 0;
+        while (count < 100) {
+            count++;
+            let index = container_start.indexOf(text[0]);
+            if (index == -1) break;
+            text = text.slice(1).trim();
+            if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
+        }
+
+        text = text.replace(blank_reg, " ");
+        return text;
     }
 
     function sortGdata() {
