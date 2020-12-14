@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.86
+// @version      0.87
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -1005,6 +1005,26 @@
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
+                    let by_sim;
+                    if (!same_title) {
+                        //search by similarity
+                        let search_key = [
+                            "title_pure",
+                            "title_pure_jpn",
+                        ];
+                        let search_result = [];
+                        search_key.forEach(key => {
+                            let best = similaritySearch(id, key);
+                            if (best) search_result.push(best);
+                        });
+                        if (search_result.length > 0) {
+                            search_result = search_result.sort((a, b) => b.sim - a.sim);
+                            search_result = search_result[0].gid;
+                            search_result = gdata.find(gallery_data => gallery_data.gid == search_result);
+                            if (search_result.title_prefix.length > 0) [same_title, by_sim] = [search_result, "similarity search"];
+                        }
+
+                    }
                     if (same_title) {
                         let new_prefix = same_title.title_prefix;
                         tofix.title_prefix = new_prefix;
@@ -1012,7 +1032,11 @@
                         tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
                         tofix.from_other_gallery = same_title.gid;
-                        print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}]`, "color:OrangeRed;");
+                        if (by_sim) {
+                            print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}] %c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
+                        } else {
+                            print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}]`, "color:OrangeRed;");
+                        }
                     }
                 }
             } else {
@@ -1023,6 +1047,91 @@
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
         });
+
+        function similaritySearch(target_id, key = "", threshold = 0.5) {
+            if (!key) return;
+            let extract_data = [];
+            let target_data, best_match;
+
+            extractData();
+            if (extract_data.length == 0 || !target_data) return;
+
+            findBestMatch();
+            if (!best_match) return;
+
+            return best_match;
+
+            function extractData() {
+                gdata.forEach(g => {
+                    let newdata = {};
+                    newdata.gid = g.gid;
+                    newdata[key] = g[key];
+                    if (newdata.gid == target_id) {
+                        target_data = newdata;
+                    } else {
+                        extract_data.push(newdata);
+                    }
+                });
+            }
+
+            function findBestMatch() {
+                extract_data.forEach(data => {
+                    if (!target_data[key] || !data[key]) return;
+                    let sim = similarity(target_data[key], data[key]);
+                    let better = false;
+                    if (sim > threshold) {
+                        if (!best_match) {
+                            better = true;
+                        } else {
+                            if (sim > best_match.sim) better = true;
+                        }
+                    }
+                    if (better) best_match = Object.assign({}, { gid: data.gid, sim: sim, });
+                });
+            }
+
+            //https://stackoverflow.com/a/36566052/13800616
+            function similarity(s1, s2) {
+                var longer = s1;
+                var shorter = s2;
+                if (s1.length < s2.length) {
+                    longer = s2;
+                    shorter = s1;
+                }
+                var longerLength = longer.length;
+                if (longerLength == 0) {
+                    return 1.0;
+                }
+                return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
+
+                function editDistance(s1, s2) {
+                    s1 = s1.toLowerCase();
+                    s2 = s2.toLowerCase();
+
+                    var costs = [];
+                    for (var i = 0; i <= s1.length; i++) {
+                        var lastValue = i;
+                        for (var j = 0; j <= s2.length; j++) {
+                            if (i == 0)
+                                costs[j] = j;
+                            else {
+                                if (j > 0) {
+                                    var newValue = costs[j - 1];
+                                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
+                                        newValue = Math.min(Math.min(newValue, lastValue),
+                                            costs[j]) + 1;
+                                    costs[j - 1] = lastValue;
+                                    lastValue = newValue;
+                                }
+                            }
+                        }
+                        if (i > 0)
+                            costs[s2.length] = lastValue;
+                    }
+                    return costs[s2.length];
+                }
+            }
+        }
     }
 
     function getTorrentList(gid = "") {
