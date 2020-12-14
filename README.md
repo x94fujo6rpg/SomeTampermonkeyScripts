@@ -76,7 +76,7 @@ click button to enable (pervent too many requests)
 
 ### updates
 
-- v0.87
+- v0.88
   - improve prefix search  
     if no 100% match title, use similarity search (threshold = 80%) and use highest one  
 
