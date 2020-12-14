@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.91
+// @version      0.92
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -103,7 +103,6 @@
     let sim_search_threshold = 0.5;
     let gallery_data_max_size = 512; // kb, 0 = no limit
     let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
-
 
     window.onload = main();
 
@@ -1028,74 +1027,81 @@
     }
 
     function fixTitlePrefix() {
+        dTime("fixTitlePrefix");
         fix_prefix = fix_prefix ? false : true;
-        selectAllGallery().forEach(gallery => {
-            let id = gallery.getAttribute("gid");
-            let tofix = gdata.find(gallery_data => gallery_data.gid == id);
-            let title_ele = gallery.querySelector(".glname");
-            let prefix = tofix.title_prefix;
-            if (fix_prefix) {
-                if (prefix.length > 0) {
-                    let checklist = [
-                        title_ele.innerHTML,
-                        tofix.title,
-                        tofix.title_original,
-                        tofix.title_jpn,
-                    ];
-                    ignore_prefix.forEach(ignore => checklist.push(ignore));
-                    if (checklist.some(title => title.includes(prefix))) return;
-                    tofix.title = `${prefix} ${tofix.title_original}`;
-                    tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
-                    title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
-                    let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]` : "";
-                    print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
-                } else {
-                    // search in same title gallery
-                    let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
-                    let by_sim = "";
-                    if (!same_title) {
-                        //search by similarity
-                        let search_key = ["title_pure", "title_pure_jpn",];
-                        let search_result = [];
-                        let timetag = `${m}[${id.padStart(10)}] sim search`;
-                        //dTime(timetag);
-                        search_key.forEach(key => {
-                            let best = similaritySearch(id, key);
-                            if (best) search_result.push(best);
-                        });
-                        //dTimeEnd(timetag);
-                        if (search_result.length > 0) {
-                            search_result = search_result.sort((a, b) => b.sim - a.sim);
-                            let sim = search_result[0].sim;
-                            search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
-                            if (search_result) {
-                                if (search_result.title_prefix.length > 0) {
-                                    if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
-                                        [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
-                                    } else {
-                                        print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same number, abort`, "color:OrangeRed", "");
+        selectAllGallery().forEach((gallery, index, arr) => {
+            setTimeout(() => {
+                let id = gallery.getAttribute("gid");
+                let tofix = gdata.find(gallery_data => gallery_data.gid == id);
+                let title_ele = gallery.querySelector(".glname");
+                let prefix = tofix.title_prefix;
+                if (fix_prefix) {
+                    if (prefix.length > 0) {
+                        let checklist = [
+                            title_ele.innerHTML,
+                            tofix.title,
+                            tofix.title_original,
+                            tofix.title_jpn,
+                        ];
+                        ignore_prefix.forEach(ignore => checklist.push(ignore));
+                        if (checklist.some(title => title.includes(prefix))) {
+                            if (index == arr.length - 1) dTimeEnd("fixTitlePrefix");
+                            return;
+                        }
+                        tofix.title = `${prefix} ${tofix.title_original}`;
+                        tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
+                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
+                        let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]` : "";
+                        print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
+                    } else {
+                        // search in same title gallery
+                        let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
+                        let by_sim = "";
+                        if (!same_title) {
+                            //search by similarity
+                            let search_key = ["title_pure", "title_pure_jpn",];
+                            let search_result = [];
+                            let timetag = `${m}[${id.padStart(10)}] sim search`;
+                            //dTime(timetag);
+                            search_key.forEach(key => {
+                                let best = similaritySearch(id, key);
+                                if (best) search_result.push(best);
+                            });
+                            //dTimeEnd(timetag);
+                            if (search_result.length > 0) {
+                                search_result = search_result.sort((a, b) => b.sim - a.sim);
+                                let sim = search_result[0].sim;
+                                search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
+                                if (search_result) {
+                                    if (search_result.title_prefix.length > 0) {
+                                        if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
+                                            [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
+                                        } else {
+                                            print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same number, abort`, "color:OrangeRed", "");
+                                        }
                                     }
                                 }
                             }
                         }
+                        if (same_title) {
+                            let new_prefix = same_title.title_prefix;
+                            tofix.title_prefix = new_prefix;
+                            tofix.title = `${new_prefix} ${tofix.title_original}`;
+                            tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
+                            title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
+                            tofix.from_other_gallery = same_title.gid;
+                            print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
+                        }
                     }
-                    if (same_title) {
-                        let new_prefix = same_title.title_prefix;
-                        tofix.title_prefix = new_prefix;
-                        tofix.title = `${new_prefix} ${tofix.title_original}`;
-                        tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
-                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
-                        tofix.from_other_gallery = same_title.gid;
-                        print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
-                    }
+                } else {
+                    tofix.title = tofix.title_original;
+                    tofix.title_jpn = tofix.title_jpn_original;
+                    title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
                 }
-            } else {
-                tofix.title = tofix.title_original;
-                tofix.title_jpn = tofix.title_jpn_original;
-                title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
-            }
-            let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
-            if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
+                let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
+                if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
+                if (index == arr.length - 1) dTimeEnd("fixTitlePrefix");
+            });
         });
 
         function checkNumberInTitle(a, b) {
@@ -1141,8 +1147,8 @@
                     "０１２３４５６７８９𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
                     "上下中前后後",
                 ].join("");
-                let reg = new RegExp(`[\d${number_system}]+`, "g");
-                return reg.test(input) ? [input.match(reg)].flat() : false;
+                let reg_number_system = new RegExp(`[\d${number_system}]+`, "g");
+                return reg_number_system.test(input) ? [input.match(reg_number_system)].flat() : false;
             }
         }
 
