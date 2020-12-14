@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.88
+// @version      0.89
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -101,6 +101,8 @@
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /[\s　]{2,}/g;
     let sim_search_threshold = 0.8;
+    let gallery_data_max_size = 512; // kb, 0 = no limit
+    let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
 
     window.onload = main();
 
@@ -436,11 +438,13 @@
                     print(`${m}gallery:[${gid}] not in list, add to list`);
 
                     let count = 0;
-                    while (downloaded_list.length > 10000) {
-                        let r = downloaded_list.shift();
-                        print(`${m}reach limit, remove [${r}]`);
-                        count++;
-                        if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
+                    if (downloaded_list.length > gallery_data_limit.max_size && gallery_data_limit.max_size != 0) {
+                        while (downloaded_list.length > gallery_data_limit.max_size) {
+                            let r = downloaded_list.shift();
+                            print(`${m}reach limit, remove [${r}]`);
+                            count++;
+                            if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
+                        }
                     }
                 }
             } else {
@@ -449,7 +453,7 @@
             let list_length = downloaded_list.length;
             downloaded_list = downloaded_list.join();
             GM_setValue(key_list.dl_list, downloaded_list);
-            print(`${m}save list. [list_size:${downloaded_list.length}, list_length:${list_length}]`);
+            print(`${m}save list. [list_size:${downloaded_list.length}(limit:${gallery_data_limit.max_size}), list_length:${list_length}(possible limit:${gallery_data_limit.max_length})]`);
 
             updateGalleryStatus();
 
@@ -1002,30 +1006,34 @@
                     tofix.title = `${prefix} ${tofix.title_original}`;
                     tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
                     title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
-                    let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery}]` : "";
-                    print(`${m}[${id.padStart(10)}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
+                    let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]` : "";
+                    print(`${m}[${id} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
-                    let by_sim;
+                    let by_sim = "";
                     if (!same_title) {
                         //search by similarity
-                        let search_key = [
-                            "title_pure",
-                            "title_pure_jpn",
-                        ];
+                        let search_key = ["title_pure", "title_pure_jpn",];
                         let search_result = [];
+                        let timetag = `${m}[${id.padStart(10)} ${similaritySearch.name}]`;
+                        if (debug_message && debug_adv) console.time(timetag);
                         search_key.forEach(key => {
                             let best = similaritySearch(id, key);
                             if (best) search_result.push(best);
                         });
+                        if (debug_message && debug_adv) console.timeEnd(timetag);
                         if (search_result.length > 0) {
                             search_result = search_result.sort((a, b) => b.sim - a.sim);
-                            search_result = search_result[0].gid;
-                            search_result = gdata.find(gallery_data => gallery_data.gid == search_result);
-                            if (search_result.title_prefix.length > 0) [same_title, by_sim] = [search_result, "similarity search"];
+                            let sim = search_result[0].sim;
+                            search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
+                            if (search_result) {
+                                if (search_result.title_prefix.length > 0) {
+                                    [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
+                                    print(`${m}found [${search_result.gid} ${search_result.title_pure_jpn} (${sim})]`);
+                                }
+                            }
                         }
-
                     }
                     if (same_title) {
                         let new_prefix = same_title.title_prefix;
@@ -1034,11 +1042,7 @@
                         tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
                         tofix.from_other_gallery = same_title.gid;
-                        if (by_sim) {
-                            print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}] %c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
-                        } else {
-                            print(`${m}[${id.padStart(10)}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery}]`, "color:OrangeRed;");
-                        }
+                        print(`${m}[${id} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
                     }
                 }
             } else {
