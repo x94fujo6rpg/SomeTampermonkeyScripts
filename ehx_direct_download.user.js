@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.89
+// @version      0.91
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -25,7 +25,7 @@
     let hid = true;
     let m = "[ehx direct download]: ";
     let debug_message = true;
-    let debug_adv = false;
+    let debug_adv = true;
     let gallery_nodes;
     let gdata = [];
     let gcount = 0;
@@ -100,9 +100,10 @@
     let group_reg = new RegExp(`^${container_reg}`);
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /[\s　]{2,}/g;
-    let sim_search_threshold = 0.8;
+    let sim_search_threshold = 0.5;
     let gallery_data_max_size = 512; // kb, 0 = no limit
     let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
+
 
     window.onload = main();
 
@@ -170,10 +171,10 @@
                         let timer = timer_list[index];
                         if (!pause) {
                             timer.id = setInterval(timer.handler, timer.delay);
-                            if (debug_adv) print(`${m}start timer[${timer.note}] id:${timer.id}`);
+                            //dPrint(`${m}start timer[${timer.note}] id:${timer.id}`);
                         } else {
                             clearInterval(timer.id);
-                            if (debug_adv) print(`${m}stop timer[${timer.note}] id:${timer.id}`);
+                            //dPrint(`${m}stop timer[${timer.note}] id:${timer.id}`);
                         }
                     }
                 }
@@ -224,6 +225,8 @@
             addTimer(updateGalleryStatus, status_update_interval);
 
             function enableDirectDownload() {
+                group();
+                time("request_data");
                 let dd = document.getElementById(id_list.dd);
                 dd.disabled = true;
                 dd.removeAttribute("onclick");
@@ -393,6 +396,8 @@
         print(`${m}request[${index}] done`);
 
         if (gcount === pcount) {
+            groupEnd();
+            timeEnd("request_data");
             print(`${m}all request done`);
             print(`${m}initializing sorting`);
             print(`${m}process data`);
@@ -479,7 +484,7 @@
                 "character:",
                 "language:",
             ];
-            if (debug_message && debug_adv) console.groupCollapsed();
+            dGroup();
             gdata.forEach(data => {
                 // extract tags
                 let copy_tags = Object.assign([], data.tags);
@@ -523,7 +528,7 @@
                 data.title_pure = removeExcess(data.title_no_group);
                 data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
                 if (debug_message && debug_adv) {
-                    print(`${String(data.gid).padStart(10)}|__________`);
+                    dPrint(`${String(data.gid).padStart(10)}|__________`);
                     let title_list = [
                         "title_original",
                         "title_no_event",
@@ -539,11 +544,11 @@
                     ];
                     title_list.forEach(key => {
                         let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
-                        print(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:OrangeRed;");
+                        dPrint(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:OrangeRed;");
                     });
                 }
             });
-            if (debug_message && debug_adv) console.groupEnd();
+            dGroupEnd();
         }
 
         function setSortingButton() {
@@ -766,6 +771,42 @@
         if (debug_message) console.log(...any);
     }
 
+    function time(tag = "") {
+        if (debug_message) return tag ? console.time(tag) : console.time();
+    }
+
+    function timeEnd(tag = "") {
+        if (debug_message) return tag ? console.timeEnd(tag) : console.timeEnd();
+    }
+
+    function group() {
+        if (debug_message) return console.groupCollapsed();
+    }
+
+    function groupEnd() {
+        if (debug_message) return console.groupEnd();
+    }
+
+    function dPrint(...any) {
+        if (debug_message && debug_adv) console.log(...any);
+    }
+
+    function dTime(tag = "") {
+        if (debug_message && debug_adv) return tag ? console.time(tag) : console.time();
+    }
+
+    function dTimeEnd(tag = "") {
+        if (debug_message && debug_adv) return tag ? console.timeEnd(tag) : console.timeEnd();
+    }
+
+    function dGroup() {
+        if (debug_message && debug_adv) return console.groupCollapsed();
+    }
+
+    function dGroupEnd() {
+        if (debug_message && debug_adv) return console.groupEnd();
+    }
+
     function addTimer(handler, delay, note = "") {
         if (note == "") note = handler.name;
         timer_list.push({
@@ -940,14 +981,14 @@
 
         let new_id_list = [];
         print(`${m}sort by: ${sort_key}`);
-        if (debug_message && debug_adv) console.groupCollapsed();
+        dGroup();
         if (newlist) {
             newlist.forEach(data => {
                 new_id_list.push(data.gid);
-                if (debug_message && debug_adv) print(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
+                dPrint(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
             });
         }
-        if (debug_message && debug_adv) console.groupEnd();
+        dGroupEnd();
 
         return new_id_list;
 
@@ -1007,7 +1048,7 @@
                     tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
                     title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
                     let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]` : "";
-                    print(`${m}[${id} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
+                    print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
@@ -1016,21 +1057,24 @@
                         //search by similarity
                         let search_key = ["title_pure", "title_pure_jpn",];
                         let search_result = [];
-                        let timetag = `${m}[${id.padStart(10)} ${similaritySearch.name}]`;
-                        if (debug_message && debug_adv) console.time(timetag);
+                        let timetag = `${m}[${id.padStart(10)}] sim search`;
+                        //dTime(timetag);
                         search_key.forEach(key => {
                             let best = similaritySearch(id, key);
                             if (best) search_result.push(best);
                         });
-                        if (debug_message && debug_adv) console.timeEnd(timetag);
+                        //dTimeEnd(timetag);
                         if (search_result.length > 0) {
                             search_result = search_result.sort((a, b) => b.sim - a.sim);
                             let sim = search_result[0].sim;
                             search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
                             if (search_result) {
                                 if (search_result.title_prefix.length > 0) {
-                                    [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
-                                    print(`${m}found [${search_result.gid} ${search_result.title_pure_jpn} (${sim})]`);
+                                    if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
+                                        [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
+                                    } else {
+                                        print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same number, abort`, "color:OrangeRed", "");
+                                    }
                                 }
                             }
                         }
@@ -1042,7 +1086,7 @@
                         tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
                         tofix.from_other_gallery = same_title.gid;
-                        print(`${m}[${id} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
+                        print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
                     }
                 }
             } else {
@@ -1053,6 +1097,54 @@
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
         });
+
+        function checkNumberInTitle(a, b) {
+            let test = /総集編/;
+            let [na, nb] = [a.match(test), b.match(test)];
+            if (na && nb) {
+                test = /\d+/;
+                if (!test.test(a) && !test.test(b)) return true;
+            }
+            test = tester(a, b, getNumber);
+            if (test) return true;
+            if (test != null) return false;
+            test = tester(a, b, utf8Number);
+            if (test) return true;
+            if (test != null) return false;
+            return true;
+
+            function tester(a, b, test) {
+                let [na, nb] = [test(a), test(b)];
+                if (na && nb) {
+                    dPrint(`%c${m}%c[${na}] <<< ${a}`, "color:rgba(0, 0, 0, 0)", "");
+                    dPrint(`%c${m}%c[${nb}] <<< ${b}`, "color:rgba(0, 0, 0, 0)", "");
+                    if (na.length != nb.length) return false;
+                    return (na.every((data, index) => data == nb[index])) ? true : false;
+                } else {
+                    return null;
+                }
+            }
+
+            function getNumber(input) {
+                let reg = /\d+/g;
+                return reg.test(input) ? [input.match(reg)].flat() : false;
+            }
+
+            function utf8Number(input) {
+                let number_system = [
+                    "²³¹⁰⁴⁵⁶⁷⁸⁹₀₁₂₃₄₅₆₇₈₉⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞⅟ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫⅰⅱⅲⅳⅴⅵⅶⅷⅸⅹⅺⅻ",
+                    "①②③④⑤⑥⑦⑧⑨⑩⑪⑫⑬⑭⑮⑯⑰⑱⑲⑳⑴⑵⑶⑷⑸⑹⑺⑻⑼⑽⑾⑿⒀⒁⒂⒃⒄⒅⒆⒇⒈⒉⒊⒋⒌⒍⒎⒏⒐⒑⒒⒓⒔⒕⒖⒗⒘⒙⒚⒛",
+                    "⒜⒝⒞⒟⒠⒡⒢⒣⒤⒥⒦⒧⒨⒩⒪⒫⒬⒭⒮⒯⒰⒱⒲⒳⒴⒵",
+                    "ⒶⒷⒸⒹⒺⒻⒼⒽⒾⒿⓀⓁⓂⓃⓄⓅⓆⓇⓈⓉⓊⓋⓌⓍⓎⓏⓐⓑⓒⓓⓔⓕⓖⓗⓘⓙⓚⓛⓜⓝⓞⓟⓠⓡⓢⓣⓤⓥⓦⓧⓨⓩ",
+                    "⓪⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴⓵⓶⓷⓸⓹⓺⓻⓼⓽⓾⓿❶❷❸❹❺❻❼❽❾❿➀➁➂➃➄➅➆➇➈➉➊➋➌➍➎➏➐➑➒➓",
+                    "㈠㈡㈢㈣㈤㈥㈦㈧㈨㈩㊀㊁㊂㊃㊄㊅㊆㊇㊈㊉一七三九二五伍八六十叁参參叄四壱壹弐拾捌柒玖肆貳贰陆陸零",
+                    "０１２３４５６７８９𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
+                    "上下中前后後",
+                ].join("");
+                let reg = new RegExp(`[\d${number_system}]+`, "g");
+                return reg.test(input) ? [input.match(reg)].flat() : false;
+            }
+        }
 
         function similaritySearch(target_id, key = "", threshold = sim_search_threshold) {
             if (!key) return;
@@ -1179,7 +1271,7 @@
         dl_list = dl_list.length > 0 ? dl_list.split(",") : [];
 
         let find_button = document.querySelector(".itg.gld");
-        if (!find_button) return debug_adv ? print(`${m}gallery list not found`) : null;
+        if (!find_button) return dPrint(`${m}gallery list not found`);
 
         find_button = find_button.querySelectorAll("button");
         if (find_button.length > 0) { updateButtonStatus(); updateExclude(); }

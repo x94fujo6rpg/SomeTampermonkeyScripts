@@ -76,9 +76,17 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.91
+  - improve prefix search  
+    try to compare every number in title, abort if not the same  
+  - threshold = 50% (edit code if you have issue)
+    ```js
+    let sim_search_threshold = 0.5
+    ```
+
 - v0.88
   - improve prefix search  
-    if no 100% match title, use similarity search (threshold = 80%) and use highest one  
+    if no 100% match title, use similarity search and use highest one  
 
 - v0.86
   - fixed buttons position, now they all line up
