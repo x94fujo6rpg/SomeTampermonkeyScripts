@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.92
+// @version      0.93
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -1077,7 +1077,7 @@
                                         if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
                                             [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
                                         } else {
-                                            print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same number, abort`, "color:OrangeRed", "");
+                                            print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same, abort`, "color:OrangeRed", "");
                                         }
                                     }
                                 }
@@ -1107,9 +1107,17 @@
         function checkNumberInTitle(a, b) {
             let test = /総集編/;
             let [na, nb] = [a.match(test), b.match(test)];
-            if (na && nb) {
-                test = /\d+/;
-                if (!test.test(a) && !test.test(b)) return true;
+            let style = ["color:rgba(0, 0, 0, 0)", ""];
+            if (na || nb) {
+                if (na && nb) {
+                    test = tester(a, b, getNumber);
+                    return test ? true : false;
+                } else {
+                    dPrint(`%c${m}%conly found 1 match ${test}`, ...style);
+                    dPrint(`%c${m}%c${a}`, ...style);
+                    dPrint(`%c${m}%c${b}`, ...style);
+                    return false;
+                }
             }
             test = tester(a, b, getNumber);
             if (test) return true;
@@ -1122,8 +1130,8 @@
             function tester(a, b, test) {
                 let [na, nb] = [test(a), test(b)];
                 if (na && nb) {
-                    dPrint(`%c${m}%c[${na}] <<< ${a}`, "color:rgba(0, 0, 0, 0)", "");
-                    dPrint(`%c${m}%c[${nb}] <<< ${b}`, "color:rgba(0, 0, 0, 0)", "");
+                    dPrint(`%c${m}%c[${na}] <<< ${a}`, ...style);
+                    dPrint(`%c${m}%c[${nb}] <<< ${b}`, ...style);
                     if (na.length != nb.length) return false;
                     return (na.every((data, index) => data == nb[index])) ? true : false;
                 } else {
