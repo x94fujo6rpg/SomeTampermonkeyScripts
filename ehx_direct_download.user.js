@@ -87,6 +87,7 @@
         "(同人ゲームCG)",
         "(18禁ゲームCG)",
         "(同人CG集)",
+        "(画集)",
     ];
     let forbidden = `<>:"/|?*\\`;
     let replacer = `＜＞：”／｜？＊＼`;
@@ -99,6 +100,7 @@
     let group_reg = new RegExp(`^${container_reg}`);
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /[\s　]{2,}/g;
+    let sim_search_threshold = 0.8;
 
     window.onload = main();
 
@@ -1048,7 +1050,7 @@
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
         });
 
-        function similaritySearch(target_id, key = "", threshold = 0.5) {
+        function similaritySearch(target_id, key = "", threshold = sim_search_threshold) {
             if (!key) return;
             let extract_data = [];
             let target_data, best_match;

@@ -78,7 +78,7 @@ click button to enable (pervent too many requests)
 
 - v0.87
   - improve prefix search  
-    if no 100% match title, use similarity search (threshold = 50%) and use highest one  
+    if no 100% match title, use similarity search (threshold = 80%) and use highest one  
 
 - v0.86
   - fixed buttons position, now they all line up
