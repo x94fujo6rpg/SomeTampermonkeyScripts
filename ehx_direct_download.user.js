@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.93
+// @version      0.94
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -15,9 +15,9 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
+/*jshint esversion: 9 */
 
 // this script only work in Thumbnail mode
-
 (function () {
     'use strict';
     let api;
@@ -100,7 +100,7 @@
     let group_reg = new RegExp(`^${container_reg}`);
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /[\s　]{2,}/g;
-    let sim_search_threshold = 0.5;
+    let sim_search_threshold = 0.6;
     let gallery_data_max_size = 512; // kb, 0 = no limit
     let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
 
@@ -225,7 +225,7 @@
 
             function enableDirectDownload() {
                 group();
-                time("request_data");
+                time(`${m}request_data`);
                 let dd = document.getElementById(id_list.dd);
                 dd.disabled = true;
                 dd.removeAttribute("onclick");
@@ -396,7 +396,7 @@
 
         if (gcount === pcount) {
             groupEnd();
-            timeEnd("request_data");
+            timeEnd(`${m}request_data`);
             print(`${m}all request done`);
             print(`${m}initializing sorting`);
             print(`${m}process data`);
@@ -543,7 +543,7 @@
                     ];
                     title_list.forEach(key => {
                         let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
-                        dPrint(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:OrangeRed;");
+                        dPrint(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:DarkOrange;");
                     });
                 }
             });
@@ -552,15 +552,28 @@
 
         function setSortingButton() {
             let pos = document.getElementById(id_list.mainbox);
-            let nodelist = [
-                newSetting("Descending", "sort_setting"), newSeparate(),
+            let input_list = [
+                newSetting("(Sort) Descending", "sort_setting"), newSeparate(),
+                newSetting("(Sort) Numeric", "sort_numeric"), newSeparate(),
+                newSetting("(Sort) Ignore Punctuation", "sort_ignore_punctuation"), newSeparate(),
                 newSetting("Copy Title When Download", "dl_and_copy"), newSeparate(),
                 newSetting("Auto Enable Pure Text", "auto_enable_puretext"), newSeparate(),
-                newSetting("Auto Enable Fix Title", "auto_fix_title"), newSeparate(),
-                newSetting("(Sort) Numeric", "sort_numeric"), newSeparate(),
-                newSetting("(Sort) Ignore Punctuation", "sort_ignore_punctuation"), newLine(),
+                newSetting("Auto Enable Fix Title", "auto_fix_title"), newLine(),
             ].flat();
-            nodelist.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
+            input_list.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
+            let form = Object.assign(
+                document.createElement("form"),
+                {
+                    id: "exhddl_setting_form_prevent_send_data",
+                    onsubmit: (event) => {
+                        event.preventDefault();
+                        return false;
+                    },
+                }
+            );
+            appendAllChild(form, input_list);
+            let nodelist = [form];
+            //nodelist.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
             nodelist.push([
                 newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
                 newSeparate(),
@@ -587,7 +600,7 @@
                 newLine(),
 
                 newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
-                newLine(),
+                newSeparate(),
                 newButton("exhddl_exclude_buttons", "Show Exclude List", style_list.top_button, () => { setExclude(); }),
             ]);
             nodelist = nodelist.flat();
@@ -890,9 +903,9 @@
         return false;
     }
 
-    function appendAllChild(node, nodeList) {
-        nodeList.forEach(e => node.appendChild(e));
-        return node;
+    function appendAllChild(to_node, nodeList) {
+        nodeList.forEach(e => to_node.appendChild(e));
+        return to_node;
     }
 
     function newSpan(text = "") {
@@ -1027,95 +1040,102 @@
     }
 
     function fixTitlePrefix() {
-        dTime("fixTitlePrefix");
+        time(`${m}fixTitlePrefix`);
+        dGroup();
         fix_prefix = fix_prefix ? false : true;
-        selectAllGallery().forEach((gallery, index, arr) => {
-            setTimeout(() => {
-                let id = gallery.getAttribute("gid");
-                let tofix = gdata.find(gallery_data => gallery_data.gid == id);
-                let title_ele = gallery.querySelector(".glname");
-                let prefix = tofix.title_prefix;
-                if (fix_prefix) {
-                    if (prefix.length > 0) {
-                        let checklist = [
-                            title_ele.innerHTML,
-                            tofix.title,
-                            tofix.title_original,
-                            tofix.title_jpn,
-                        ];
-                        ignore_prefix.forEach(ignore => checklist.push(ignore));
-                        if (checklist.some(title => title.includes(prefix))) {
-                            if (index == arr.length - 1) dTimeEnd("fixTitlePrefix");
-                            return;
-                        }
+        dPrint(fix_prefix ? "try fix prefix" : "restore original title");
+        let arr = selectAllGallery();
+        for (let gallery of arr) {
+            let id = gallery.getAttribute("gid");
+            let tofix = gdata.find(gallery_data => gallery_data.gid == id);
+            let title_ele = gallery.querySelector(".glname");
+            let prefix = tofix.title_prefix;
+            if (fix_prefix) {
+                dPrint("");
+                dPrint(`${tofix.title_jpn}`);
+                if (prefix.length > 0) {
+                    let checklist = [
+                        title_ele.innerHTML,
+                        tofix.title,
+                        tofix.title_original,
+                        tofix.title_jpn,
+                    ];
+                    ignore_prefix.forEach(ignore => checklist.push(ignore));
+                    if (!checklist.some(title => title.includes(prefix))) {
                         tofix.title = `${prefix} ${tofix.title_original}`;
                         tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
-                        let add = tofix.from_other_gallery ? ` from [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]` : "";
-                        print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${prefix}"%c${add}`, "color:OrangeRed;");
+                        dPrint(`add prefix "${prefix}" from self`);
                     } else {
-                        // search in same title gallery
-                        let same_title = gdata.find(gallery_data => (gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0));
-                        let by_sim = "";
-                        if (!same_title) {
-                            //search by similarity
-                            let search_key = ["title_pure", "title_pure_jpn",];
-                            let search_result = [];
-                            let timetag = `${m}[${id.padStart(10)}] sim search`;
-                            //dTime(timetag);
-                            search_key.forEach(key => {
-                                let best = similaritySearch(id, key);
-                                if (best) search_result.push(best);
-                            });
-                            //dTimeEnd(timetag);
-                            if (search_result.length > 0) {
-                                search_result = search_result.sort((a, b) => b.sim - a.sim);
-                                let sim = search_result[0].sim;
-                                search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
-                                if (search_result) {
-                                    if (search_result.title_prefix.length > 0) {
-                                        if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
-                                            [same_title, by_sim] = [search_result, ` similarity search(${sim})`];
-                                        } else {
-                                            print(`${m}[${id.padStart(10)}] similarity search found %c[${search_result.gid}(${sim})]%c but not same, abort`, "color:OrangeRed", "");
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        if (same_title) {
-                            let new_prefix = same_title.title_prefix;
-                            tofix.title_prefix = new_prefix;
-                            tofix.title = `${new_prefix} ${tofix.title_original}`;
-                            tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
-                            title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
-                            tofix.from_other_gallery = same_title.gid;
-                            print(`${m}[${id.padStart(10)} ${tofix.title_pure_jpn}] add prefix "${new_prefix}" %cfrom [${tofix.from_other_gallery} ${same_title.title_pure_jpn}]%c${by_sim}`, "color:OrangeRed;", "color:DeepPink;");
-                        }
+                        dPrint(`skip`);
                     }
                 } else {
-                    tofix.title = tofix.title_original;
-                    tofix.title_jpn = tofix.title_jpn_original;
-                    title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
+                    // search in same title gallery
+                    let same_title = gdata.find(gallery_data => ((gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0)));
+                    dPrint(`same_title ${same_title ? same_title.title_pure_jpn : "not found"}`);
+                    let by_sim = "";
+                    if (!same_title) {
+                        // try similarity search
+                        let search_key = ["title_pure", "title_pure_jpn",];
+                        let search_result = [];
+                        let timetag = `sim search`;
+                        dTime(timetag);
+                        for (let key of search_key) {
+                            let best = similaritySearch(tofix, key);
+                            if (best) {
+                                search_result.push(best);
+                                if (best.sim == 1) break;
+                            }
+                        }
+                        dTimeEnd(timetag);
+                        if (search_result.length > 0) {
+                            search_result = search_result.sort((a, b) => b.sim - a.sim);
+                            let sim = search_result[0].sim;
+                            dPrint(`best`, search_result[0]);
+                            search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
+                            if (search_result) {
+                                if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
+                                    [same_title, by_sim] = [search_result, ` ${sim}`];
+                                } else {
+                                    print(`similarity search found [%c${search_result.gid}(${sim})%c] but failed in number check, abort`, "color:DarkOrange", "");
+                                }
+                            }
+                        } else {
+                            dPrint(`sim search result: ${search_result.length}`);
+                        }
+                    }
+                    if (same_title) {
+                        let new_prefix = same_title.title_prefix;
+                        tofix.title_prefix = new_prefix;
+                        tofix.title = `${new_prefix} ${tofix.title_original}`;
+                        tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
+                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
+                        tofix.from_other_gallery = same_title.gid;
+                        let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DeepPink;"];
+                        print(`[%c${id} ${tofix.title_pure_jpn}%c] add prefix "${new_prefix}" from\n[%c${same_title.gid} ${same_title.title_pure_jpn}%c]%c${by_sim}`, ...style);
+                    }
                 }
-                let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
-                if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
-                if (index == arr.length - 1) dTimeEnd("fixTitlePrefix");
-            });
-        });
+            } else {
+                dPrint(`restore [%c${tofix.title_jpn_original}%c]`, "color:DarkOrange;", "");
+                tofix.title = tofix.title_original;
+                tofix.title_jpn = tofix.title_jpn_original;
+                title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
+            }
+            let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
+            if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
+        }
+        dGroupEnd();
+        timeEnd(`${m}fixTitlePrefix`);
 
         function checkNumberInTitle(a, b) {
             let test = /総集編/;
             let [na, nb] = [a.match(test), b.match(test)];
-            let style = ["color:rgba(0, 0, 0, 0)", ""];
             if (na || nb) {
                 if (na && nb) {
                     test = tester(a, b, getNumber);
                     return test ? true : false;
                 } else {
-                    dPrint(`%c${m}%conly found 1 match ${test}`, ...style);
-                    dPrint(`%c${m}%c${a}`, ...style);
-                    dPrint(`%c${m}%c${b}`, ...style);
+                    print(`only found 1 match use regexp ${test} , abort\n${a}\n${b}`);
                     return false;
                 }
             }
@@ -1130,8 +1150,7 @@
             function tester(a, b, test) {
                 let [na, nb] = [test(a), test(b)];
                 if (na && nb) {
-                    dPrint(`%c${m}%c[${na}] <<< ${a}`, ...style);
-                    dPrint(`%c${m}%c[${nb}] <<< ${b}`, ...style);
+                    print(`[${na}] <<< ${a}\n[${nb}] <<< ${b}`);
                     if (na.length != nb.length) return false;
                     return (na.every((data, index) => data == nb[index])) ? true : false;
                 } else {
@@ -1160,46 +1179,33 @@
             }
         }
 
-        function similaritySearch(target_id, key = "", threshold = sim_search_threshold) {
-            if (!key) return;
-            let extract_data = [];
-            let target_data, best_match;
-
-            extractData();
-            if (extract_data.length == 0 || !target_data) return;
-
+        function similaritySearch(target, key = "", threshold = sim_search_threshold) {
+            //dPrint(`search key "${key}" for [${target.title_pure_jpn}]`);
+            if (!key || !target) return;
+            if (gdata.length == 0) return;
+            let best_match;
             findBestMatch();
             if (!best_match) return;
-
             return best_match;
 
-            function extractData() {
-                gdata.forEach(g => {
-                    let newdata = {};
-                    newdata.gid = g.gid;
-                    newdata[key] = g[key];
-                    if (newdata.gid == target_id) {
-                        target_data = newdata;
-                    } else {
-                        extract_data.push(newdata);
-                    }
-                });
-            }
-
             function findBestMatch() {
-                extract_data.forEach(data => {
-                    if (!target_data[key] || !data[key]) return;
-                    let sim = similarity(target_data[key], data[key]);
+                for (let g of gdata) {
+                    if (g.gid == target.gid) continue;
+                    if (!target[key] || !g[key]) continue;
+                    if (g.title_prefix.length == 0) continue;
+                    let sim = similarity(target[key], g[key]);
                     let better = false;
                     if (sim > threshold) {
+                        let style = ["color:DarkOrange;", "", "color:DeepPink;", ""];
+                        dPrint(`[%c${target.gid} ${target[key]}%c] use key [${key}] found prefix "${g.title_prefix}" in\n[%c${g.gid} ${g[key]}%c] ${sim}`, ...style);
                         if (!best_match) {
                             better = true;
                         } else {
                             if (sim > best_match.sim) better = true;
                         }
                     }
-                    if (better) best_match = Object.assign({}, { gid: data.gid, sim: sim, });
-                });
+                    if (better) best_match = { gid: g.gid, sim: sim, };
+                }
             }
 
             //https://stackoverflow.com/a/36566052/13800616
@@ -1211,34 +1217,28 @@
                     shorter = s1;
                 }
                 var longerLength = longer.length;
-                if (longerLength == 0) {
-                    return 1.0;
-                }
+                if (longerLength == 0) return 1.0;
                 return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
 
                 function editDistance(s1, s2) {
                     s1 = s1.toLowerCase();
                     s2 = s2.toLowerCase();
-
                     var costs = [];
                     for (var i = 0; i <= s1.length; i++) {
                         var lastValue = i;
                         for (var j = 0; j <= s2.length; j++) {
-                            if (i == 0)
+                            if (i == 0) {
                                 costs[j] = j;
-                            else {
+                            } else {
                                 if (j > 0) {
                                     var newValue = costs[j - 1];
-                                    if (s1.charAt(i - 1) != s2.charAt(j - 1))
-                                        newValue = Math.min(Math.min(newValue, lastValue),
-                                            costs[j]) + 1;
+                                    if (s1.charAt(i - 1) != s2.charAt(j - 1)) newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
                                     costs[j - 1] = lastValue;
                                     lastValue = newValue;
                                 }
                             }
                         }
-                        if (i > 0)
-                            costs[s2.length] = lastValue;
+                        if (i > 0) costs[s2.length] = lastValue;
                     }
                     return costs[s2.length];
                 }

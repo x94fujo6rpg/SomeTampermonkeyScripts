@@ -42,7 +42,12 @@ click button to enable (pervent too many requests)
     - Title => `(aaaaaaaa) [bbbbbbbb] cccccccc (dddddddd)`  
     - Event => `(aaaaaaaa)`  
   - ##### fix/unfix event in title (auto enable by default)
-    - search event prefix in `torrent / same title gallery` and add to title
+    - search event prefix in `torrent` / `same title gallery` and add to title
+    - if no 100% match found, try similarity search
+      - threshold (edit code if you have issue)
+        ```js
+        let sim_search_threshold = 0.6
+        ```
     - priority: `title_jpn` > `title_en` > `torrent` > `same title gallery`
     - highlight prefix [(github doesn't support color in 2020...okay...)](https://github.com/github/markup/issues/369)
       - from torrents (![](https://via.placeholder.com/15/008000/000000?text=+) green)
@@ -76,17 +81,20 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.94
+  - improve prefix search  
+    - reduce unnecessary `data extract`  
+    - reduce unnecessary `similarity compare`(very slow)  
+    - fix some bug in similarity search
+  - try prevent script's input element submit data  
+
 - v0.91
   - improve prefix search  
-    try to compare every number in title, abort if not the same  
-  - threshold = 50% (edit code if you have issue)
-    ```js
-    let sim_search_threshold = 0.5
-    ```
+    - try to compare every number in title, abort if not the same  
 
 - v0.88
   - improve prefix search  
-    if no 100% match title, use similarity search and use highest one  
+    - if no 100% match found, use similarity search and use highest one  
 
 - v0.86
   - fixed buttons position, now they all line up
