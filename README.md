@@ -81,6 +81,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.97
+  - add mask test at end so that `oooAAooo` != `oooBBooo` even have high similarity
+
 - v0.96
   - pre-process titles for compare instead of before every compare  
 

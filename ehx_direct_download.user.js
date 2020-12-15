@@ -25,7 +25,7 @@
     let hid = true;
     let m = "[ehx direct download]: ";
     let debug_message = true;
-    let debug_adv = true;
+    let debug_adv = false;
     let gallery_nodes;
     let gdata = [];
     let gcount = 0;
@@ -390,7 +390,7 @@
                 dl_button.insertAdjacentElement("afterend", newLine());
             }
         });
-        if (mark_list.length > 0) print(`${m}found in list, set as downloaded: ${mark_list}`);
+        if (mark_list.length > 0) print(`${m}found in list, set as downloaded:\n`, mark_list);
 
         print(`${m}request[${index}] done`);
 
@@ -528,7 +528,7 @@
                 data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
                 data.title_pure_for_sim = removeAllPunctuation(data.title_pure).toLowerCase();
                 data.title_pure_jpn_for_sim = removeAllPunctuation(data.title_pure_jpn).toLowerCase();
-                
+
                 if (debug_message && debug_adv) {
                     dPrint(`${String(data.gid).padStart(10)}|__________`);
                     let title_list = [
@@ -1096,13 +1096,13 @@
                         if (search_result.length > 0) {
                             search_result = search_result.sort((a, b) => b.sim - a.sim);
                             let sim = search_result[0].sim;
-                            dPrint(`best`, search_result[0]);
+                            dPrint(`best`, Object.keys(search_result[0]).map(key => [key, search_result[0][key]]).flat());
                             search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
                             if (search_result) {
                                 if (checkNumberInTitle(tofix.title_pure_jpn_for_sim, search_result.title_pure_jpn_for_sim)) {
                                     [same_title, by_sim] = [search_result, ` ${sim}`];
                                 } else {
-                                    print(`similarity search found [%c${search_result.gid}(${sim})%c] but failed in number check, abort`, "color:DarkOrange", "");
+                                    print(`similarity search found [%c${search_result.gid}%c] (${sim}) but failed in final test, abort`, "color:DarkOrange", "");
                                 }
                             }
                         } else {
@@ -1135,6 +1135,7 @@
         function checkNumberInTitle(a, b) {
             let test = /總集篇|総集編|soushuuhen/g;
             let [na, nb] = [a.match(test), b.match(test)];
+            let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DarkOrange;", "", "color:OrangeRed;", ""];
             if (na || nb) {
                 if (na && nb) {
                     return tester(a, b, getNumber) ? true : false;
@@ -1149,12 +1150,12 @@
             test = tester(a, b, utf8Number);
             if (test) return true;
             if (test != null) return false;
-            return true;
+            return maskTest(a, b) ? true : false;
 
             function tester(a, b, test) {
                 let [na, nb] = [test(a), test(b)];
                 if (na && nb) {
-                    print(`[${na}] <<< ${a}\n[${nb}] <<< ${b}`);
+                    print(`[%c${a}%c, %c${b}%c] >>> [%c${na}%c, %c${nb}%c]`, ...style);
                     if (na.length != nb.length) return false;
                     return (na.every((data, index) => data == nb[index])) ? true : false;
                 } else {
@@ -1180,6 +1181,14 @@
                 ].join("");
                 let reg_number_system = new RegExp(`[\d${number_system}]+`, "g");
                 return reg_number_system.test(input) ? [input.match(reg_number_system)].flat() : false;
+            }
+
+            function maskTest(a, b) {
+                let mask_a = a.replace(new RegExp(`[${b}]`, "g"), "");
+                let mask_b = b.replace(new RegExp(`[${a}]`, "g"), "");
+                print(`mask test [%c${a}%c, %c${b}%c] >>> [%c${mask_a}%c, %c${mask_b}%c]`, ...style);
+                if (mask_a && mask_b) return false;
+                return (!mask_a && !mask_b) ? true : false;
             }
         }
 
@@ -1246,7 +1255,7 @@
             }
         }
     }
-    
+
     function removeAllPunctuation(input = "") {
         let reg = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s　]/g;
         return shiftCode(input).replace(reg, "");
@@ -1340,7 +1349,7 @@
                     }
                 }
             });
-            if (marked.length > 0) print(`${m}found in list, mark gallery: ${marked}`);
+            if (marked.length > 0) print(`${m}found in list, mark gallery:\n`, marked);
 
             function isEH() {
                 return document.domain == "e-hentai.org" ? true : false;
