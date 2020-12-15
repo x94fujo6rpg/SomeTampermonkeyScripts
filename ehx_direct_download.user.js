@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.95
+// @version      0.96
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -526,20 +526,25 @@
                 [data.title_group_jpn, data.title_no_group_jpn] = extractGroup(data.title_no_event_jpn);
                 data.title_pure = removeExcess(data.title_no_group);
                 data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
+                data.title_pure_for_sim = removeAllPunctuation(data.title_pure).toLowerCase();
+                data.title_pure_jpn_for_sim = removeAllPunctuation(data.title_pure_jpn).toLowerCase();
+                
                 if (debug_message && debug_adv) {
                     dPrint(`${String(data.gid).padStart(10)}|__________`);
                     let title_list = [
                         "title_original",
-                        "title_no_event",
-                        "title_no_group",
+                        //"title_no_event",
+                        //"title_no_group",
                         "title_pure",
                         "title_prefix",
-                        "title_group",
+                        //"title_group",
                         "title_jpn",
-                        "title_no_event_jpn",
-                        "title_no_group_jpn",
+                        //"title_no_event_jpn",
+                        //"title_no_group_jpn",
                         "title_pure_jpn",
-                        "title_group_jpn"
+                        //"title_group_jpn"
+                        "title_pure_for_sim",
+                        "title_pure_jpn_for_sim",
                     ];
                     title_list.forEach(key => {
                         let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
@@ -1071,12 +1076,12 @@
                     }
                 } else {
                     // search in same title gallery
-                    let same_title = gdata.find(gallery_data => ((gallery_data.title_pure == tofix.title_pure || gallery_data.title_pure_jpn == tofix.title_pure_jpn) && (gallery_data.title_prefix.length > 0)));
+                    let same_title = gdata.find(gallery_data => ((gallery_data.title_pure_for_sim == tofix.title_pure_for_sim || gallery_data.title_pure_jpn_for_sim == tofix.title_pure_jpn_for_sim) && (gallery_data.title_prefix.length > 0)));
                     dPrint(`same_title ${same_title ? same_title.title_pure_jpn : "not found"}`);
                     let by_sim = "";
                     if (!same_title) {
                         // try similarity search
-                        let search_key = ["title_pure", "title_pure_jpn",];
+                        let search_key = ["title_pure_for_sim", "title_pure_jpn_for_sim",];
                         let search_result = [];
                         let timetag = `sim search`;
                         dTime(timetag);
@@ -1094,7 +1099,7 @@
                             dPrint(`best`, search_result[0]);
                             search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
                             if (search_result) {
-                                if (checkNumberInTitle(tofix.title_pure_jpn, search_result.title_pure_jpn)) {
+                                if (checkNumberInTitle(tofix.title_pure_jpn_for_sim, search_result.title_pure_jpn_for_sim)) {
                                     [same_title, by_sim] = [search_result, ` ${sim}`];
                                 } else {
                                     print(`similarity search found [%c${search_result.gid}(${sim})%c] but failed in number check, abort`, "color:DarkOrange", "");
@@ -1128,22 +1133,20 @@
         timeEnd(`${m}fixTitlePrefix`);
 
         function checkNumberInTitle(a, b) {
-            let clean_a = removeAllPunctuation(a).toLowerCase();
-            let clean_b = removeAllPunctuation(b).toLowerCase();
             let test = /總集篇|総集編|soushuuhen/g;
-            let [na, nb] = [clean_a.match(test), clean_b.match(test)];
+            let [na, nb] = [a.match(test), b.match(test)];
             if (na || nb) {
                 if (na && nb) {
-                    return tester(clean_a, clean_b, getNumber) ? true : false;
+                    return tester(a, b, getNumber) ? true : false;
                 } else {
-                    print(`only found 1 match use regexp ${test} , abort\n${clean_a}\n${clean_b}`);
+                    print(`only found 1 match use regexp ${test} , abort\n${a}\n${b}`);
                     return false;
                 }
             }
-            test = tester(clean_a, clean_b, getNumber);
+            test = tester(a, b, getNumber);
             if (test) return true;
             if (test != null) return false;
-            test = tester(clean_a, clean_b, utf8Number);
+            test = tester(a, b, utf8Number);
             if (test) return true;
             if (test != null) return false;
             return true;
@@ -1181,7 +1184,6 @@
         }
 
         function similaritySearch(target, key = "", threshold = sim_search_threshold) {
-            //dPrint(`search key "${key}" for [${target.title_pure_jpn}]`);
             if (!key || !target) return;
             if (gdata.length == 0) return;
             let best_match;
@@ -1194,13 +1196,11 @@
                     if (g.gid == target.gid) continue;
                     if (!target[key] || !g[key]) continue;
                     if (g.title_prefix.length == 0) continue;
-                    let clean_target = removeAllPunctuation(target[key]).toLowerCase();
-                    let clean_g = removeAllPunctuation(g[key]).toLowerCase();
-                    let sim = similarity(clean_target, clean_g);
+                    let sim = similarity(target[key], g[key]);
                     let better = false;
                     if (sim > threshold) {
                         let style = ["color:DarkOrange;", "", "color:DeepPink;", ""];
-                        dPrint(`[%c${String(target.gid).padStart(10)} ${clean_target}%c] use key [${key}] found prefix "${g.title_prefix}" in\n[%c${String(g.gid).padStart(10)} ${clean_g}%c] ${sim}`, ...style);
+                        dPrint(`[%c${String(target.gid).padStart(10)} ${target[key]}%c] use key [${key}] found prefix "${g.title_prefix}" in\n[%c${String(g.gid).padStart(10)} ${g[key]}%c] ${sim}`, ...style);
                         if (!best_match) {
                             better = true;
                         } else {
@@ -1224,8 +1224,6 @@
                 return (longerLength - editDistance(longer, shorter)) / parseFloat(longerLength);
 
                 function editDistance(s1, s2) {
-                    s1 = s1.toLowerCase();
-                    s2 = s2.toLowerCase();
                     var costs = [];
                     for (var i = 0; i <= s1.length; i++) {
                         var lastValue = i;
