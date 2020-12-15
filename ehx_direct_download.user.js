@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.97
+// @version      0.98
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -1136,31 +1136,30 @@
             let test = /總集篇|総集編|soushuuhen/g;
             let [na, nb] = [a.match(test), b.match(test)];
             let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DarkOrange;", "", "color:OrangeRed;", ""];
-            if (na || nb) {
-                if (na && nb) {
-                    return tester(a, b, getNumber) ? true : false;
-                } else {
-                    print(`only found 1 match use regexp ${test} , abort\n${a}\n${b}`);
-                    return false;
-                }
+
+            if ((na || nb) && !(na && nb)) {
+                print(`only found 1 match use regexp ${test} , abort\n${a}\n${b}`);
+                return false;
             }
+
             test = tester(a, b, getNumber);
             if (test) return true;
             if (test != null) return false;
+
             test = tester(a, b, utf8Number);
             if (test) return true;
             if (test != null) return false;
-            return maskTest(a, b) ? true : false;
+
+            return maskTest(a, b);
 
             function tester(a, b, test) {
                 let [na, nb] = [test(a), test(b)];
+                print(`${test.name} [%c${a}%c, %c${b}%c] >>> [%c${na}%c, %c${nb}%c]`, ...style);
                 if (na && nb) {
-                    print(`[%c${a}%c, %c${b}%c] >>> [%c${na}%c, %c${nb}%c]`, ...style);
                     if (na.length != nb.length) return false;
                     return (na.every((data, index) => data == nb[index])) ? true : false;
-                } else {
-                    return null;
                 }
+                return (!na && !nb) ? null : false;
             }
 
             function getNumber(input) {
@@ -1179,7 +1178,7 @@
                     "０１２３４５６７８９𝟎𝟏𝟐𝟑𝟒𝟓𝟔𝟕𝟖𝟗𝟘𝟙𝟚𝟛𝟜𝟝𝟞𝟟𝟠𝟡𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿",
                     "上下中前后後",
                 ].join("");
-                let reg_number_system = new RegExp(`[\d${number_system}]+`, "g");
+                let reg_number_system = new RegExp(`[\d${number_system}]`, "g");
                 return reg_number_system.test(input) ? [input.match(reg_number_system)].flat() : false;
             }
 
@@ -1187,7 +1186,6 @@
                 let mask_a = a.replace(new RegExp(`[${b}]`, "g"), "");
                 let mask_b = b.replace(new RegExp(`[${a}]`, "g"), "");
                 print(`mask test [%c${a}%c, %c${b}%c] >>> [%c${mask_a}%c, %c${mask_b}%c]`, ...style);
-                if (mask_a && mask_b) return false;
                 return (!mask_a && !mask_b) ? true : false;
             }
         }
@@ -1258,12 +1256,16 @@
 
     function removeAllPunctuation(input = "") {
         let reg = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s　]/g;
-        return shiftCode(input).replace(reg, "");
+        return shiftCode(decodeHTMLString(input)).replace(reg, "");
+
+        function decodeHTMLString(input = "") {
+            return new DOMParser().parseFromString(input, "text/html").documentElement.textContent;
+        }
 
         function shiftCode(string = "") {
             let reg_fullwidth_code = /[\uFF01-\uFF63]/g;
             let reg_muti_blank = /[\s　\n\t]+/g;
-            return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, " ").trim();
+            return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, "").trim();
         }
     }
 
