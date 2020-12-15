@@ -81,6 +81,13 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v0.95
+  - improve similarity compare  
+    - before compare:
+      - convert fullwidth to halfwidth
+      - convert to lower case
+      - remove all punctuation
+
 - v0.94
   - improve prefix search  
     - reduce unnecessary `data extract`  

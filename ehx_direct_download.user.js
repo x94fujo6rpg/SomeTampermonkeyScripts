@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.94
+// @version      0.95
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -1052,7 +1052,7 @@
             let prefix = tofix.title_prefix;
             if (fix_prefix) {
                 dPrint("");
-                dPrint(`${tofix.title_jpn}`);
+                dPrint(`[%c${String(id).padStart(10)} ${tofix.title_jpn}%c]`, "color:DarkOrange;", "");
                 if (prefix.length > 0) {
                     let checklist = [
                         title_ele.innerHTML,
@@ -1112,11 +1112,11 @@
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
                         tofix.from_other_gallery = same_title.gid;
                         let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DeepPink;"];
-                        print(`[%c${id} ${tofix.title_pure_jpn}%c] add prefix "${new_prefix}" from\n[%c${same_title.gid} ${same_title.title_pure_jpn}%c]%c${by_sim}`, ...style);
+                        print(`[%c${String(id).padStart(10)} ${tofix.title_pure_jpn}%c] add prefix "${new_prefix}" from\n[%c${String(same_title.gid).padStart(10)} ${same_title.title_pure_jpn}%c]%c${by_sim}`, ...style);
                     }
                 }
             } else {
-                dPrint(`restore [%c${tofix.title_jpn_original}%c]`, "color:DarkOrange;", "");
+                dPrint(`restore [%c${String(id).padStart(10)} ${tofix.title_jpn_original}%c]`, "color:DarkOrange;", "");
                 tofix.title = tofix.title_original;
                 tofix.title_jpn = tofix.title_jpn_original;
                 title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
@@ -1128,21 +1128,22 @@
         timeEnd(`${m}fixTitlePrefix`);
 
         function checkNumberInTitle(a, b) {
-            let test = /総集編/;
-            let [na, nb] = [a.match(test), b.match(test)];
+            let clean_a = removeAllPunctuation(a).toLowerCase();
+            let clean_b = removeAllPunctuation(b).toLowerCase();
+            let test = /總集篇|総集編|soushuuhen/g;
+            let [na, nb] = [clean_a.match(test), clean_b.match(test)];
             if (na || nb) {
                 if (na && nb) {
-                    test = tester(a, b, getNumber);
-                    return test ? true : false;
+                    return tester(clean_a, clean_b, getNumber) ? true : false;
                 } else {
-                    print(`only found 1 match use regexp ${test} , abort\n${a}\n${b}`);
+                    print(`only found 1 match use regexp ${test} , abort\n${clean_a}\n${clean_b}`);
                     return false;
                 }
             }
-            test = tester(a, b, getNumber);
+            test = tester(clean_a, clean_b, getNumber);
             if (test) return true;
             if (test != null) return false;
-            test = tester(a, b, utf8Number);
+            test = tester(clean_a, clean_b, utf8Number);
             if (test) return true;
             if (test != null) return false;
             return true;
@@ -1159,7 +1160,7 @@
             }
 
             function getNumber(input) {
-                let reg = /\d+/g;
+                let reg = /\d/g;
                 return reg.test(input) ? [input.match(reg)].flat() : false;
             }
 
@@ -1193,11 +1194,13 @@
                     if (g.gid == target.gid) continue;
                     if (!target[key] || !g[key]) continue;
                     if (g.title_prefix.length == 0) continue;
-                    let sim = similarity(target[key], g[key]);
+                    let clean_target = removeAllPunctuation(target[key]).toLowerCase();
+                    let clean_g = removeAllPunctuation(g[key]).toLowerCase();
+                    let sim = similarity(clean_target, clean_g);
                     let better = false;
                     if (sim > threshold) {
                         let style = ["color:DarkOrange;", "", "color:DeepPink;", ""];
-                        dPrint(`[%c${target.gid} ${target[key]}%c] use key [${key}] found prefix "${g.title_prefix}" in\n[%c${g.gid} ${g[key]}%c] ${sim}`, ...style);
+                        dPrint(`[%c${String(target.gid).padStart(10)} ${clean_target}%c] use key [${key}] found prefix "${g.title_prefix}" in\n[%c${String(g.gid).padStart(10)} ${clean_g}%c] ${sim}`, ...style);
                         if (!best_match) {
                             better = true;
                         } else {
@@ -1243,6 +1246,17 @@
                     return costs[s2.length];
                 }
             }
+        }
+    }
+    
+    function removeAllPunctuation(input = "") {
+        let reg = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s　]/g;
+        return shiftCode(input).replace(reg, "");
+
+        function shiftCode(string = "") {
+            let reg_fullwidth_code = /[\uFF01-\uFF63]/g;
+            let reg_muti_blank = /[\s　\n\t]+/g;
+            return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, " ").trim();
         }
     }
 
