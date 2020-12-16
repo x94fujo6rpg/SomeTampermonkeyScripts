@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.98
+// @version      0.99
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -89,8 +89,6 @@
         "(同人CG集)",
         "(画集)",
     ];
-    let forbidden = `<>:"/|?*\\`;
-    let replacer = `＜＞：”／｜？＊＼`;
     let container_list = [
         "()", "[]", "{}", "（）",
         "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
@@ -100,6 +98,7 @@
     let group_reg = new RegExp(`^${container_reg}`);
     let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
     let blank_reg = /[\s　]{2,}/g;
+    let enable_sim_search = false;
     let sim_search_threshold = 0.6;
     let gallery_data_max_size = 512; // kb, 0 = no limit
     let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
@@ -150,7 +149,8 @@
                         text-align: center;
                         margin: 0.2rem;
                         border: 0.1rem solid;
-                        padding: 0.2rem;
+                        padding-bottom: 0.4rem;
+                        display: inline-grid;
                     }
                 `,
             });
@@ -166,8 +166,7 @@
             document.addEventListener("visibilitychange", () => {
                 if (timer_list.length > 0) {
                     let pause = (document.visibilityState === "visible") ? false : true;
-                    for (let index in timer_list) {
-                        let timer = timer_list[index];
+                    for (let timer of timer_list) {
                         if (!pause) {
                             timer.id = setInterval(timer.handler, timer.delay);
                             //dPrint(`${m}start timer[${timer.note}] id:${timer.id}`);
@@ -330,9 +329,7 @@
         data = JSON.parse(data);
         print(`${m}process request[${index}] data, gallery count:[${Object.keys(data.gmetadata).length}]`);
 
-        let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-        downloaded_list = downloaded_list.length > 0 ? downloaded_list.split(",") : [];
-
+        let downloaded_list = getGMList("dl_list");
         let gidlist = [];
         let mark_list = [];
         data.gmetadata.forEach(gallery_data => {
@@ -407,11 +404,11 @@
             setCopyTitle();
             print(`${m}setup show torrent title button`);
             setShowTorrent();
-            if (GM_getValue(key_list.auto_fix_title, default_value.auto_fix_title)) {
+            if (getGMValue("auto_fix_title")) {
                 print(`${m}auto enable fix title`);
                 document.getElementById("exhddl_fix_title").click();
             }
-            if (GM_getValue(key_list.auto_enable_puretext, default_value.auto_enable_puretext)) {
+            if (getGMValue("auto_enable_puretext")) {
                 print(`${m}auto enable pure text`);
                 document.getElementById("exhddl_puretext").click();
             }
@@ -428,9 +425,7 @@
 
         function setGalleryStatus(gid) {
             gid = `${gid}`; // convert to string
-            let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-            downloaded_list = downloaded_list.length > 0 ? downloaded_list.split(",") : [];
-
+            let downloaded_list = getGMList("dl_list");
             if (downloaded_list.length > 0) {
                 let index = downloaded_list.indexOf(gid);
                 if (index != -1) {
@@ -440,7 +435,6 @@
                 } else {
                     downloaded_list.push(gid);
                     print(`${m}gallery:[${gid}] not in list, add to list`);
-
                     let count = 0;
                     if (downloaded_list.length > gallery_data_limit.max_size && gallery_data_limit.max_size != 0) {
                         while (downloaded_list.length > gallery_data_limit.max_size) {
@@ -511,8 +505,8 @@
                     // try to found prefix in torrent
                     let torrent_list = getTorrentList(data.gid);
                     if (torrent_list) {
-                        for (let index in torrent_list) {
-                            let [prefix,] = extractPrefix(torrent_list[index]);
+                        for (let torrent of torrent_list) {
+                            let [prefix,] = extractPrefix(torrent);
                             if (prefix) {
                                 data.title_prefix = prefix;
                                 from_torrent = true;
@@ -617,7 +611,7 @@
                     Object.assign(document.createElement("input"), {
                         type: "checkbox",
                         id: id_list[id_key],
-                        checked: GM_getValue(key_list[id_key], default_value[id_key]),
+                        checked: getGMValue(id_key),
                     }),
                     Object.assign(document.createElement("label"), {
                         htmlFor: id_list[id_key],
@@ -627,15 +621,9 @@
             }
 
             function updateSetting() {
-                let skip_list = [
-                    "dl_list",
-                    "exclude_list",
-                    "exclude_tag",
-                    "exclude_uploader",
-                ];
-                let updatelist = Object.keys(key_list).filter(key => skip_list.every(skip => key != skip));
-                let info = [];
-                let style = [];
+                let skip_list = Object.keys(default_value).filter(key => typeof (default_value[key]) != "boolean");
+                let updatelist = Object.keys(key_list).filter(key => !skip_list.includes(key));
+                let [info, style] = [[], []];
                 updatelist.forEach(key => {
                     let value = document.getElementById(id_list[key]).checked;
                     GM_setValue(key_list[key], value);
@@ -682,7 +670,7 @@
 
                 if (torrent_list) {
                     let box = Object.assign(document.createElement("div"), { className: "torrent_title", style: "display:none" });
-                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(torrent), { className: "puretext", })); });
+                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(decodeHTMLString(torrent)), { className: "puretext", })); });
                     pos.insertAdjacentElement("beforebegin", box);
                 } else {
                     button.disabled = true;
@@ -743,8 +731,7 @@
                 updateByKey(update_key, exclude);
 
                 function updateByKey(key, value) {
-                    let list = GM_getValue(key_list[key], default_value[key]);
-                    list = list.length > 0 ? list.split(",") : [];
+                    let list = getGMList(key);
                     let index = list.indexOf(value);
                     if (index == -1) {
                         list.push(value);
@@ -834,16 +821,12 @@
         });
     }
 
-    function findEleByText(type, string) {
-        let es = document.querySelectorAll(type);
-        for (let index in es) {
-            if (!isNaN(index)) {
-                let e = es[index];
-                if (e.textContent.includes(string)) {
-                    return e;
-                }
-            }
+    function findEleByText(css_selector, string) {
+        let es = document.querySelectorAll(css_selector);
+        for (let ele of es) {
+            if (ele.textContent.includes(string)) return ele;
         }
+        return false;
     }
 
     function visitGallery(link) {
@@ -874,14 +857,9 @@
 
     function addToDownloadedList(gid) {
         gid = `${gid}`; // convert to string
-        let downloaded_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-        if (downloaded_list.length != 0) {
-            downloaded_list = downloaded_list.split(",");
-
-            if (downloaded_list.indexOf(gid) != -1) return print(`${m}[${gid}] is already in the list, abort`);
-
-            downloaded_list.push(gid);
-
+        let downloaded_list = getGMList("dl_list");
+        if (downloaded_list.includes(gid)) return print(`${m}[${gid}] is already in the list, abort`);
+        if (downloaded_list.length > 0) {
             let count = 0;
             while (downloaded_list.length > 10000) {
                 let r = downloaded_list.shift();
@@ -889,13 +867,12 @@
                 count++;
                 if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
             }
-        } else {
-            print(`${m}no list found, creat new list`);
-            downloaded_list = [gid];
         }
+        downloaded_list.push(gid);
+        let list_length = downloaded_list.length;
         downloaded_list = downloaded_list.join();
         GM_setValue(key_list.dl_list, downloaded_list);
-        print(`${m}add [${gid}] to list. [list_size:${downloaded_list.length}, list_length:${downloaded_list.split(",").length}]`);
+        print(`${m}add [${gid}] to list. [list_size:${downloaded_list.length}, list_length:${list_length}]`);
     }
 
     function my_popUp(URL, w, h) {
@@ -990,8 +967,7 @@
 
     function getSortedGalleryID(object_list, sort_key) {
         let newlist = [];
-        let descending = document.getElementById(id_list.sort_setting);
-        descending = descending.checked ? true : false;
+        let descending = document.getElementById(id_list.sort_setting).checked;
         newlist = object_list.sort((a, b) => {
             return descending ? naturalSort(b[sort_key], a[sort_key]) : naturalSort(a[sort_key], b[sort_key]);
         });
@@ -1056,7 +1032,7 @@
             let title_ele = gallery.querySelector(".glname");
             let prefix = tofix.title_prefix;
             if (fix_prefix) {
-                dPrint("");
+                dPrint("==================================================");
                 dPrint(`[%c${String(id).padStart(10)} ${tofix.title_jpn}%c]`, "color:DarkOrange;", "");
                 if (prefix.length > 0) {
                     let checklist = [
@@ -1077,9 +1053,9 @@
                 } else {
                     // search in same title gallery
                     let same_title = gdata.find(gallery_data => ((gallery_data.title_pure_for_sim == tofix.title_pure_for_sim || gallery_data.title_pure_jpn_for_sim == tofix.title_pure_jpn_for_sim) && (gallery_data.title_prefix.length > 0)));
-                    dPrint(`same_title ${same_title ? same_title.title_pure_jpn : "not found"}`);
                     let by_sim = "";
-                    if (!same_title) {
+                    dPrint(`same_title [%c${same_title ? (same_title.gid + " " + same_title.title_pure_jpn) : "not found"}%c]`, "color:OrangeRed;", "");
+                    if (!same_title && enable_sim_search) {
                         // try similarity search
                         let search_key = ["title_pure_for_sim", "title_pure_jpn_for_sim",];
                         let search_result = [];
@@ -1096,13 +1072,13 @@
                         if (search_result.length > 0) {
                             search_result = search_result.sort((a, b) => b.sim - a.sim);
                             let sim = search_result[0].sim;
-                            dPrint(`best`, Object.keys(search_result[0]).map(key => [key, search_result[0][key]]).flat());
+                            dPrint(`best: `, search_result[0]);
                             search_result = gdata.find(gallery_data => gallery_data.gid == search_result[0].gid);
                             if (search_result) {
                                 if (checkNumberInTitle(tofix.title_pure_jpn_for_sim, search_result.title_pure_jpn_for_sim)) {
                                     [same_title, by_sim] = [search_result, ` ${sim}`];
                                 } else {
-                                    print(`similarity search found [%c${search_result.gid}%c] (${sim}) but failed in final test, abort`, "color:DarkOrange", "");
+                                    print(`similarity search found [%c${search_result.gid}%c] (${sim}) but failed in final test, abort\n`, "color:DarkOrange", "");
                                 }
                             }
                         } else {
@@ -1111,11 +1087,11 @@
                     }
                     if (same_title) {
                         let new_prefix = same_title.title_prefix;
-                        tofix.title_prefix = new_prefix;
                         tofix.title = `${new_prefix} ${tofix.title_original}`;
                         tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
-                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
+                        tofix.title_prefix = new_prefix;
                         tofix.from_other_gallery = same_title.gid;
+                        title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
                         let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DeepPink;"];
                         print(`[%c${String(id).padStart(10)} ${tofix.title_pure_jpn}%c] add prefix "${new_prefix}" from\n[%c${String(same_title.gid).padStart(10)} ${same_title.title_pure_jpn}%c]%c${by_sim}`, ...style);
                     }
@@ -1257,16 +1233,16 @@
     function removeAllPunctuation(input = "") {
         let reg = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s　]/g;
         return shiftCode(decodeHTMLString(input)).replace(reg, "");
+    }
 
-        function decodeHTMLString(input = "") {
-            return new DOMParser().parseFromString(input, "text/html").documentElement.textContent;
-        }
+    function shiftCode(string = "") {
+        let reg_fullwidth_code = /[\uFF01-\uFF63]/g;
+        let reg_muti_blank = /[\s　\n\t]+/g;
+        return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, "").trim();
+    }
 
-        function shiftCode(string = "") {
-            let reg_fullwidth_code = /[\uFF01-\uFF63]/g;
-            let reg_muti_blank = /[\s　\n\t]+/g;
-            return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, "").trim();
-        }
+    function decodeHTMLString(input = "") {
+        return new DOMParser().parseFromString(input, "text/html").documentElement.textContent;
     }
 
     function getTorrentList(gid = "") {
@@ -1304,11 +1280,10 @@
     }
 
     function updateGalleryStatus() {
-        let dl_list = GM_getValue(key_list.dl_list, default_value.dl_list);
-        dl_list = dl_list.length > 0 ? dl_list.split(",") : [];
+        let dl_list = getGMList("dl_list");
 
         let find_button = document.querySelector(".itg.gld");
-        if (!find_button) return dPrint(`${m}gallery list not found`);
+        if (!find_button) return print(`${m}gallery list not found`);
 
         find_button = find_button.querySelectorAll("button");
         if (find_button.length > 0) { updateButtonStatus(); updateExclude(); }
@@ -1316,10 +1291,8 @@
 
         function updateExclude() {
             if (gdata.length == 0) return;
-            let ex_uploader = GM_getValue(key_list.exclude_uploader, default_value.exclude_uploader);
-            let ex_tag = GM_getValue(key_list.exclude_tag, default_value.exclude_tag);
-            ex_uploader = ex_uploader.length > 0 ? ex_uploader.split(",") : [];
-            ex_tag = ex_tag.length > 0 ? ex_tag.split(",") : [];
+            let ex_uploader = getGMList("exclude_uploader");
+            let ex_tag = getGMList("exclude_tag");
             gdata.forEach(gallery_data => {
                 let match_uploader = ex_uploader.includes(gallery_data.uploader);
                 let match_tag = gallery_data.tags.some(tag => ex_tag.includes(tag));
@@ -1336,7 +1309,7 @@
             selectAllGallery().forEach(gallery => {
                 let id = gallery.getAttribute("gid");
                 let puretext = gallery.querySelector(".puretext");
-                if (dl_list.indexOf(id) != -1) {
+                if (dl_list.includes(id)) {
                     if (!gallery.getAttribute("marked")) {
                         if (!gallery.querySelector("s")) Object.assign(gallery.style, style_list.gallery_marked);
                         gallery.setAttribute("marked", true);
@@ -1374,15 +1347,18 @@
     }
 
     function repalceForbiddenChar(string = "") {
-        for (let index in forbidden) {
-            let fb = forbidden[index];
-            let rp = replacer[index];
-            let count = 0;
-            while (string.indexOf(fb) != -1 && count < 999) {
-                string = string.replaceAll(fb, rp);
-                count++;
-            }
-        }
+        let forbidden = `<>:"/|?*\\`;
+        let replacer = `＜＞：”／｜？＊＼`;
+        [...forbidden].forEach((fb, index) => { string = string.replaceAll(fb, replacer[index]); });
         return string.trim();
+    }
+
+    function getGMList(key = "") {
+        let value = GM_getValue(key_list[key], default_value[key]);
+        return value.length > 0 ? value.split(",") : [];
+    }
+
+    function getGMValue(key = "") {
+        return GM_getValue(key_list[key], default_value[key]);
     }
 })();

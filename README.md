@@ -43,7 +43,7 @@ click button to enable (pervent too many requests)
     - Event => `(aaaaaaaa)`  
   - ##### fix/unfix event in title (auto enable by default)
     - search event prefix in `torrent` / `same title gallery` and add to title
-    - if no 100% match found, try similarity search
+    - if no 100% match found, try similarity search (disabled by default)
       - threshold (edit code if you have issue)
         ```js
         let sim_search_threshold = 0.6
@@ -63,6 +63,8 @@ click button to enable (pervent too many requests)
         "(ゲームCG)",
         "(同人ゲームCG)",
         "(18禁ゲームCG)",  
+        "(同人CG集)",
+        "(画集)",
         ```
   - ##### options
     - sort order (descending by default)
@@ -80,6 +82,29 @@ click button to enable (pervent too many requests)
   - make all gallery show entire title
 
 ### updates
+
+- v0.99
+  - fix some issue in `show torrent list`  
+    - decode HTML text (like `&#039;`)
+    - separate each line
+  - disable similarity search by default  
+    pre-processed title is good enough, and it seems that no match can pass the final test anyway  
+    in some cases, even humans are confused  
+    ```js
+    //after pre-process they all will be "title" and match
+    "[group] title (anime series)"
+    "[group] title (different anime series)"
+    "[group] title [uploader description]"
+    "[group] title (uploader description)"
+    "(some uploader description) title"
+
+    //if not pre-process, these won't match
+    "[group] title"
+    "[group] title [uploader description]"
+    "[group] title (anime series)"
+    "title"
+    ```
+    maybe add similarity search result under gallery like `torrent list` for quick check in the future  
 
 - v0.97
   - add mask test at end so that `oooAAooo` != `oooBBooo` even have high similarity
