@@ -162,23 +162,6 @@
             [...document.styleSheets[0].cssRules].find(s => s.selectorText == ".gl4t").style.removeProperty("max-height");
         }
 
-        function timerMananger() {
-            document.addEventListener("visibilitychange", () => {
-                if (timer_list.length > 0) {
-                    let pause = (document.visibilityState === "visible") ? false : true;
-                    for (let timer of timer_list) {
-                        if (!pause) {
-                            timer.id = setInterval(timer.handler, timer.delay);
-                            //dPrint(`${m}start timer[${timer.note}] id:${timer.id}`);
-                        } else {
-                            clearInterval(timer.id);
-                            //dPrint(`${m}stop timer[${timer.note}] id:${timer.id}`);
-                        }
-                    }
-                }
-            });
-        }
-
         function setEvent(link) {
             let _link = link.split("/");
             if (_link[3] === "g") {
@@ -809,6 +792,23 @@
 
     function dGroupEnd() {
         if (debug_message && debug_adv) return console.groupEnd();
+    }
+
+    function timerMananger() {
+        document.addEventListener("visibilitychange", () => {
+            if (timer_list.length > 0) {
+                let pause = (document.visibilityState === "visible") ? false : true;
+                for (let timer of timer_list) {
+                    if (!pause) {
+                        timer.id = setInterval(timer.handler, timer.delay);
+                        //dPrint(`${m}start timer[${timer.note}] id:${timer.id}`);
+                    } else {
+                        clearInterval(timer.id);
+                        //dPrint(`${m}stop timer[${timer.note}] id:${timer.id}`);
+                    }
+                }
+            }
+        });
     }
 
     function addTimer(handler, delay, note = "") {
