@@ -332,16 +332,21 @@ show images direct link under title (only resized images)
 ![](https://i.imgur.com/pw1fW6X.jpg)  
 
 ## [[pornhub user video]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)  
+- replace `user link` to `user video list`, except comment  
+  it will try to go to ```user/videos/public``` first  
+  if it doesn't exist, auto redirect to ```user/videos```  
+
 - video page  
-  - replace `user link` to `user video list`, except comment  
-    it will try to go to ```user/videos/public``` first  
-    if it doesn't exist, auto redirect to ```user/videos```  
   - add a button to copy link of current page  
 
 - user video list  
   - add checkbox for each video and a textbox on top to select and copy links  
   - make upload time visable  
   - [effect](https://i.imgur.com/lL6sJZX.png)  
+
+- v0.04  
+  - delay trigger when in background  
+  - replace user link now support other pages  
 
 ## [[anti-bili-anti-copy]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)  
 remove bilibili article copy protection  
