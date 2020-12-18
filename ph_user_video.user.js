@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.04
+// @version      0.05
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -66,7 +66,7 @@
             if (target) {
                 target.forEach(e => {
                     let a = e.querySelector("a");
-                    if (a) a.href = `${a.href}/videos/public`;
+                    if (a) if (!a.href.includes("/videos")) a.href = `${a.href}/videos/public`;
                 });
             } else {
                 print(`${targetid} not found`);
