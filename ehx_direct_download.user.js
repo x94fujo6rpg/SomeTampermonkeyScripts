@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      0.99
+// @version      1.01
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -15,7 +15,7 @@
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
-/*jshint esversion: 9 */
+/* jshint esversion: 9 */
 
 // this script only work in Thumbnail mode
 (function () {
@@ -152,6 +152,27 @@
                         padding-bottom: 0.4rem;
                         display: inline-grid;
                     }
+
+                    .prefix_from {
+                        text-align: center;
+                        white-space: break-spaces;
+                        border: 0.1rem solid blueviolet;
+                        position: relative;
+                        background: rgba(138, 43, 226, 0.1);
+                    }
+
+                    .prefix_from>div {
+                        display: none;
+                    }
+
+                    .prefix_from:hover>div {
+                        display: block;
+                        position: absolute;
+                        z-index: 10;
+                        margin: 0.6rem;
+                        overflow: hidden;
+                        bottom: 100%;
+                    }
                 `,
             });
             document.head.appendChild(newcss);
@@ -159,7 +180,7 @@
         }
 
         function setTitleStyle() {
-            [...document.styleSheets[0].cssRules].find(s => s.selectorText == ".gl4t").style.removeProperty("max-height");
+            [...[...document.styleSheets].find(s => s.href).cssRules].find(s => s.selectorText == ".gl4t").style.removeProperty("max-height");
         }
 
         function setEvent(link) {
@@ -216,7 +237,7 @@
                 setBottomStyle();
 
                 function setBottomStyle() {
-                    [...document.styleSheets[0].cssRules].find(s => s.selectorText == ".gl5t").style.removeProperty("margin");
+                    [...[...document.styleSheets].find(s => s.href).cssRules].find(s => s.selectorText == ".gl5t").style.removeProperty("margin");
                 }
 
                 function acquireGalleryData() {
@@ -292,7 +313,8 @@
                         className: "puretext",
                     });
                     puretext_div.setAttribute("name", id_list.puretext);
-                    let pos = gallery.querySelector(".gl3t");
+                    let pos = gallery.querySelector(".prefix_from");
+                    if (!pos) pos = gallery.querySelector(".gl3t");
                     pos.insertAdjacentElement("afterend", puretext_div);
                 });
             }
@@ -473,8 +495,8 @@
                 });
                 data.misc = copy_tags; // unused list
 
-                data.title_original = data.title;
-                data.title_jpn = data.title_jpn.length > 0 ? data.title_jpn : data.title;
+                data.title_original = decodeHTMLString(data.title);
+                data.title_jpn = data.title_jpn.length > 0 ? decodeHTMLString(data.title_jpn) : data.title;
                 data.title_jpn_original = data.title_jpn;
                 [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
                 [, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
@@ -653,7 +675,7 @@
 
                 if (torrent_list) {
                     let box = Object.assign(document.createElement("div"), { className: "torrent_title", style: "display:none" });
-                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(decodeHTMLString(torrent)), { className: "puretext", })); });
+                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(torrent), { className: "puretext", })); });
                     pos.insertAdjacentElement("beforebegin", box);
                 } else {
                     button.disabled = true;
@@ -879,8 +901,8 @@
         window.open(
             URL,
             `_pu${Math.random().toString().replace(/0\./, "")}`,
-            `toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0
-            ,width=${w},height=${h},left=${(screen.width - w) / 2},top=${(screen.height - h) / 2}`
+            `toolbar=0,scrollbars=0,location=0,statusbar=0,menubar=0,resizable=0` +
+            `,width=${w},height=${h},left=${(screen.width - w) / 2},top=${(screen.height - h) / 2}`
         );
         return false;
     }
@@ -1046,6 +1068,7 @@
                         tofix.title = `${prefix} ${tofix.title_original}`;
                         tofix.title_jpn = `${prefix} ${tofix.title_jpn}`;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${prefix} `), { style: tofix.from_other_gallery ? "color:blueviolet" : "color:green;" }));
+                        if (tofix.from_other_gallery) gallery.querySelector(".prefix_from").style.display = "";
                         dPrint(`add prefix "${prefix}" from self`);
                     } else {
                         dPrint(`skip`);
@@ -1092,6 +1115,38 @@
                         tofix.title_prefix = new_prefix;
                         tofix.from_other_gallery = same_title.gid;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
+
+                        // add span to show where the prefix came from
+                        let from = gallery.querySelector(".prefix_from");
+                        if (!from) {
+                            let pos = gallery.querySelector(".gl3t");
+                            let box = Object.assign(document.createElement("div"), { className: "prefix_from" });
+                            let img_source_div = document.querySelector(`[gid="${same_title.gid}"] .gl3t`);
+                            let img_source_img = img_source_div.querySelector("img");
+                            let img = Object.assign(document.createElement("img"), {
+                                src: img_source_img.src,
+                                style: `height:${img_source_img.style.height};width:${img_source_img.style.width};`,
+                            });
+                            let img_div = Object.assign(document.createElement("div"), {
+                                style: `height:${img_source_div.style.height};width:${img_source_div.style.width};`,
+                            });
+                            img_div.appendChild(img);
+                            let nodelist = [
+                                img_div,
+                                newSpan(`prefix from: ${same_title.gid}`),
+                                newSpan(`\n${new_prefix} ${same_title.title_no_event_jpn}`),
+                            ];
+                            appendAllChild(box, nodelist);
+                            let pt = gallery.querySelector("div.puretext");
+                            if (pt) {
+                                pt.insertAdjacentElement("beforebegin", box);
+                            } else {
+                                pos.insertAdjacentElement("afterend", box);
+                            }
+                        } else {
+                            from.style.display = "";
+                        }
+
                         let style = ["color:DarkOrange;", "", "color:OrangeRed;", "", "color:DeepPink;"];
                         print(`[%c${String(id).padStart(10)} ${tofix.title_pure_jpn}%c] add prefix "${new_prefix}" from\n[%c${String(same_title.gid).padStart(10)} ${same_title.title_pure_jpn}%c]%c${by_sim}`, ...style);
                     }
@@ -1101,6 +1156,8 @@
                 tofix.title = tofix.title_original;
                 tofix.title_jpn = tofix.title_jpn_original;
                 title_ele.innerHTML = tofix.title_jpn ? tofix.title_jpn : tofix.title;
+                let from = gallery.querySelector(".prefix_from");
+                if (from) from.style.display = "none";
             }
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
@@ -1232,7 +1289,7 @@
 
     function removeAllPunctuation(input = "") {
         let reg = /[\u2000-\u206F\u2E00-\u2E7F\u3000-\u303F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~\s　]/g;
-        return shiftCode(decodeHTMLString(input)).replace(reg, "");
+        return shiftCode(input).replace(reg, "");
     }
 
     function shiftCode(string = "") {
@@ -1246,16 +1303,14 @@
     }
 
     function getTorrentList(gid = "") {
-        let list = [];
         let torrents = gdata.find(gallery_data => gallery_data.gid == gid);
         if (!torrents) {
-            print(`${m}${gdata.gid} have no torrents`);
+            print(`${m}${gdata.gid} have no torrents ???`);
             return false;
         }
         torrents = torrents.torrents;
         if (torrents.length == 0) return false;
-        torrents.forEach(torrent => list.push(torrent.name));
-        return list.reverse();
+        return torrents.map(torrent => decodeHTMLString(torrent.name)).reverse();
     }
 
     function addInfoToAllGallery() {

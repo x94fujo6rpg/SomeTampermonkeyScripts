@@ -83,6 +83,12 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.01
+  - fix script not work in eh (css not found)  
+  - quick check prefix source  
+    - display which gallery the prefix is from under the gallery  
+    - move mouse on top will show the image  
+
 - v0.99
   - fix some issue in `show torrent list`  
     - decode HTML text (like `&#039;`)
