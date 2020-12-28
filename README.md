@@ -16,6 +16,7 @@ click link to install
 |[google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)|
 |[reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)|
 |[anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)|
+|[fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)|[raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)|
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
@@ -370,3 +371,15 @@ auto click and redirect to download link immediately
 
 ## [[google drive auto click]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)
 auto skip & click download
+
+## [[fc2 show all products]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)
+only work at link like this: `https://adult.contents.fc2.com/users/*/articles?sort=date&order=desc`
+![](https://i.imgur.com/chXUrUu.png)
+![](https://i.imgur.com/kWXJ5ea.png)
+
+- show full list of products in 1 page and sort by id
+- show id
+- show full title
+- remove link in title (click image to product page)
+- remove some heavy element
+- make product link open in new tab
