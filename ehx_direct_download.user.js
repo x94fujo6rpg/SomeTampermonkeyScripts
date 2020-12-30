@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.01
+// @version      1.02
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -28,8 +28,7 @@
     let debug_adv = false;
     let gallery_nodes;
     let gdata = [];
-    let gcount = 0;
-    let pcount = 0;
+    let gallery_count = 0;
     let timer_list = [];
     let key_list = {
         dl_list: "exhddl_list",
@@ -96,7 +95,7 @@
     let [container_start, container_end] = extracContainer();
     let container_reg = containerRegexGenerator();
     let group_reg = new RegExp(`^${container_reg}`);
-    let excess_reg = new RegExp(`\\s*${container_reg}\\s*`);
+    let excess_reg = new RegExp(`^\\s*${container_reg}\\s*|\\s*${container_reg}\\s*$`, "g");
     let blank_reg = /[\s　]{2,}/g;
     let enable_sim_search = false;
     let sim_search_threshold = 0.6;
@@ -222,8 +221,10 @@
 
             document.getElementById("toppane").insertAdjacentElement("afterend", box);
             if (hid) hlexg();
-            addInfoToAllGallery();
-            setAllLinkToNewTab();
+            forEachGallery(gallery => {
+                addInfoToGallery(gallery);
+                setLinkToNewTab(gallery);
+            });
             addTimer(updateGalleryStatus, status_update_interval);
 
             function enableDirectDownload() {
@@ -242,20 +243,20 @@
 
                 function acquireGalleryData() {
                     let gallery_nodelist = selectAllGallery();
-                    let gc = 0;
                     if (gallery_nodelist) {
                         print(`${m}acquire gallery data`);
                         let data = { method: "gdata", gidlist: [], namespace: 1 };
                         let alldata = [];
                         let count = 0;
                         let glist = [];
-                        gallery_nodelist.forEach((gallery, index) => {
+                        for (let index = 0, length = gallery_nodelist.length; index < length; index++) {
+                            let gallery = gallery_nodelist[index];
                             let gid = gallery.getAttribute("gid");
                             let gtoken = gallery.getAttribute("gtoken");
                             if (gid && gtoken) {
                                 glist.push([gid, gtoken]);
                                 count++;
-                                gc++;
+                                gallery_count++;
                                 if (count === 25 || index === gallery_nodelist.length - 1) {
                                     count = 0;
                                     let newdata = Object.assign({}, data);
@@ -264,11 +265,9 @@
                                     glist = [];
                                 }
                             }
-                        });
-                        gcount = gc; // save gallery list count
-                        print(`${m}gallery queue length:[${alldata.length}], total gallery count:[${gc}]`);
+                        }
+                        print(`${m}gallery queue length:[${alldata.length}], total gallery count:[${gallery_count}]`);
                         if (alldata.length != 0) {
-                            print(`${m}start sending request`);
                             requestData(alldata);
                         } else {
                             print(`${m}gallery queue is empty`);
@@ -276,30 +275,55 @@
                     }
                 }
 
-                function requestData(datalist, request_index = 0) {
-                    if (request_index >= datalist.length) return;
-                    print(`${m}sending request[${request_index + 1}]`);
-                    myApiCall(datalist, request_index);
+                async function requestData(datalist) {
+                    print(`${m}start sending request`);
+                    for (let index = 0, length = datalist.length; index < length; index++) {
+                        print(`${m}sending request[${index}]`);
+                        await myApiCall(datalist[index])
+                            .then(async reslove => {
+                                print(`${m}receive request[${index}]`);
+                                await directDL(reslove, index);
+                            })
+                            .catch(reject => {
+                                print(`${m}request[${index}] failed`, reject);
+                            });
+                    }
+                    // all done
+                    groupEnd();
+                    timeEnd(`${m}request_data`);
+                    print(`${m}all request done`);
+                    print(`${m}initializing sorting`);
+                    print(`${m}process data`);
+                    processGdata();
+                    print(`${m}setup sorting button`);
+                    setSortingButton();
+                    print(`${m}setup copy title button`);
+                    forEachGallery(setCopyTitle);
+                    print(`${m}setup show torrent title button`);
+                    forEachGallery(setShowTorrent);
+                    if (getGMValue("auto_fix_title")) {
+                        print(`${m}auto enable fix title`);
+                        document.getElementById("exhddl_fix_title").click();
+                    }
+                    if (getGMValue("auto_enable_puretext")) {
+                        print(`${m}auto enable pure text`);
+                        document.getElementById("exhddl_puretext").click();
+                    }
                 }
 
-                function myApiCall(datalist, request_index) {
-                    let request = new XMLHttpRequest();
-                    request.open("POST", api);
-                    request.setRequestHeader("Content-Type", "application/json");
-                    request.withCredentials = true;
-                    request.onreadystatechange = function () {
-                        if (request.readyState == 4) {
-                            if (request.status == 200) {
-                                print(`${m}receive request[${request_index + 1}]`);
-                                directDL(request.responseText, request_index + 1);
-                                requestData(datalist, request_index + 1);
-                            } else {
-                                print(`${m}request[${request_index}] failed, status:[${request.status}]`);
-                                print(request);
+                function myApiCall(data) {
+                    return new Promise((reslove, reject) => {
+                        let request = new XMLHttpRequest();
+                        request.open("POST", api);
+                        request.setRequestHeader("Content-Type", "application/json");
+                        request.withCredentials = true;
+                        request.onreadystatechange = () => {
+                            if (request.readyState == 4) {
+                                return (request.status == 200) ? reslove(request.responseText) : reject(request.responseText);
                             }
-                        }
-                    };
-                    request.send(JSON.stringify(datalist[request_index]));
+                        };
+                        request.send(JSON.stringify(data));
+                    });
                 }
             }
 
@@ -307,7 +331,7 @@
                 let button = document.getElementById(id_list.puretext);
                 button.disabled = true;
                 button.removeAttribute("onclick");
-                selectAllGallery().forEach(gallery => {
+                forEachGallery(gallery => {
                     let puretext_div = Object.assign(document.createElement("div"), {
                         innerHTML: gallery.querySelector(".glname").innerHTML,
                         className: "puretext",
@@ -325,19 +349,20 @@
             }
 
             function hlexg() {
-                selectAllGallery().forEach(gallery => { if (gallery.querySelector("s")) Object.assign(gallery.style, style_list.ex); });
+                forEachGallery(gallery => { if (gallery.querySelector("s")) Object.assign(gallery.style, style_list.ex); });
             }
         }
     }
 
-    function directDL(data, index) {
+    function directDL(data, index) {        
         data = JSON.parse(data);
         print(`${m}process request[${index}] data, gallery count:[${Object.keys(data.gmetadata).length}]`);
 
         let downloaded_list = getGMList("dl_list");
         let gidlist = [];
         let mark_list = [];
-        data.gmetadata.forEach(gallery_data => {
+
+        for (let gallery_data of data.gmetadata) {
             gdata.push(gallery_data);
             let gid = gallery_data.gid;
             let gtoken = gallery_data.token;
@@ -378,7 +403,6 @@
                 pos.insertAdjacentElement("beforebegin", box);
 
                 gidlist.push(dl_button.id);
-                pcount++;
 
                 let set_status_button = Object.assign(document.createElement("button"), {
                     id: `gallery_status_${gid}`,
@@ -391,33 +415,11 @@
                 dl_button.insertAdjacentElement("afterend", set_status_button);
                 dl_button.insertAdjacentElement("afterend", newLine());
             }
-        });
+        }
         if (mark_list.length > 0) print(`${m}found in list, set as downloaded:\n`, mark_list);
 
         print(`${m}request[${index}] done`);
-
-        if (gcount === pcount) {
-            groupEnd();
-            timeEnd(`${m}request_data`);
-            print(`${m}all request done`);
-            print(`${m}initializing sorting`);
-            print(`${m}process data`);
-            processGdata();
-            print(`${m}setup sorting button`);
-            setSortingButton();
-            print(`${m}setup copy title button`);
-            setCopyTitle();
-            print(`${m}setup show torrent title button`);
-            setShowTorrent();
-            if (getGMValue("auto_fix_title")) {
-                print(`${m}auto enable fix title`);
-                document.getElementById("exhddl_fix_title").click();
-            }
-            if (getGMValue("auto_enable_puretext")) {
-                print(`${m}auto enable pure text`);
-                document.getElementById("exhddl_puretext").click();
-            }
-        }
+        return new Promise(reslove => reslove());
 
         function downloadButton(button, gid, archivelink, glink) {
             Object.assign(button.style, style_list.button_marked);
@@ -456,7 +458,7 @@
             let list_length = downloaded_list.length;
             downloaded_list = downloaded_list.join();
             GM_setValue(key_list.dl_list, downloaded_list);
-            print(`${m}save list. [list_size:${downloaded_list.length}(limit:${gallery_data_limit.max_size}), list_length:${list_length}(possible limit:${gallery_data_limit.max_length})]`);
+            print(`${m}save list. [list_size:${downloaded_list.length} (limit:${gallery_data_limit.max_size}), list_length:${list_length} (possible limit:${gallery_data_limit.max_length})]`);
 
             updateGalleryStatus();
 
@@ -471,224 +473,188 @@
                 dl_button.removeAttribute("marked");
             }
         }
+    }
 
-        function processGdata() {
-            let tag_key_list = [
-                "artist:",
-                "group:",
-                "female:",
-                "male:",
-                "parody:",
-                "character:",
-                "language:",
-            ];
-            dGroup();
-            gdata.forEach(data => {
-                // extract tags
-                let copy_tags = Object.assign([], data.tags);
-                tag_key_list.forEach(tag_key => {
-                    let data_key = tag_key.replace(":", "");
-                    data[data_key] = [];
-                    copy_tags.forEach(tag => { if (tag.includes(tag_key)) data[data_key].push(tag); });
-                    // remove used
-                    copy_tags = copy_tags.filter(tag => data[data_key].indexOf(tag) == -1);
-                });
-                data.misc = copy_tags; // unused list
+    function processGdata() {
+        let tag_key_list = [
+            "artist:",
+            "group:",
+            "female:",
+            "male:",
+            "parody:",
+            "character:",
+            "language:",
+        ];
+        dGroup();
+        for (let data of gdata) {
+            // extract tags
+            let copy_tags = Object.assign([], data.tags);
+            for (let tag_key of tag_key_list) {
+                let data_key = tag_key.replace(":", "");
+                data[data_key] = [];
+                copy_tags.every(tag => { if (tag.includes(tag_key)) data[data_key].push(tag); });
+                // remove used
+                copy_tags = copy_tags.filter(tag => data[data_key].indexOf(tag) == -1);
+            }
+            data.misc = copy_tags; // unuse list
 
-                data.title_original = decodeHTMLString(data.title);
-                data.title_jpn = data.title_jpn.length > 0 ? decodeHTMLString(data.title_jpn) : data.title;
-                data.title_jpn_original = data.title_jpn;
-                [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
-                [, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
+            data.title_original = decodeHTMLString(data.title);
+            data.title_jpn = data.title_jpn.length > 0 ? decodeHTMLString(data.title_jpn) : data.title;
+            data.title_jpn_original = data.title_jpn;
+            [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
+            [, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
 
-                // try to found prefix in title_jpn
-                let [title_prefix_jpn,] = extractPrefix(data.title_jpn);
-                if (title_prefix_jpn) data.title_prefix = title_prefix_jpn;
+            // try to found prefix in title_jpn
+            let [title_prefix_jpn,] = extractPrefix(data.title_jpn);
+            if (title_prefix_jpn) data.title_prefix = title_prefix_jpn;
 
-                let from_torrent = false;
-                if (data.title_prefix.length == 0) {
-                    // try to found prefix in torrent
-                    let torrent_list = getTorrentList(data.gid);
-                    if (torrent_list) {
-                        for (let torrent of torrent_list) {
-                            let [prefix,] = extractPrefix(torrent);
-                            if (prefix) {
-                                data.title_prefix = prefix;
-                                from_torrent = true;
-                                break;
-                            }
+            let from_torrent = false;
+            if (data.title_prefix.length == 0) {
+                // try to found prefix in torrent
+                let torrent_list = getTorrentList(data.gid);
+                if (torrent_list) {
+                    for (let torrent of torrent_list) {
+                        let [prefix,] = extractPrefix(torrent);
+                        if (prefix) {
+                            data.title_prefix = prefix;
+                            from_torrent = true;
+                            break;
                         }
                     }
                 }
+            }
 
-                [data.title_group, data.title_no_group] = extractGroup(data.title_no_event);
-                [data.title_group_jpn, data.title_no_group_jpn] = extractGroup(data.title_no_event_jpn);
-                data.title_pure = removeExcess(data.title_no_group);
-                data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
-                data.title_pure_for_sim = removeAllPunctuation(data.title_pure).toLowerCase();
-                data.title_pure_jpn_for_sim = removeAllPunctuation(data.title_pure_jpn).toLowerCase();
+            [data.title_group, data.title_no_group] = extractGroup(data.title_no_event);
+            [data.title_group_jpn, data.title_no_group_jpn] = extractGroup(data.title_no_event_jpn);
+            data.title_pure = removeExcess(data.title_no_group);
+            data.title_pure_jpn = removeExcess(data.title_no_group_jpn);
+            data.title_pure_for_sim = removeAllPunctuation(data.title_pure).toLowerCase();
+            data.title_pure_jpn_for_sim = removeAllPunctuation(data.title_pure_jpn).toLowerCase();
 
-                if (debug_message && debug_adv) {
-                    dPrint(`${String(data.gid).padStart(10)}|__________`);
-                    let title_list = [
-                        "title_original",
-                        //"title_no_event",
-                        //"title_no_group",
-                        "title_pure",
-                        "title_prefix",
-                        //"title_group",
-                        "title_jpn",
-                        //"title_no_event_jpn",
-                        //"title_no_group_jpn",
-                        "title_pure_jpn",
-                        //"title_group_jpn"
-                        "title_pure_for_sim",
-                        "title_pure_jpn_for_sim",
-                    ];
-                    title_list.forEach(key => {
-                        let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
-                        dPrint(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:DarkOrange;");
-                    });
-                }
-            });
-            dGroupEnd();
-        }
-
-        function setSortingButton() {
-            let pos = document.getElementById(id_list.mainbox);
-            let input_list = [
-                newSetting("(Sort) Descending", "sort_setting"), newSeparate(),
-                newSetting("(Sort) Numeric", "sort_numeric"), newSeparate(),
-                newSetting("(Sort) Ignore Punctuation", "sort_ignore_punctuation"), newSeparate(),
-                newSetting("Copy Title When Download", "dl_and_copy"), newSeparate(),
-                newSetting("Auto Enable Pure Text", "auto_enable_puretext"), newSeparate(),
-                newSetting("Auto Enable Fix Title", "auto_fix_title"), newLine(),
-            ].flat();
-            input_list.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
-            let form = Object.assign(
-                document.createElement("form"),
-                {
-                    id: "exhddl_setting_form_prevent_send_data",
-                    onsubmit: (event) => {
-                        event.preventDefault();
-                        return false;
-                    },
-                }
-            );
-            appendAllChild(form, input_list);
-            let nodelist = [form];
-            //nodelist.forEach(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
-            nodelist.push([
-                newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_title_pure", "Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_title_no_event", "Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
-                newSeparate(),
-
-                newButton("exhddl_sort_by_date", "Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_prefix", "Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_artist", "Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_group", "Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_category", "Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
-                newSeparate(),
-                newButton("exhddl_sort_by_ex", "???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
-                newLine(),
-
-                newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
-                newSeparate(),
-                newButton("exhddl_exclude_buttons", "Show Exclude List", style_list.top_button, () => { setExclude(); }),
-            ]);
-            nodelist = nodelist.flat();
-            pos.querySelector("span").remove(); // remove loading message
-            appendAllChild(pos, nodelist);
-
-            function newSetting(lable_text, id_key) {
-                return [
-                    Object.assign(document.createElement("input"), {
-                        type: "checkbox",
-                        id: id_list[id_key],
-                        checked: getGMValue(id_key),
-                    }),
-                    Object.assign(document.createElement("label"), {
-                        htmlFor: id_list[id_key],
-                        textContent: lable_text,
-                    })
+            if (debug_message && debug_adv) {
+                dPrint(`${String(data.gid).padStart(10)}|__________`);
+                let title_list = [
+                    "title_original",
+                    //"title_no_event",
+                    //"title_no_group",
+                    "title_pure",
+                    "title_prefix",
+                    //"title_group",
+                    "title_jpn",
+                    //"title_no_event_jpn",
+                    //"title_no_group_jpn",
+                    "title_pure_jpn",
+                    //"title_group_jpn"
+                    "title_pure_for_sim",
+                    "title_pure_jpn_for_sim",
                 ];
-            }
-
-            function updateSetting() {
-                let skip_list = Object.keys(default_value).filter(key => typeof (default_value[key]) != "boolean");
-                let updatelist = Object.keys(key_list).filter(key => !skip_list.includes(key));
-                let [info, style] = [[], []];
-                updatelist.forEach(key => {
-                    let value = document.getElementById(id_list[key]).checked;
-                    GM_setValue(key_list[key], value);
-                    info.push(`[${key}]:%c${value}`);
-                    style.push("", value ? "color:DeepSkyBlue" : "color:DeepPink");
+                title_list.forEach(key => {
+                    let add = (from_torrent && key == "title_prefix") ? "　found in torrent" : "";
+                    dPrint(`${String(data.gid).padStart(10)}|${key.padStart(25)}|${data[key]}%c${add}`, "color:DarkOrange;");
                 });
-                print(`${m}updateSetting | %c${info.join(" %c| ")}`, ...style);
-            }
-
-            function sortGalleryByKey(key = "") {
-                if (!key) return;
-                getAllGalleryNode();
-                sortGdata();
-                let sorted_id = getSortedGalleryID(gdata, key);
-                let container = document.querySelector(".itg.gld");
-                removeAllGallery();
-                sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
             }
         }
+        dGroupEnd();
+    }
 
-        function setCopyTitle() {
-            selectAllGallery().forEach(gallery => {
-                let gid = gallery.getAttribute("gid");
-                let pos = gallery.querySelector(`#gallery_status_${gid}`);
-                let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
-                    navigator.clipboard.writeText(repalceForbiddenChar(document.querySelector(`[gid="${gid}"] .glname`).textContent.trim()));
-                });
-                pos.insertAdjacentElement("beforebegin", button);
-                pos.insertAdjacentElement("beforebegin", newLine());
-            });
+    function setSortingButton() {
+        let pos = document.getElementById(id_list.mainbox);
+        let input_list = [
+            newSetting("(Sort) Descending", "sort_setting"), newSeparate(),
+            newSetting("(Sort) Numeric", "sort_numeric"), newSeparate(),
+            newSetting("(Sort) Ignore Punctuation", "sort_ignore_punctuation"), newSeparate(),
+            newSetting("Copy Title When Download", "dl_and_copy"), newSeparate(),
+            newSetting("Auto Enable Pure Text", "auto_enable_puretext"), newSeparate(),
+            newSetting("Auto Enable Fix Title", "auto_fix_title"), newLine(),
+        ].flat();
+        input_list.every(node => { if (node.tagName == "INPUT") { node.addEventListener("change", updateSetting); } });
+        let form = Object.assign(
+            document.createElement("form"),
+            {
+                id: "exhddl_setting_form_prevent_send_data",
+                onsubmit: (event) => {
+                    event.preventDefault();
+                    return false;
+                },
+            }
+        );
+        appendAllChild(form, input_list);
+        let nodelist = [form];
+        nodelist.push([
+            newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_pure", "Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_no_event", "Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+            newSeparate(),
+
+            newButton("exhddl_sort_by_date", "Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_prefix", "Event", style_list.top_button, () => { sortGalleryByKey("title_prefix"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_artist", "Artist", style_list.top_button, () => { sortGalleryByKey("artist"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_group", "Group/Circle", style_list.top_button, () => { sortGalleryByKey("group"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_category", "Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_ex", "???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
+            newLine(),
+
+            newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
+            newSeparate(),
+            newButton("exhddl_exclude_buttons", "Show Exclude List", style_list.top_button, () => { setExclude(); }),
+        ]);
+        nodelist = nodelist.flat();
+        pos.querySelector("span").remove(); // remove loading message
+        appendAllChild(pos, nodelist);
+
+        function newSetting(lable_text, id_key) {
+            return [
+                Object.assign(document.createElement("input"), {
+                    type: "checkbox",
+                    id: id_list[id_key],
+                    checked: getGMValue(id_key),
+                }),
+                Object.assign(document.createElement("label"), {
+                    htmlFor: id_list[id_key],
+                    textContent: lable_text,
+                })
+            ];
         }
 
-        function setShowTorrent() {
-            selectAllGallery().forEach(gallery => {
-                let gid = gallery.getAttribute("gid");
-                let torrent_list = getTorrentList(gid);
-                let pos = gallery.querySelector(".gallery_box");
-                let button = newButton(`t_title_${gid}`, "Show torrent List", style_list.gallery_button, function () {
-                    let torrent_list = document.querySelector(`[gid="${gid}"] .torrent_title`);
-                    torrent_list.style.display = (torrent_list.style.display == "none") ? "" : "none";
-                });
-                pos.insertAdjacentElement("beforeend", newLine());
-                pos.insertAdjacentElement("beforeend", button);
+        function updateSetting() {
+            let skip_list = Object.keys(default_value).filter(key => typeof (default_value[key]) != "boolean");
+            let updatelist = Object.keys(key_list).filter(key => !skip_list.includes(key));
+            let [info, style] = [[], []];
+            for (let key of updatelist) {
+                let value = document.getElementById(id_list[key]).checked;
+                GM_setValue(key_list[key], value);
+                info.push(`[${key}]:%c${value}`);
+                style.push("", value ? "color:DeepSkyBlue" : "color:DeepPink");
+            }
+            print(`${m}updateSetting | %c${info.join(" %c| ")}`, ...style);
+        }
 
-                if (torrent_list) {
-                    let box = Object.assign(document.createElement("div"), { className: "torrent_title", style: "display:none" });
-                    torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(torrent), { className: "puretext", })); });
-                    pos.insertAdjacentElement("beforebegin", box);
-                } else {
-                    button.disabled = true;
-                    button.removeAttribute("onclick");
-                }
-            });
+        function sortGalleryByKey(key = "") {
+            if (!key) return;
+            getAllGalleryNode();
+            sortGdata();
+            let sorted_id = getSortedGalleryID(gdata, key);
+            let container = document.querySelector(".itg.gld");
+            removeAllGallery();
+            sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
         }
 
         function setExclude() {
             let self = document.getElementById("exhddl_exclude_buttons");
             self.disabled = true;
             self.removeAttribute("onclick");
-            selectAllGallery().forEach(gallery => {
+            forEachGallery(gallery => {
                 let gid = gallery.getAttribute("gid");
                 let data = gdata.find(gallery_data => gallery_data.gid == gid);
                 let pos = gallery.querySelector(".gallery_box");
@@ -751,25 +717,60 @@
         }
     }
 
+    function setCopyTitle(gallery) {
+        let gid = gallery.getAttribute("gid");
+        let pos = gallery.querySelector(`#gallery_status_${gid}`);
+        let button = newButton(`copy_title_${gid}`, "Copy Title", style_list.gallery_button, function () {
+            navigator.clipboard.writeText(repalceForbiddenChar(document.querySelector(`[gid="${gid}"] .glname`).textContent.trim()));
+        });
+        pos.insertAdjacentElement("beforebegin", button);
+        pos.insertAdjacentElement("beforebegin", newLine());
+    }
+
+    function setShowTorrent(gallery) {
+        let gid = gallery.getAttribute("gid");
+        let torrent_list = getTorrentList(gid);
+        let pos = gallery.querySelector(".gallery_box");
+        let button = newButton(`t_title_${gid}`, "Show torrent List", style_list.gallery_button, function () {
+            let torrent_list = document.querySelector(`[gid="${gid}"] .torrent_title`);
+            torrent_list.style.display = (torrent_list.style.display == "none") ? "" : "none";
+        });
+        pos.insertAdjacentElement("beforeend", newLine());
+        pos.insertAdjacentElement("beforeend", button);
+
+        if (torrent_list) {
+            let box = Object.assign(document.createElement("div"), { className: "torrent_title", style: "display:none" });
+            torrent_list.forEach(torrent => { box.appendChild(Object.assign(newSpan(torrent), { className: "puretext", })); });
+            pos.insertAdjacentElement("beforebegin", box);
+        } else {
+            button.disabled = true;
+            button.removeAttribute("onclick");
+        }
+    }
+
     function extracContainer() {
         let [start, end] = ["", ""];
-        container_list.forEach(c => {
+        for (let c of container_list) {
             start += c[0];
             end += c[1];
-        });
+        }
         return [start, end];
     }
 
     function containerRegexGenerator() {
         let reg = [];
         let esc_reg = /[-\/\\^$*+?.()|[\]{}]/g;
-        container_list.forEach(c => {
+        for (let c of container_list) {
             let esc = c.replace(esc_reg, "\\$&");
             let end = esc.slice(esc.length / 2);
             let start = esc.replace(end, "");
             reg.push(`${start}[^${esc}]*${end}`);
-        });
+        }
         return `(${reg.join("|")})`;
+    }
+
+    function forEachGallery(handler) {
+        for (let index = 0, all = selectAllGallery(), length = all.length; index < length; index++) handler(all[index]);
     }
 
     function selectAllGallery() {
@@ -954,16 +955,9 @@
     function removeExcess(text = "") {
         // remove excess text
         let count = 0;
-        while (count < 100) {
+        while (count < 100 && text.match(excess_reg)) {
+            text = text.replace(excess_reg, "");
             count++;
-            let extract = excess_reg.exec(text);
-            if (extract) {
-                if (extract[0] != text) {
-                    text = text.replace(extract[0], "");
-                    continue;
-                }
-            }
-            break;
         }
         // remove container if it at start or end
         count = 0;
@@ -974,7 +968,6 @@
             text = text.slice(1).trim();
             if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
         }
-
         text = text.replace(blank_reg, " ");
         return text;
     }
@@ -998,10 +991,10 @@
         print(`${m}sort by: ${sort_key}`);
         dGroup();
         if (newlist) {
-            newlist.forEach(data => {
+            for (let data of newlist) {
                 new_id_list.push(data.gid);
                 dPrint(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
-            });
+            }
         }
         dGroupEnd();
 
@@ -1016,7 +1009,7 @@
 
     function getAllGalleryNode() {
         gallery_nodes = {};
-        selectAllGallery().forEach(gallery => {
+        forEachGallery(gallery => {
             let id = gallery.getAttribute("gid");
             let title = gallery.getAttribute("gtitle");
             let deepcopy = gallery.cloneNode(true);
@@ -1039,7 +1032,7 @@
     }
 
     function removeAllGallery() {
-        selectAllGallery().forEach(gallery => gallery.remove());
+        forEachGallery(gallery => gallery.remove());
     }
 
     function fixTitlePrefix() {
@@ -1047,8 +1040,7 @@
         dGroup();
         fix_prefix = fix_prefix ? false : true;
         dPrint(fix_prefix ? "try fix prefix" : "restore original title");
-        let arr = selectAllGallery();
-        for (let gallery of arr) {
+        forEachGallery(gallery => {
             let id = gallery.getAttribute("gid");
             let tofix = gdata.find(gallery_data => gallery_data.gid == id);
             let title_ele = gallery.querySelector(".glname");
@@ -1161,7 +1153,7 @@
             }
             let title_puretext = gallery.querySelector(`[name="${id_list.puretext}"]`);
             if (title_puretext) title_puretext.innerHTML = title_ele.innerHTML;
-        }
+        });
         dGroupEnd();
         timeEnd(`${m}fixTitlePrefix`);
 
@@ -1299,7 +1291,10 @@
     }
 
     function decodeHTMLString(input = "") {
-        return new DOMParser().parseFromString(input, "text/html").documentElement.textContent;
+        let parser = new DOMParser();
+        let text = parser.parseFromString(input, "text/html").documentElement.textContent;
+        parser = null;
+        return text;
     }
 
     function getTorrentList(gid = "") {
@@ -1313,25 +1308,18 @@
         return torrents.map(torrent => decodeHTMLString(torrent.name)).reverse();
     }
 
-    function addInfoToAllGallery() {
-        selectAllGallery().forEach(gallery => {
-            let link = gallery.querySelector("a").href;
-            let id = link.split("/g/")[1].split("/")[0];
-            let token = link.split("/g/")[1].split("/")[1];
-            let title = gallery.querySelector(".glname").textContent;
-
-            gallery.setAttribute("gid", id);
-            gallery.setAttribute("gtoken", token);
-            gallery.setAttribute("gtitle", title);
-        });
+    function addInfoToGallery(gallery) {
+        let link = gallery.querySelector("a").href;
+        let id = link.split("/g/")[1].split("/")[0];
+        let token = link.split("/g/")[1].split("/")[1];
+        let title = gallery.querySelector(".glname").textContent;
+        gallery.setAttribute("gid", id);
+        gallery.setAttribute("gtoken", token);
+        gallery.setAttribute("gtitle", title);
     }
 
-    function setAllLinkToNewTab() {
-        selectAllGallery().forEach(gallery => {
-            gallery.querySelectorAll("a").forEach(a => {
-                if (a.href.includes("/g/")) a.target = "_blank";
-            });
-        });
+    function setLinkToNewTab(gallery) {
+        gallery.querySelectorAll("a").forEach(a => { if (a.href.includes("/g/")) a.target = "_blank"; });
     }
 
     function updateGalleryStatus() {
@@ -1361,7 +1349,7 @@
 
         function updateGalleryColor() {
             let marked = [];
-            selectAllGallery().forEach(gallery => {
+            forEachGallery(gallery => {
                 let id = gallery.getAttribute("gid");
                 let puretext = gallery.querySelector(".puretext");
                 if (dl_list.includes(id)) {
