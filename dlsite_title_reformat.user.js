@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.63
+// @version      0.64
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/maniax/work/=/product_id/*
@@ -85,7 +85,7 @@
     let add_esc = "\\$&";
     let [container_start, container_end] = extracContainer();
     let reg_container = containerRegexGenerator();
-    let reg_excess = new RegExp(`\\s*${reg_container}\\s*`);
+    let reg_excess = new RegExp(`^\\s*${reg_container}\\s*|\\s*${reg_container}\\s*$`, "g");
     let reg_blank = /[\s　]{2,}/g;
     let reg_muti_blank = /[\s　\n\t]+/g;
     let reg_ascii = /[\x00-\x7F]/g;
@@ -431,16 +431,9 @@
     function removeExcess(text) {
         // remove excess text
         let count = 0;
-        while (count < 100) {
+        while (count < 100 && text.match(reg_excess)) {
+            text = text.replace(reg_excess, "");
             count++;
-            let extract = reg_excess.exec(text);
-            if (extract) {
-                if (extract[0] != text) {
-                    text = text.replace(extract[0], "");
-                    continue;
-                }
-            }
-            break;
         }
         // remove if it at start or end
         count = 0;
@@ -451,7 +444,6 @@
             text = text.slice(1).trim();
             if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
         }
-
         text = text.replace(reg_blank, " ");
         return text;
     }
@@ -801,7 +793,7 @@
     function extractTrackListFromText() {
         let raw_text = document.querySelector(".work_parts_container");
         if (!raw_text) return false;
-        if(debug) console.groupCollapsed();
+        if (debug) console.groupCollapsed();
         //------------------------------------------------------
         let extract_result = [];
         let reg_number = /[\d１２３４５６７８９０]+/;
@@ -895,9 +887,9 @@
             if (track_list.length > 0) extract_result.push(track_list);
             print("");
         }
-        if(debug) console.groupEnd();
+        if (debug) console.groupEnd();
         //------------------------------------------------------
-        if(debug) console.groupCollapsed();
+        if (debug) console.groupCollapsed();
         print("extract_result | ", extract_result);
         if (extract_result) {
             extract_result.forEach((result, result_index) => {
@@ -937,7 +929,7 @@
                 }
             });
         }
-        if(debug) console.groupEnd();
+        if (debug) console.groupEnd();
         return extract_result.length > 0 ? extract_result.sort((a, b) => b.length - a.length) : false;
     }
 
@@ -997,28 +989,24 @@
             print("processed | ", newlist);
         }
         if (newlist.some(line => line == "")) return print("found empty line, abort");
-
-        let pos = document.querySelector("[itemprop='description']");
-        let textbox = document.createElement("textarea");
-        let row_count = 0;
-        let maxlength = 0;
-        let id = `dtr_tracklist${index}`;
-        let box = Object.assign(document.createElement("div"), { className: "dtr_tracklist" });
-
-        let textlist = [];
-        newlist.forEach((line, index) => {
-            textlist.push(line.match(/^\d+/) ? `${line}` : `${index + 1}. ${line}`);
-            row_count++;
-            if (getTrueLength(line) > maxlength) maxlength = getTrueLength(line);
-        });
-        if (textlist.every(line => line.match(/^\d+/))) {
-            textlist = textlist.sort((a, b) =>
+        if (newlist.every(line => line.match(/^\d+/))) {
+            newlist = newlist.sort((a, b) =>
                 a.localeCompare(b,
                     navigator.languages[0] || navigator.language, {
                     numeric: true,
                 })
             );
         }
+
+        let pos = document.querySelector("[itemprop='description']");
+        let textbox = document.createElement("textarea");
+        let id = `dtr_tracklist${index}`;
+        let box = Object.assign(document.createElement("div"), { className: "dtr_tracklist" });
+        let textlist = [];
+        newlist.forEach((line, index) => { textlist.push(`${index + 1}. ${line}`); });
+
+        let row_count = textlist.length;
+        let maxlength = Math.max(...textlist.map(t => getTrueLength(t)));
         textbox.value = textlist.join("\n");
         print("final | ", textlist);
         Object.assign(textbox, { id: id, rows: row_count + 1, cols: maxlength, });
@@ -1037,7 +1025,7 @@
 
         function getTrueLength(string = "") {
             let length = 0;
-            [...string].forEach(char => { length += char.match(/[\w\s]/) ? 1 : 2; });
+            [...string].forEach(char => { length += char.match(/[\w\s_]/) ? 1 : 2; });
             return length;
         }
     }

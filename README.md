@@ -300,6 +300,14 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.63
+  - fix a bug in title process
+    ```
+    example: ccc[ddd]eee (fff)  
+    old: ccceee  
+    now: cccdddeee  
+    ```
+
 - v0.62
   - improved track list extract
   - list now use natural sort

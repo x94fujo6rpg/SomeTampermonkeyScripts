@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.02
+// @version      1.03
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -257,7 +257,7 @@
                                 glist.push([gid, gtoken]);
                                 count++;
                                 gallery_count++;
-                                if (count === 25 || index === gallery_nodelist.length - 1) {
+                                if (count === 25 || index === length - 1) {
                                     count = 0;
                                     let newdata = Object.assign({}, data);
                                     newdata.gidlist = Object.assign([], glist);
@@ -292,14 +292,13 @@
                     groupEnd();
                     timeEnd(`${m}request_data`);
                     print(`${m}all request done`);
-                    print(`${m}initializing sorting`);
                     print(`${m}process data`);
                     processGdata();
-                    print(`${m}setup sorting button`);
+                    print(`${m}setup sorting`);
                     setSortingButton();
-                    print(`${m}setup copy title button`);
+                    print(`${m}setup copy title`);
                     forEachGallery(setCopyTitle);
-                    print(`${m}setup show torrent title button`);
+                    print(`${m}setup show torrent title`);
                     forEachGallery(setShowTorrent);
                     if (getGMValue("auto_fix_title")) {
                         print(`${m}auto enable fix title`);
@@ -502,10 +501,10 @@
             data.title_jpn = data.title_jpn.length > 0 ? decodeHTMLString(data.title_jpn) : data.title;
             data.title_jpn_original = data.title_jpn;
             [data.title_prefix, data.title_no_event] = extractPrefix(data.title);
-            [, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
 
+            let title_prefix_jpn;
+            [title_prefix_jpn, data.title_no_event_jpn] = extractPrefix(data.title_jpn);
             // try to found prefix in title_jpn
-            let [title_prefix_jpn,] = extractPrefix(data.title_jpn);
             if (title_prefix_jpn) data.title_prefix = title_prefix_jpn;
 
             let from_torrent = false;
