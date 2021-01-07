@@ -2,21 +2,22 @@
 some scripts I made  
 click link to install  
 
-| script                                                                                                    | install                                                                                                 |
-| --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| [ehx direct download](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-direct-download)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)    |
-| [ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-link-color)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)         |
-| [ehx torrent text](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-torrent-text)               | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)       |
-| [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)  |
-| [mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js) |
-| [pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)          |
-| [youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)     |
-| [prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)                 | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)        |
-| [sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)        | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)   |
-| [google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js) |
-| [reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)             | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)      |
-| [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)    |
-| [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)  |
+| script                                                                                                      | install                                                                                                   |
+| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [ehx direct download](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-direct-download)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)      |
+| [ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-link-color)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)           |
+| [ehx torrent text](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-torrent-text)                 | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)         |
+| [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)    |
+| [mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)   |
+| [pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)             | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)            |
+| [youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)       |
+| [prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)          |
+| [sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)          | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)     |
+| [google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)   |
+| [reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)               | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)        |
+| [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)      |
+| [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)    |
+| [nexusmods skip countdown](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#nexusmods-skip-countdown) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js) |
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
@@ -400,3 +401,10 @@ only work at link like this: `https://adult.contents.fc2.com/users/*/articles?so
 - remove link in title (click image to product page)
 - remove some heavy element
 - make product link open in new tab
+
+## [[nexusmods skip countdown]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js)
+[www.nexusmods.com](https://www.nexusmods.com/)
+after click MANUAL  
+![](https://i.imgur.com/kV1tB5W.png)  
+- no countdown
+- auto start download
