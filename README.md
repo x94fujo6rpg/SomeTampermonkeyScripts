@@ -1,3 +1,11 @@
+The end of user scripts on chrome  
+1 year left after chrome 88  
+
+[https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code)  
+[https://github.com/Tampermonkey/tampermonkey/issues/644](https://github.com/Tampermonkey/tampermonkey/issues/644)  
+Remotely hosted code is no longer allowed;  
+an extension can only execute JavaScript that is included within its package.  
+
 # SomeTampermonkeyScripts  
 some scripts I made  
 click link to install  
