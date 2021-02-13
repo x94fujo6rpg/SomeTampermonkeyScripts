@@ -410,9 +410,14 @@ only work at link like this: `https://adult.contents.fc2.com/users/*/articles?so
 - remove some heavy element
 - make product link open in new tab
 
+#### updates
+- v0.2
+  - fix some issue
+  - improve speed
+
 ## [[nexusmods skip countdown]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js)
 [www.nexusmods.com](https://www.nexusmods.com/)
-after click MANUAL  
+after click MANUAL and selected file (some mod have mutiple files)  
 ![](https://i.imgur.com/kV1tB5W.png)  
 - no countdown
 - auto start download
