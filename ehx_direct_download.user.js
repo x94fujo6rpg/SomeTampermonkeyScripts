@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.03
+// @version      1.04
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -353,7 +353,7 @@
         }
     }
 
-    function directDL(data, index) {        
+    function directDL(data, index) {
         data = JSON.parse(data);
         print(`${m}process request[${index}] data, gallery count:[${Object.keys(data.gmetadata).length}]`);
 
@@ -1104,7 +1104,7 @@
                         tofix.title = `${new_prefix} ${tofix.title_original}`;
                         tofix.title_jpn = `${new_prefix} ${tofix.title_jpn_original}`;
                         tofix.title_prefix = new_prefix;
-                        tofix.from_other_gallery = same_title.gid;
+                        tofix.from_other_gallery = same_title.from_other_gallery ? same_title.from_other_gallery : same_title.gid;
                         title_ele.insertAdjacentElement("afterbegin", Object.assign(newSpan(`${new_prefix} `), { style: "color:blueviolet;" }));
 
                         // add span to show where the prefix came from

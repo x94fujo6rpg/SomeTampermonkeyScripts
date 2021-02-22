@@ -93,6 +93,17 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.04
+  - `fix event title` now show the real source
+    - same title gallery `A B C D`, only `A` have event, `B` get event from `A`
+      then:
+      - old
+        `C` get event from `B` and record it is from `B`
+        `D` get event from `C` and record it is from `C`
+      - new
+        `C` get event from `B` and record it is from `A`
+        `D` get event from `C` and record it is from `A`
+
 - v1.02  
   - fix a bug in title pre-process  
     ```
