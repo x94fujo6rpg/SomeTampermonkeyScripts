@@ -26,12 +26,13 @@ click link to install
 | [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)      |
 | [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)    |
 | [nexusmods skip countdown](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#nexusmods-skip-countdown) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js) |
+| [avgle m3u8 extractor](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#avgle-m3u8-extractor)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)     |
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
 
 click button to enable (pervent too many requests)  
-![](https://i.imgur.com/P3ZWFR8.png)
+![](https://i.imgur.com/tAjehJl.png)
 
 #### Features:
 
@@ -432,3 +433,28 @@ after click MANUAL and selected file (some mod have mutiple files)
 ![](https://i.imgur.com/kV1tB5W.png)  
 - no countdown
 - auto start download
+
+
+## [[avgle m3u8 extractor]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)
+- extract m3u8 after click close
+- when it done, click button to download
+- use video title as filename
+
+options:
+```js
+let discard_first_seg = false; //discard the first segment
+let url_only = false; //only the video url as .txt instead of .m3u8 (for youtube-dl/uget/wget...etc)
+```
+
+download and convert
+`streamlink --http-header Referer=https://avgle.com/ file://"C:/example.m3u8" best -o example.ts`
+`ffmpeg -i example.ts -c copy example.mp4`
+
+streamlink loacal file path use `/` even in windows
+also you might not want use `*.ts` (google: `windows 10 ts file freeze`)
+cus windows werid behavior like scan for thumbnail can make system freeze/hanging
+change it to like `._ts_` `.tmp` so windows does't recognize it, but ffmpeg still can handle it correctly
+
+reference:
+https://github.com/download-online-video/chrome-avgle-helper/issues/21
+https://github.com/download-online-video/chrome-avgle-helper/issues/54
