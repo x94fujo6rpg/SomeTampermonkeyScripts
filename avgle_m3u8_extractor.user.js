@@ -47,7 +47,7 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 
 		await cap_segments().then(data => {
 			debug_data(data);
-			let title = video_title.replaceAll(" ", "_");
+			let title = video_title;
 			let seg_data = data.decrypted.map(x => x.uri);
 			let duration_data = data.info;
 			let max_duration = arr => Math.ceil(Math.max(...arr));
