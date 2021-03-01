@@ -440,21 +440,26 @@ after click MANUAL and selected file (some mod have mutiple files)
 - when it done, click button to download
 - use video title as filename
 
-options:
+options:  
 ```js
-let discard_first_seg = false; //discard the first segment
-let url_only = false; //only the video url as .txt instead of .m3u8 (for youtube-dl/uget/wget...etc)
+let discard_first_seg = false; //discard the first segment  
+let url_only = false; //only the video url as .txt instead of .m3u8 (for youtube-dl/uget/wget...etc)  
 ```
 
-download and convert
-`streamlink --http-header Referer=https://avgle.com/ file://"C:/example.m3u8" best -o example.ts`
-`ffmpeg -i example.ts -c copy example.mp4`
+download use [streamlink](https://streamlink.github.io/index.html)  
+```
+streamlink --http-header Referer=https://avgle.com/ file://"C:/example.m3u8" best -o example.ts  
+```
+convert  
+```
+ffmpeg -i example.ts -c copy example.mp4  
+```
 
-streamlink loacal file path use `/` even in windows
-also you might not want use `*.ts` (google: `windows 10 ts file freeze`)
-cus windows werid behavior like scan for thumbnail can make system freeze/hanging
-change it to like `._ts_` `.tmp` so windows does't recognize it, but ffmpeg still can handle it correctly
+streamlink loacal file path use `/` even in windows  
+also you might not want use `*.ts` (google: `windows 10 ts file freeze`)  
+cus windows werid behavior like scan for thumbnail can make system freeze/hanging  
+change it to like `._ts_` `.tmp` so windows does't recognize it, but ffmpeg still can handle it correctly  
 
-reference:
-https://github.com/download-online-video/chrome-avgle-helper/issues/21
-https://github.com/download-online-video/chrome-avgle-helper/issues/54
+reference:  
+https://github.com/download-online-video/chrome-avgle-helper/issues/21  
+https://github.com/download-online-video/chrome-avgle-helper/issues/54  
