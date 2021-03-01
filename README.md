@@ -440,13 +440,15 @@ after click MANUAL and selected file (some mod have mutiple files)
 - when it done, click button to download
 - use video title as filename
 
+#### the m3u8/url will expire over time  
+
 options:  
 ```js
 let discard_first_seg = false; //discard the first segment  
 let url_only = false; //only the video url as .txt instead of .m3u8 (for youtube-dl/uget/wget...etc)  
 ```
 
-download use [streamlink](https://streamlink.github.io/index.html)  
+use m3u8 to download and merge in to single file use [streamlink](https://streamlink.github.io/index.html)  
 ```
 streamlink --http-header Referer=https://avgle.com/ file://"C:/example.m3u8" best -o example.ts  
 ```
