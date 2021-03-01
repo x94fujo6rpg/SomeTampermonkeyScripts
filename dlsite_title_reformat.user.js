@@ -3,15 +3,18 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.64
+// @version      0.65
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
-// @match        https://www.dlsite.com/maniax/work/=/product_id/*
 // @match        https://www.dlsite.com/home/work/=/product_id/*
-// @match        https://www.dlsite.com/maniax/circle/profile/*
 // @match        https://www.dlsite.com/home/circle/profile/*
-// @match        https://www.dlsite.com/maniax/fsr/*
 // @match        https://www.dlsite.com/home/fsr/*
+// @match        https://www.dlsite.com/maniax/work/=/product_id/*
+// @match        https://www.dlsite.com/maniax/circle/profile/*
+// @match        https://www.dlsite.com/maniax/fsr/*
+// @match        https://www.dlsite.com/girls/work/=/product_id/*
+// @match        https://www.dlsite.com/girls/circle/profile/*
+// @match        https://www.dlsite.com/girls/fsr/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
@@ -204,7 +207,7 @@
                 id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
                 title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
                 title_f_text = stringFormatter(title_o_text);
-                circle_text = pos.querySelector(".maker_name a").textContent;
+                circle_text = stringFormatter(pos.querySelector(".maker_name a").textContent);
 
                 id = newCopyButton(id);
                 title_o = newCopyButton(title_o_text);
@@ -325,16 +328,14 @@
         let sitedata = contents.detail[0];
         let [Y, m, d] = sitedata.regist_date.split("/");
         let y = Y.slice(2);
-        let circle = document
-            .getElementById("work_maker")
-            .querySelector("span.maker_name[itemprop='brand']");
-        let circle_text = circle.querySelector("a").textContent;
+        let circle = document.getElementById("work_maker").querySelector("span.maker_name[itemprop='brand']");
+        let circle_text = stringFormatter(circle.querySelector("a").textContent);
         circle.insertAdjacentElement("afterbegin", newCopyButton(circle_text, "Copy"));
         Object.assign(formatted_data, {
             id: sitedata.id,
             title_original: sitedata.name,
             title_formatted: stringFormatter(sitedata.name),
-            circle: stringFormatter(circle_text),
+            circle: circle_text,
             Year: Y,
             year: y,
             month: m,
