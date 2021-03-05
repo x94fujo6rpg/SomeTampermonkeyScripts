@@ -393,6 +393,9 @@ show images direct link under title (only resized images)
   - make upload time visable  
   - [effect](https://i.imgur.com/lL6sJZX.png)  
 
+- v0.06
+  - improve auto redirect
+
 - v0.04  
   - delay trigger when in background  
   - replace user link now support other pages  

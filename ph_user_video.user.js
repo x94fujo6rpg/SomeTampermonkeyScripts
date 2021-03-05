@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.05
+// @version      0.06
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -14,17 +14,19 @@
     'use strict';
     let itemIndex = 0;
     let trycount = 0;
-    let timer_list = [];
+    let listener = false;
 
-    window.onload = () => {
-        if (document.visibilityState != "visible") {
-            // wait until visible
-            timerMananger();
-            addTimer(main, 0, "", true);
-        } else {
+    window.onload = startScript();
+
+    function startScript() {
+        if (document.visibilityState == "visible") {
+            if (listener) document.removeEventListener("visibilitychange", startScript);
             main();
+        } else {
+            document.addEventListener("visibilitychange", startScript);
+            listener = true;
         }
-    };
+    }
 
     function main() {
         myCss();
@@ -219,41 +221,6 @@
 
     function print(...any) {
         console.log(...any);
-    }
-
-    function timerMananger() {
-        document.addEventListener("visibilitychange", () => {
-            if (timer_list.length > 0) {
-                let pause = (document.visibilityState === "visible") ? false : true;
-                for (let timer of timer_list) {
-                    if (!timer.id) {
-                        if (!pause) {
-                            setTimeout(timer.handler, timer.delay);
-                            print(`set timeout[${timer.note}]`);
-                            timer_list = timer_list.slice(1);
-                        }
-                    } else {
-                        if (!pause) {
-                            timer.id = setInterval(timer.handler, timer.delay);
-                            print(`start timer[${timer.note}] id:${timer.id}`);
-                        } else {
-                            clearInterval(timer.id);
-                            print(`stop timer[${timer.note}] id:${timer.id}`);
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    function addTimer(handler, delay, note = "", timeout = false) {
-        if (note == "") note = handler.name;
-        timer_list.push({
-            id: timeout ? false : setInterval(handler, delay),
-            handler: handler,
-            delay: delay,
-            note: note,
-        });
     }
 
     function newButton(bclass, btext, handeler) {
