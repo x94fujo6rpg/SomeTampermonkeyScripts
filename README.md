@@ -94,6 +94,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.05
+  - at gallery page, add a link to goto e-h/ex
+  
 - v1.04
   - `fix event title` now show the real source  
     - same title gallery `A B C D`, only `A` have event, `B` get event from `A`  

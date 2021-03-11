@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.04
+// @version      1.06
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -23,7 +23,7 @@
     let api;
     let domain;
     let hid = true;
-    let m = "[ehx direct download]: ";
+    let m = "[ehx direct download] ";
     let debug_message = true;
     let debug_adv = false;
     let gallery_nodes;
@@ -192,6 +192,25 @@
                 });
                 print(`${m}set trigger for updateList on gallery:${gid}`);
             }
+
+            let url = document.location.href;
+            let match_eh = url.match(/e-hentai.org\/g\/\d+\/\w+\//) ? url.replace("e-hentai", "exhentai") : false;
+            let match_ex = url.match(/exhentai.org\/g\/\d+\/\w+\//) ? url.replace("exhentai", "e-hentai") : false;
+            if (match_eh || match_ex) {
+                let pos = document.querySelector(".gtb");
+                let b = Object.assign(document.createElement("div"), {
+                    className: "tha",
+                    textContent: match_eh ? "goto exhentai" : "goto e-hentai",
+                    style: `
+                        margin: auto;
+                        margin-bottom: 0.5rem;
+                        float: none;
+                        width: max-content;
+                        `,
+                    onclick: () => { document.location.href = match_eh ? match_eh : match_ex; },
+                });
+                pos.insertAdjacentElement("afterbegin", b);
+            }
         }
 
         function checkDisplayMode() {
@@ -277,6 +296,7 @@
 
                 async function requestData(datalist) {
                     print(`${m}start sending request`);
+                    print(`${m}----------------------`);
                     for (let index = 0, length = datalist.length; index < length; index++) {
                         print(`${m}sending request[${index}]`);
                         await myApiCall(datalist[index])
@@ -418,6 +438,7 @@
         if (mark_list.length > 0) print(`${m}found in list, set as downloaded:\n`, mark_list);
 
         print(`${m}request[${index}] done`);
+        print(`${m}----------------------`);
         return new Promise(reslove => reslove());
 
         function downloadButton(button, gid, archivelink, glink) {
@@ -1388,11 +1409,14 @@
         }
     }
 
-    function repalceForbiddenChar(string = "") {
-        let forbidden = `<>:"/|?*\\`;
-        let replacer = `＜＞：”／｜？＊＼`;
-        [...forbidden].forEach((fb, index) => { string = string.replaceAll(fb, replacer[index]); });
-        return string.trim();
+    const forbidden = `<>:"/|?*\\`;
+    const replacer = `＜＞：”／｜？＊＼`;
+    const regesc = t => t.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+    function repalceForbiddenChar(text = "") {
+        for (let index in forbidden) {
+            text = text.replace(new RegExp(regesc(forbidden[index]), "g"), replacer[index]);
+        }
+        return text.trim();
     }
 
     function getGMList(key = "") {

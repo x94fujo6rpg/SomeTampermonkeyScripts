@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js
-// @version      0.01
+// @version      0.02
 // @description  extract m3u8 after click close / use video title as filename
 // @author       x94fujo6
 // @match		 https://avgle.com/video/*
@@ -44,6 +44,13 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 		let b = newButton("aet_dl_button", "click close to extract data", { width: "max-content" }, () => { });
 		pos.insertAdjacentElement("afterbegin", b);
 		b = document.querySelector("#aet_dl_button");
+		b.disabled = true;
+
+		let ob = new MutationObserver(() => {
+			b.textContent = "waitting data...";
+			ob.disconnect();
+		});
+		ob.observe(document.querySelector("#player_3x2_container"), { attributes: true });
 
 		await cap_segments().then(data => {
 			debug_data(data);
@@ -57,6 +64,7 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 				seg_data.shift();
 				duration_data.shift();
 			}
+			b.disabled = false;
 			if (url_only) {
 				file = seg_data.join("\n");
 				b.textContent = "download url text";
@@ -84,7 +92,11 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 		function cap_segments() {
 			return new Promise(resolve => {
 				let v = videojs('video-player');
-				v.on("loadedmetadata", () => {
+				v.on("loadedmetadata", async () => {
+					await new Promise(resolve => {
+						b.textContent = "processing...";
+						resolve();
+					});
 					setTimeout(() => {
 						debug_msg("metadata loaded");
 						let segments = v.tech_.hls.playlists.media_.segments;

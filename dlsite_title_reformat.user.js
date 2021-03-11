@@ -3,21 +3,17 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.65
+// @version      0.66
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
-// @match        https://www.dlsite.com/home/work/=/product_id/*
-// @match        https://www.dlsite.com/home/circle/profile/*
-// @match        https://www.dlsite.com/home/fsr/*
-// @match        https://www.dlsite.com/maniax/work/=/product_id/*
-// @match        https://www.dlsite.com/maniax/circle/profile/*
-// @match        https://www.dlsite.com/maniax/fsr/*
-// @match        https://www.dlsite.com/girls/work/=/product_id/*
-// @match        https://www.dlsite.com/girls/circle/profile/*
-// @match        https://www.dlsite.com/girls/fsr/*
+// @match        https://www.dlsite.com/*/work/=/product_id/*
+// @match        https://www.dlsite.com/*/circle/profile/*
+// @match        https://www.dlsite.com/*/fsr/*
+// @match        https://www.dlsite.com/*/genres/works?*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
+/* jshint esversion: 9 */
 
 (function () {
     'use strict';
@@ -42,26 +38,26 @@
     };
     let data_list = Object.keys(formatted_data);
     let updateid;
-    let forbidden = `<>:"/|?*\\`;
-    let replacer = `＜＞：”／｜？＊＼`;
+    const forbidden = `<>:"/|?*\\`;
+    const replacer = `＜＞：”／｜？＊＼`;
     //-----------------------------------------------------
-    let key_format = "format_seting";
-    let key_adv = "format_adv";
-    let key_f2h = "format_f2h";
-    let key_half = "format_falf";
-    let key_full = "format_full";
-    let key_show_ot = "format_show_ot";
-    let key_show_ft = "format_show_ft";
-    let key_sep = "format_sep";
+    const key_format = "format_seting";
+    const key_adv = "format_adv";
+    const key_f2h = "format_f2h";
+    const key_half = "format_falf";
+    const key_full = "format_full";
+    const key_show_ot = "format_show_ot";
+    const key_show_ft = "format_show_ft";
+    const key_sep = "format_sep";
     //-----------------------------------------------------
-    let default_format = "%id% %title_formatted%";
-    let default_adv = false;
-    let default_f2h = true;
-    let default_half = "1234567890()[]{}~!@#$%^&_+-=;':,.()~";
-    let default_full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）〜";
-    let default_show_ot = true;
-    let default_show_ft = true;
-    let default_sep = "、";
+    const default_format = "%id% %title_formatted%";
+    const default_adv = false;
+    const default_f2h = true;
+    const default_half = "1234567890()[]{}~!@#$%^&_+-=;':,.()~";
+    const default_full = "１２３４５６７８９０（）［］｛｝～！＠＃＄％︿＆＿＋－＝；’：，．（）〜";
+    const default_show_ot = true;
+    const default_show_ft = true;
+    const default_sep = "、";
     //-----------------------------------------------------
     let setting_format = GM_getValue(key_format, default_format);
     let setting_adv = GM_getValue(key_adv, default_adv);
@@ -72,7 +68,7 @@
     let setting_show_ft = GM_getValue(key_show_ft, default_show_ft);
     let setting_sep = GM_getValue(key_sep, default_sep);
     //-----------------------------------------------------
-    print("[load setting]");
+    print("load setting");
     print(`${key_format}: ${setting_format}`);
     print(`${key_adv}: ${setting_adv}`);
     print(`${key_f2h}: ${setting_f2h}`);
@@ -80,20 +76,20 @@
     print(`${key_show_ft}: ${setting_show_ft}`);
     print(`${key_sep}: ${setting_sep}`);
     //-----------------------------------------------------
-    let container_list = [
+    const container_list = [
         "()", "[]", "{}", "（）", "<>",
         "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
     ];
-    let reg_esc = /[-\/\\^$*+?.()|[\]{}]/g;
-    let add_esc = "\\$&";
-    let [container_start, container_end] = extracContainer();
-    let reg_container = containerRegexGenerator();
-    let reg_excess = new RegExp(`^\\s*${reg_container}\\s*|\\s*${reg_container}\\s*$`, "g");
-    let reg_blank = /[\s　]{2,}/g;
-    let reg_muti_blank = /[\s　\n\t]+/g;
-    let reg_ascii = /[\x00-\x7F]/g;
-    let reg_until_number = /[^\d]*[\d]+/;
-    let reg_time = new RegExp(`[${regesc(container_start)}]*\\d+:\\d+[${regesc(container_end)}]*|約\\d*時*間*\\d+分\\d*秒*|合*計*\\d+分\\d+秒|\\d+時間\\d+分\\d*秒*`, "g");
+    const reg_esc = /[-\/\\^$*+?.()|[\]{}]/g;
+    const add_esc = "\\$&";
+    const [container_start, container_end] = extracContainer();
+    const reg_container = containerRegexGenerator();
+    const reg_excess = new RegExp(`^\\s*${reg_container}\\s*|\\s*${reg_container}\\s*$`, "g");
+    const reg_blank = /[\s　]{2,}/g;
+    const reg_muti_blank = /[\s　\n\t]+/g;
+    const reg_ascii = /[\x00-\x7F]/g;
+    const reg_until_number = /[^\d]*[\d]+/;
+    const reg_time = new RegExp(`[${regesc(container_start)}]*\\d+:\\d+[${regesc(container_end)}]*|約\\d*時*間*\\d+分\\d*秒*|合*計*\\d+分\\d+秒|\\d+時間\\d+分\\d*秒*`, "g");
     print("reg_unwanted | ", reg_time);
     /*
         \u0021-\u002f   !"#$%&'()*+,-./
@@ -102,9 +98,9 @@
         \u007b-\u007e   {|}~
         \uff5f-\uff63   ｟｠｡｢｣
     */
-    let reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
-    let reg_text_start = /^(トラック|track)/;
-    let max_depth = 10;
+    const reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
+    const reg_text_start = /^(トラック|track)/;
+    const max_depth = 10;
     //let language;
 
     window.document.body.onload = main();
@@ -126,7 +122,7 @@
     }
 
     function extracContainer() {
-        let [start, end] = ["", ""];
+        let start = "", end = "";
         container_list.forEach(c => {
             start += c[0];
             end += c[1];
@@ -381,9 +377,7 @@
             }
         });
         //------------------------------------------------------
-        let tagpart = document
-            .getElementById("work_right_inner")
-            .querySelector("div.main_genre");
+        let tagpart = document.querySelector("#work_right_inner div.main_genre");
         let insertpos = tagpart;
         tagpart = tagpart.querySelectorAll("a");
         let tags = [];
@@ -416,9 +410,7 @@
     }
 
     function isInList(text, list, data) {
-        if (!data) {
-            if (list.some(t => text.includes(t))) return true;
-        }
+        if (!data) if (list.some(t => text.includes(t))) return true;
         return false;
     }
 
@@ -450,27 +442,15 @@
     }
 
     function toHalfWidth(text) {
-        for (let index in setting_half) {
-            let h = setting_half[index];
-            let f = setting_full[index];
-            let count = 0;
-            while (text.indexOf(f) != -1 && count < 999) {
-                text = text.replace(f, h);
-                count++;
-            }
+        for (let i in setting_full) {
+            text = text.replace(new RegExp(setting_full[i], "g"), setting_half[i]);
         }
         return text;
     }
 
     function repalceForbiddenChar(text) {
         for (let index in forbidden) {
-            let fb = forbidden[index];
-            let rp = replacer[index];
-            let count = 0;
-            while (text.indexOf(fb) != -1 && count < 999) {
-                text = text.replace(fb, rp);
-                count++;
-            }
+            text = text.replace(new RegExp(regesc(forbidden[index]), "g"), replacer[index]);
         }
         return text;
     }
@@ -488,7 +468,6 @@
                 cb.onclick = () => navigator.clipboard.writeText(formatted);
             }
         }
-
         let sep = document.getElementById(`dtr_${key_sep}`);
         setting_sep = sep.value;
     }
@@ -496,11 +475,7 @@
     function parseFormatString(string = "") {
         let formatted_text = string;
         data_list.forEach(key => {
-            let count = 0;
-            while (formatted_text.includes(`%${key}%`) && count < 999) {
-                formatted_text = formatted_text.replace(`%${key}%`, formatted_data[key]);
-                count++;
-            }
+            formatted_text = formatted_text.replace(new RegExp(`%${key}%`, "g"), formatted_data[key]);
         });
         formatted_text = repalceForbiddenChar(formatted_text);
         return formatted_text;
@@ -818,7 +793,6 @@
             let track_list = [];
             let offset = 1;
             let not_add = 0;
-            print(extract);
             let extract_copy = Object.assign([], extract);
             let skip = 0;
             for (let index = 1; index < extract_copy.length; index += offset) {
@@ -1053,7 +1027,7 @@
     }
 
     function newSeparate() {
-        return newSpan(" / ");
+        return newSpan(` / `);
     }
 
     function newButton(btext, onclick) {
@@ -1135,6 +1109,6 @@
     }
 
     function print(...any) {
-        if (debug) console.log(...any);
+        if (debug) console.log(`[dlsite title reformat] `, ...any);
     }
 })();
