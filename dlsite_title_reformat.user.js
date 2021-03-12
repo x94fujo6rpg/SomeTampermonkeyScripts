@@ -80,8 +80,7 @@
         "()", "[]", "{}", "（）", "<>",
         "［］", "｛｝", "【】", "『』", "《》", "〈〉", "「」"
     ];
-    const reg_esc = /[-\/\\^$*+?.()|[\]{}]/g;
-    const add_esc = "\\$&";
+    const regesc = t => t.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
     const [container_start, container_end] = extracContainer();
     const reg_container = containerRegexGenerator();
     const reg_excess = new RegExp(`^\\s*${reg_container}\\s*|\\s*${reg_container}\\s*$`, "g");
@@ -107,7 +106,6 @@
 
     function main() {
         let link = window.location.href;
-        //language = document.querySelector(".eisysGroupHeaderLanguageList .is-selected").textContent;
         if (link.includes("/product_id/")) {
             myCss();
             productHandler();
@@ -115,10 +113,6 @@
             myCss();
             searchHandler();
         }
-    }
-
-    function regesc(text) {
-        return text.replace(reg_esc, add_esc);
     }
 
     function extracContainer() {
@@ -183,48 +177,75 @@
         }
     }
 
+    function cover_replacer(node) {
+        const to_full_size = url => url.replace(/(.*)resize(.*)_240x240(.*)/, "$1modpub$2$3");
+        //if (!(node instanceof HTMLElement)) return;
+        let img = node.querySelector("img");
+        //if (!img) return;
+        img.src = to_full_size(img.src);
+        return img.src;
+    }
+
+    function newCoverDownload(url) {
+        let b = document.createElement("button");
+        b.textContent = "Cover";
+        b.onclick = () => {
+            let rq = new XMLHttpRequest();
+            rq.open("GET", url, true);
+            rq.responseType = "blob";
+            rq.onload = () => dl(rq.response, url.match(/[Rr][Jj]\d+[^\/]*\.[a-zA-Z]+/)[0]);
+            rq.send();
+
+            function dl(blob, filename) {
+                let file_url = window.URL.createObjectURL(blob);
+                let a = document.querySelector("#dtr_img_dl_url");
+                if (!a) {
+                    a = document.createElement("a");
+                    a.id = "dtr_img_dl_url";
+                    document.body.insertAdjacentElement("afterbegin", a);
+                }
+                a.href = file_url;
+                a.download = filename;
+                a.click();
+                window.URL.revokeObjectURL(file_url);
+            }
+        };
+        return b;
+    }
+
     function listHandler() {
         console.time(listHandler.name);
         let list = document.querySelectorAll("#search_result_list");
         if (!list) {
             print("list not found");
         } else {
-            list = list[list.length - 1];
-            list = list.querySelectorAll("tr");
+            list = list[list.length - 1].querySelectorAll("tr");
             list.forEach(tr => {
-                let id,
-                    title_o, title_o_text, title_f, title_f_text,
-                    circle, circle_text,
+                let id, cover,
+                    title_o_text, title_f_text,
+                    circle_text,
                     cv, tags,
                     pos, newbox, node_list;
-
                 pos = tr.querySelector("dl");
-
                 id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
                 title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
                 title_f_text = stringFormatter(title_o_text);
                 circle_text = stringFormatter(pos.querySelector(".maker_name a").textContent);
-
-                id = newCopyButton(id);
-                title_o = newCopyButton(title_o_text);
-                title_f = newCopyButton(title_f_text);
-                circle = newCopyButton(circle_text);
+                cover = cover_replacer(tr);
 
                 node_list = [
                     newLine(),
-                    title_o, newLine(),
-                    title_f, newLine(),
-                    id, newSeparate(), circle,
+                    newCopyButton(title_o_text), newLine(),
+                    newCopyButton(title_f_text), newLine(),
+                    newCopyButton(id), newSeparate(), newCoverDownload(cover), newSeparate(), newCopyButton(circle_text),
                 ];
                 if (title_o_text == title_f_text) node_list.splice(3, 2);
                 newbox = appendAll(document.createElement("dd"), node_list);
 
                 cv = pos.querySelector(".author");
                 cv = cv ? getMutipleDataToList(cv) : "";
-
                 tags = pos.querySelector(".search_tag");
                 tags = tags ? getMutipleDataToList(tags) : "";
-
                 if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
                 if (tags != "") appendAll(newbox, [newSeparate(), newCopyButton(tags, "Tags")]);
 
@@ -241,46 +262,35 @@
             print("list not found");
         } else {
             let w = document.createElement("div");
-            w.appendChild(
-                newSpan("Can't get full CV/Author list in grid view. If you need it, please switch to list view.",
-                    "dtr_list_w_text"));
+            w.appendChild(newSpan("Can't get full CV/Author list in grid view. If you need it, switch to list view.", "dtr_list_w_text"));
             document.querySelector(".sort_box").insertAdjacentElement("afterend", w);
 
             list.forEach(box => {
-                let id,
-                    title_o, title_o_text, title_f, title_f_text,
-                    circle, circle_text,
+                let id, cover,
+                    title_o_text, title_f_text,
+                    circle_text,
                     cv,
                     pos, newbox, node_list;
-
                 pos = box.querySelector(".work_price_wrap");
-
                 id = box.querySelector(".search_img.work_thumb").id.replace("_link_", "");
-
-                title_o = box.querySelector(".work_name a");
-                title_o_text = title_o.textContent;
+                title_o_text = box.querySelector(".work_name a").textContent;
                 title_f_text = stringFormatter(title_o_text);
-
-                circle = box.querySelector(".maker_name a");
-                circle_text = stringFormatter(circle.textContent);
-
+                circle_text = stringFormatter(box.querySelector(".maker_name a").textContent);
                 cv = box.querySelector(".author");
                 cv = cv ? getMutipleDataToList(cv) : "";
-
-                id = newCopyButton(id);
-                title_o = newCopyButton(title_o_text, "Original");
-                title_f = newCopyButton(title_f_text, "Formatted");
-                circle = newCopyButton(circle_text, "Circle");
+                cover = cover_replacer(box);
 
                 node_list = [
-                    id, newLine(),
-                    title_o, newSeparate(), title_f, newLine(),
-                    circle,
+                    newCopyButton(id), newSeparate(), newCoverDownload(cover), newLine(),
+                    newCopyButton(title_o_text, "Original"), newSeparate(),
+                    newCopyButton(title_f_text, "Formatted"), newLine(),
+                    newCopyButton(circle_text, "Circle"),
                 ];
-                if (title_o_text == title_f_text) node_list.splice(3, 2);
+                if (title_o_text == title_f_text) node_list.splice(5, 2);
                 newbox = appendAll(document.createElement("dd"), node_list);
 
                 if (cv != "") appendAll(newbox, [newSeparate(), newCopyButton(cv, "CV/Author")]);
+
                 pos.insertAdjacentElement("beforebegin", newbox);
             });
         }
@@ -704,6 +714,7 @@
         pos = pos.parentNode;
 
         let id = formatted_data.id;
+        let cover = document.querySelector(`img[itemprop="image"]`).src;
         let title_o = formatted_data.title_original;
         let title_f = formatted_data.title_formatted;
         let title_id_c = parseFormatString(setting_format);
@@ -732,6 +743,10 @@
         //------------------------------------------------------
         // add copy ID button
         pos.append(newCopyButton(id));
+        pos.append(newSeparate());
+        //------------------------------------------------------
+        // add download cover
+        pos.append(newCoverDownload(cover));
         pos.append(newSeparate());
         //------------------------------------------------------
         // add copy custom format button
@@ -1031,12 +1046,10 @@
     }
 
     function newButton(btext, onclick) {
-        let _button = document.createElement("button");
-        Object.assign(_button, {
-            textContent: btext,
-            onclick: onclick,
-        });
-        return _button;
+        let button = document.createElement("button");
+        button.innerHTML = btext;
+        button.onclick = onclick;
+        return button;
     }
 
     function newDataButton(btext, format_string) {

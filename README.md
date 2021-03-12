@@ -324,6 +324,9 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.66
+  - in list/grid/search view, replace all cover to full size and add a button to download
+
 - v0.65
   - add support for dlsite girl part `https://www.dlsite.com/girls/*`
   - fix circle text is not formatted
