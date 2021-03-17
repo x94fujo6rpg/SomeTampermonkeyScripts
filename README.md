@@ -94,6 +94,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.08
+  - fix addToDownloadedList use wrong limit
+
 - v1.07
   - set default downloaded/marked gallery list size limit to 0 (no limit)
   ```js

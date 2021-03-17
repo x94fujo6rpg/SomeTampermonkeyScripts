@@ -902,11 +902,11 @@
         gid = `${gid}`; // convert to string
         let downloaded_list = getGMList("dl_list");
         if (downloaded_list.includes(gid)) return print(`${m}[${gid}] is already in the list, abort`);
-        if (downloaded_list.length > 0) {
+        if (downloaded_list.length > gallery_data_limit.max_size && gallery_data_limit.max_size != 0) {
             let count = 0;
-            while (downloaded_list.length > 10000) {
+            while (downloaded_list.length > gallery_data_limit.max_size) {
                 let r = downloaded_list.shift();
-                print(`${m}reach limit, remove [${r}]`);
+                print(`${m}%creach limit, remove [${r}]`, "color:OrangeRed;");
                 count++;
                 if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
             }
