@@ -94,6 +94,12 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.07
+  - set default downloaded/marked gallery list size limit to 0 (no limit)
+  ```js
+  let gallery_data_max_size = 0; // kb, 0 = no limit
+  ```
+
 - v1.05
   - at gallery page, add a link to goto e-h/ex
   

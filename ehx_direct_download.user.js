@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.06
+// @version      1.07
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -99,7 +99,7 @@
     let blank_reg = /[\s　]{2,}/g;
     let enable_sim_search = false;
     let sim_search_threshold = 0.6;
-    let gallery_data_max_size = 512; // kb, 0 = no limit
+    let gallery_data_max_size = 0; // kb, 0 = no limit
     let gallery_data_limit = { max_size: 1024 * (gallery_data_max_size), max_length: parseInt((1024 * gallery_data_max_size) / 7, 10), };
 
     window.onload = main();
@@ -466,7 +466,7 @@
                     if (downloaded_list.length > gallery_data_limit.max_size && gallery_data_limit.max_size != 0) {
                         while (downloaded_list.length > gallery_data_limit.max_size) {
                             let r = downloaded_list.shift();
-                            print(`${m}reach limit, remove [${r}]`);
+                            print(`${m}%creach limit, remove [${r}]`, "color:OrangeRed;");
                             count++;
                             if (count > 100) return print(`${m}unknow error while removing old data, script stop`);
                         }
