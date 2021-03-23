@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.06
+// @version      0.07
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -42,24 +42,49 @@
         function setLink() {
             let info = document.querySelector(".video-detailed-info");
             info = info.querySelector(".usernameBadgesWrapper");
-            if (info) {
-                info = info.querySelector("a");
-                let link = `${info.href}/videos/public`;
-                info.setAttribute("href", link);
-            }
+            if (!info) return print("no user info");
+            info = info.querySelector("a");
+            let username = info.textContent;
+            print("username", username);
+
+            let link = `${info.href}/videos/public`;
+            info.setAttribute("href", link);
 
             replaceLink(".usernameWrap");
+            markSameUser(username);
 
             let button = newButton("myButtonB", "Copy Video link", copyLink);
             let div = document.createElement("div");
             div.appendChild(button);
 
-            let pos = document.querySelector(".underplayerAd");
+            let pos = document.querySelector("#player");
             pos.insertAdjacentElement("afterend", div);
 
             function copyLink() {
                 let link = window.location.href;
                 navigator.clipboard.writeText(link);
+            }
+        }
+
+        function markSameUser(username = "") {
+            mark("#relatedVideosCenter");
+            mark("#recommendedVideosVPage");
+
+            function mark(css_selector) {
+                let target = document.querySelector(css_selector);
+                if (target) {
+                    target = target.querySelectorAll("li");
+                    if (target) {
+                        target.forEach(e => {
+                            let uploader = e.querySelector(".usernameWrap a");
+                            if (uploader) {
+                                if (uploader.textContent == username) {
+                                    e.style = "border: red 0.2rem solid;";
+                                }
+                            }
+                        });
+                    }
+                }
             }
         }
 
@@ -101,7 +126,7 @@
                 textbox.insertAdjacentElement("beforebegin", document.createElement("br"));
 
                 let button;
-                button = newButton("myButton", "Copy All", copyAll);
+                button = newButton("myButton", "Copy", copyAll);
                 textbox.insertAdjacentElement("afterend", button);
                 button = newButton("myButton", "Invert Select", invertSecect);
                 textbox.insertAdjacentElement("afterend", button);
@@ -247,7 +272,9 @@
             padding: 1rem;
             width: 100%;
             border-style: solid;
-            font-size: 1rem;
+            font-size: 1rem;            
+            background: transparent;
+            color: white;
         }
 
         .myButton {

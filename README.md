@@ -408,6 +408,9 @@ show images direct link under title (only resized images)
   - make upload time visable  
   - [effect](https://i.imgur.com/lL6sJZX.png)  
 
+- v0.07
+  - mark related/recommended video if uploader is the same as current video
+
 - v0.06
   - improve auto redirect
 
