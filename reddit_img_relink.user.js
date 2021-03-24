@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
-// @version      0.14
+// @version      0.15
 // @description  show images direct link under title
 // @author       x94fujo6
 // @match        https://www.reddit.com/r/*
@@ -30,26 +30,22 @@
                     let link_to_post = box.querySelector(`a[href*="/r/"]`);
                     if (link_to_post) {
                         let pos = link_to_post.parentElement;
-                        let copy = link_to_post.innerHTML;
+                        let copy = link_to_post.cloneNode(true);
                         link_to_post.remove();
-                        pos.innerHTML = copy;
+                        pos.appendChild(copy);
                     }
                     let image = box.querySelector("img");
                     if (image) {
                         image.src = image.src.replace(/https:\/\/preview\.redd\.it\/([^.]+\.[^\?]+)\?.*/, (m, p1) => `https://i.redd.it/${p1}`);
                         if (image.src.match(/external-preview/)) {
                             let source = post.querySelector(".styled-outbound-link");
-                            if (source) {
-                                image.setAttribute("crossOrigin", "anonymous");
-                                image.src = source.href;
-                            }
+                            if (source) image.src = source.href;
                         }
                         let pos = post.querySelector("._2FCtq-QzlfuN-SwVMUZMM3");
                         if (pos) {
                             let link = document.createElement("a");
                             link.textContent = link.href = image.src;
                             link.target = "_blank";
-                            link.setAttribute("crossOrigin", "anonymous");
                             let div = document.createElement("div");
                             div.appendChild(link);
                             pos.appendChild(div);
