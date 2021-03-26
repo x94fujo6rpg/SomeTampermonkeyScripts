@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js
-// @version      0.15
+// @version      0.16
 // @description  show images direct link under title
 // @author       x94fujo6
 // @match        https://www.reddit.com/r/*
@@ -27,6 +27,7 @@
                 if (load) load.remove();
                 let box = post.querySelector(".STit0dLageRsa2yR4te_b");
                 if (box) {
+                    /*
                     let link_to_post = box.querySelector(`a[href*="/r/"]`);
                     if (link_to_post) {
                         let pos = link_to_post.parentElement;
@@ -34,6 +35,7 @@
                         link_to_post.remove();
                         pos.appendChild(copy);
                     }
+                    */
                     let image = box.querySelector("img");
                     if (image) {
                         image.src = image.src.replace(/https:\/\/preview\.redd\.it\/([^.]+\.[^\?]+)\?.*/, (m, p1) => `https://i.redd.it/${p1}`);
