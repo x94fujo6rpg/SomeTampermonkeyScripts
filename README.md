@@ -333,6 +333,10 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.67
+  - fix switch link [R18(HENTAI), R18(BL/TL), All-ages] on top right  
+    make it stay at same product/circle page
+
 - v0.66
   - in list/grid/search view, replace all cover to full size and add a button to download
 

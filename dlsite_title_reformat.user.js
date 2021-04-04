@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.66
+// @version      0.67
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*/work/=/product_id/*
@@ -100,7 +100,6 @@
     const reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
     const reg_text_start = /^(トラック|track)/;
     const max_depth = 10;
-    //let language;
 
     window.document.body.onload = main();
 
@@ -109,9 +108,11 @@
         if (link.includes("/product_id/")) {
             myCss();
             productHandler();
+            fix_switch_link();
         } else if (link.includes("/circle/profile/") || link.includes("/fsr/")) {
             myCss();
             searchHandler();
+            fix_switch_link();
         }
     }
 
@@ -177,6 +178,13 @@
         }
     }
 
+    function fix_switch_link() {
+        let links = document.querySelectorAll(".floorNavLink-item a");
+        if (!links || links.length == 0) return;
+        let current = window.location.href.replace(/.+www\.dlsite\.com\/\w+\/(.+)/, "$1");
+        links.forEach(link => link.href += current);
+    }
+
     function cover_replacer(node) {
         const to_full_size = url => url.replace(/(.*)resize(.*)_240x240(.*)/, "$1modpub$2$3");
         //if (!(node instanceof HTMLElement)) return;
@@ -188,6 +196,7 @@
 
     function newCoverDownload(url) {
         let b = document.createElement("button");
+        b.id = "dtr_cover_dl";
         b.textContent = "Cover";
         b.onclick = () => {
             let rq = new XMLHttpRequest();
@@ -1059,15 +1068,9 @@
     }
 
     function newCopyButton(copytext, btext = "") {
-        if (btext === "") {
-            return newButton(copytext, () => {
-                navigator.clipboard.writeText(copytext);
-            });
-        } else {
-            return newButton(btext, () => {
-                navigator.clipboard.writeText(copytext);
-            });
-        }
+        return newButton(btext === "" ? copytext : btext, async () => {
+            await navigator.clipboard.writeText(copytext);
+        });
     }
 
     function newSpan(text = "", className = "dtr_textsize05") {
