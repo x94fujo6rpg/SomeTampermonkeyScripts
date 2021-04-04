@@ -6,10 +6,7 @@
 // @version      0.67
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
-// @match        https://www.dlsite.com/*/work/=/product_id/*
-// @match        https://www.dlsite.com/*/circle/profile/*
-// @match        https://www.dlsite.com/*/fsr/*
-// @match        https://www.dlsite.com/*/genres/works?*
+// @match        https://www.dlsite.com/*
 // @grant        GM_getValue
 // @grant        GM_setValue
 // ==/UserScript==
@@ -105,14 +102,23 @@
 
     function main() {
         let link = window.location.href;
+        let match_list = [
+            "/circle/profile/",
+            "/fsr/",
+            "/genres/works",
+        ];
         if (link.includes("/product_id/")) {
+            print(productHandler.name);
             myCss();
             productHandler();
             fix_switch_link();
-        } else if (link.includes("/circle/profile/") || link.includes("/fsr/")) {
+        } else if (match_list.some(key => link.includes(key))) {
+            print(searchHandler.name);
             myCss();
             searchHandler();
             fix_switch_link();
+        } else {
+            return print("not in support list");
         }
     }
 
