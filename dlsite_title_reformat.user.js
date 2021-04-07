@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.67
+// @version      0.68
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -108,15 +108,15 @@
             "/genres/works",
         ];
         if (link.includes("/product_id/")) {
-            print(productHandler.name);
             myCss();
             productHandler();
             fix_switch_link();
+            return print(productHandler.name);
         } else if (match_list.some(key => link.includes(key))) {
-            print(searchHandler.name);
             myCss();
             searchHandler();
             fix_switch_link();
+            return print(searchHandler.name);
         } else {
             return print("not in support list");
         }
@@ -191,20 +191,15 @@
         links.forEach(link => link.href += current);
     }
 
-    function cover_replacer(node) {
-        const to_full_size = url => url.replace(/(.*)resize(.*)_240x240(.*)/, "$1modpub$2$3");
-        //if (!(node instanceof HTMLElement)) return;
-        let img = node.querySelector("img");
-        //if (!img) return;
-        img.src = to_full_size(img.src);
-        return img.src;
-    }
+    const to_full_size_image = url => url.replace(/(.*)resize(.*)_240x240(.*)/, "$1modpub$2$3");
 
-    function newCoverDownload(url) {
+    function newCoverDownload(id) {
         let b = document.createElement("button");
         b.id = "dtr_cover_dl";
         b.textContent = "Cover";
         b.onclick = () => {
+            let url = document.querySelector(`img[src*="${id}"`).src;
+            url = to_full_size_image(url);
             let rq = new XMLHttpRequest();
             rq.open("GET", url, true);
             rq.responseType = "blob";
@@ -228,6 +223,53 @@
         return b;
     }
 
+    function addSortButton() {
+        let classname = "reSortByID";
+        let ele = document.querySelector(`.${classname}`);
+        if (ele) return;
+
+        let pos = document.querySelector(".sort_box .status_select");
+        if (!pos) return;
+
+        ele = document.createElement("div");
+        ele.textContent = "SortByID:";
+        ele.style = "margin: 0.5rem;";
+        pos.appendChild(ele);
+
+        ele = document.createElement("button");
+        ele.textContent = "Descent";
+        ele.className = classname;
+        ele.onclick = () => sortByID(true);
+        pos.appendChild(ele);
+
+        ele = document.createElement("button");
+        ele.textContent = "Ascent";
+        ele.className = classname;
+        ele.onclick = () => sortByID();
+        pos.appendChild(ele);
+    }
+
+    async function sortByID(descent = false) {
+        console.time(sortByID.name);
+        let grid_mode = document.querySelector(".display_block.on") ? true : false;
+        let eles = document.querySelectorAll(grid_mode ? ".search_result_img_box_inner" : "#search_result_list tr");
+        let pos = document.querySelector(grid_mode ? "#search_result_img_box" : "#search_result_list tbody");
+        let attrname = "sort_id";
+        await new Promise(r => {
+            eles.forEach(e => {
+                let id = e.querySelector(grid_mode ? ".search_img" : ".work_thumb_inner")
+                    .id.replace("_link_", "");
+                e.setAttribute(attrname, id);
+            });
+            r();
+        });
+        let id_list = [...eles].map(e => parseInt(e.getAttribute(attrname).replace("RJ", ""), 10));
+        id_list = id_list.sort((a, b) => descent ? b - a : a - b);
+        console.log(id_list);
+        id_list.forEach(id => pos.appendChild(document.querySelector(`[${attrname}="RJ${id}"]`)));
+        console.timeEnd(sortByID.name);
+    }
+
     function listHandler() {
         console.time(listHandler.name);
         let list = document.querySelectorAll("#search_result_list");
@@ -236,7 +278,7 @@
         } else {
             list = list[list.length - 1].querySelectorAll("tr");
             list.forEach(tr => {
-                let id, cover,
+                let id,
                     title_o_text, title_f_text,
                     circle_text,
                     cv, tags,
@@ -246,13 +288,12 @@
                 title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
                 title_f_text = stringFormatter(title_o_text);
                 circle_text = stringFormatter(pos.querySelector(".maker_name a").textContent);
-                cover = cover_replacer(tr);
 
                 node_list = [
                     newLine(),
                     newCopyButton(title_o_text), newLine(),
                     newCopyButton(title_f_text), newLine(),
-                    newCopyButton(id), newSeparate(), newCoverDownload(cover), newSeparate(), newCopyButton(circle_text),
+                    newCopyButton(id), newSeparate(), newCoverDownload(id), newSeparate(), newCopyButton(circle_text),
                 ];
                 if (title_o_text == title_f_text) node_list.splice(3, 2);
                 newbox = appendAll(document.createElement("dd"), node_list);
@@ -268,6 +309,7 @@
             });
         }
         console.timeEnd(listHandler.name);
+        addSortButton();
     }
 
     function gridHandler() {
@@ -281,7 +323,7 @@
             document.querySelector(".sort_box").insertAdjacentElement("afterend", w);
 
             list.forEach(box => {
-                let id, cover,
+                let id,
                     title_o_text, title_f_text,
                     circle_text,
                     cv,
@@ -293,10 +335,9 @@
                 circle_text = stringFormatter(box.querySelector(".maker_name a").textContent);
                 cv = box.querySelector(".author");
                 cv = cv ? getMutipleDataToList(cv) : "";
-                cover = cover_replacer(box);
 
                 node_list = [
-                    newCopyButton(id), newSeparate(), newCoverDownload(cover), newLine(),
+                    newCopyButton(id), newSeparate(), newCoverDownload(id), newLine(),
                     newCopyButton(title_o_text, "Original"), newSeparate(),
                     newCopyButton(title_f_text, "Formatted"), newLine(),
                     newCopyButton(circle_text, "Circle"),
@@ -310,6 +351,7 @@
             });
         }
         console.timeEnd(gridHandler.name);
+        addSortButton();
     }
 
     function appendAll(node, nodeList) {
@@ -761,7 +803,7 @@
         pos.append(newSeparate());
         //------------------------------------------------------
         // add download cover
-        pos.append(newCoverDownload(cover));
+        pos.append(newCoverDownload(id));
         pos.append(newSeparate());
         //------------------------------------------------------
         // add copy custom format button
