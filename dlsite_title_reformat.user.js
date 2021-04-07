@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.68
+// @version      0.69
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -263,7 +263,7 @@
             });
             r();
         });
-        let id_list = [...eles].map(e => parseInt(e.getAttribute(attrname).replace("RJ", ""), 10));
+        let id_list = [...eles].map(e => e.getAttribute(attrname).replace("RJ", ""));
         id_list = id_list.sort((a, b) => descent ? b - a : a - b);
         console.log(id_list);
         id_list.forEach(id => pos.appendChild(document.querySelector(`[${attrname}="RJ${id}"]`)));
