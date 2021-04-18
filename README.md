@@ -310,13 +310,13 @@ let autoclose = true;
   - custom title format
   - auto convert forbidden characters `<>:"/|?*\` to fullwidth 
   - add copy button for data
+  - add button to sort search result by ID
   - extract track list (experimental)
-    - #### Still have many bugs
-    - official (example: RJ298079)
+    - official list (example: RJ298079)
     - search offset line
     - remove time info
     - remove excess white space
-    - sort (only if official list is out of order and have 2nd index in title)
+    - sort (only if list is out of order and have 2nd index in title)
     - example: RJ237403
       ```
       1.track3 cccc
@@ -325,13 +325,18 @@ let autoclose = true;
 
       convert to
 
-      1 aaaa
-      2 bbbb
-      3 cccc
+      1.1 aaaa
+      2.2 bbbb
+      3.3 cccc
       ```
 
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
+
+- v0.71
+  - if title is empty after process, return to original title
+  - remove incomplete bracket `"(no_end" => "no_end"`, `"no_start)" => "no_start"`
+  - improve excess removal of track title
 
 - v0.68
   - add button to sort item by id

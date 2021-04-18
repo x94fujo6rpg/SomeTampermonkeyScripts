@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.69
+// @version      0.71
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -65,13 +65,13 @@
     let setting_show_ft = GM_getValue(key_show_ft, default_show_ft);
     let setting_sep = GM_getValue(key_sep, default_sep);
     //-----------------------------------------------------
-    print("load setting");
-    print(`${key_format}: ${setting_format}`);
-    print(`${key_adv}: ${setting_adv}`);
-    print(`${key_f2h}: ${setting_f2h}`);
-    print(`${key_show_ot}: ${setting_show_ot}`);
-    print(`${key_show_ft}: ${setting_show_ft}`);
-    print(`${key_sep}: ${setting_sep}`);
+    debug_msg("load setting");
+    debug_msg(`${key_format}: ${setting_format}`);
+    debug_msg(`${key_adv}: ${setting_adv}`);
+    debug_msg(`${key_f2h}: ${setting_f2h}`);
+    debug_msg(`${key_show_ot}: ${setting_show_ot}`);
+    debug_msg(`${key_show_ft}: ${setting_show_ft}`);
+    debug_msg(`${key_sep}: ${setting_sep}`);
     //-----------------------------------------------------
     const container_list = [
         "()", "[]", "{}", "（）", "<>",
@@ -85,8 +85,7 @@
     const reg_muti_blank = /[\s　\n\t]+/g;
     const reg_ascii = /[\x00-\x7F]/g;
     const reg_until_number = /[^\d]*[\d]+/;
-    const reg_time = new RegExp(`[${regesc(container_start)}]*\\d+:\\d+[${regesc(container_end)}]*|約\\d*時*間*\\d+分\\d*秒*|合*計*\\d+分\\d+秒|\\d+時間\\d+分\\d*秒*`, "g");
-    print("reg_unwanted | ", reg_time);
+    const reg_time = new RegExp(`[${regesc(container_start)}]*(\\d+:\\d+|約\\d*時*間*\\d+分\\d*秒*|合*計*\\d+分\\d+秒|\\d+時間\\d+分\\d*秒*)[${regesc(container_end)}]*`, "g");
     /*
         \u0021-\u002f   !"#$%&'()*+,-./
         \u003a-\u0040   :;<=>?@
@@ -97,6 +96,16 @@
     const reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
     const reg_text_start = /^(トラック|track)/;
     const max_depth = 10;
+    debug_msg("container_start | ", container_start);
+    debug_msg("container_end | ", container_end);
+    debug_msg("reg_container | ", reg_container);
+    debug_msg("reg_excess | ", reg_excess);
+    debug_msg("reg_blank | ", reg_blank);
+    debug_msg("reg_muti_blank | ", reg_muti_blank);
+    debug_msg("reg_ascii | ", reg_ascii);
+    debug_msg("reg_time | ", reg_time);
+    debug_msg("reg_non_word_at_start | ", reg_non_word_at_start);
+    debug_msg("reg_text_start | ", reg_text_start);
 
     window.document.body.onload = main();
 
@@ -111,14 +120,14 @@
             myCss();
             productHandler();
             fix_switch_link();
-            return print(productHandler.name);
+            return debug_msg(productHandler.name);
         } else if (match_list.some(key => link.includes(key))) {
             myCss();
             searchHandler();
             fix_switch_link();
-            return print(searchHandler.name);
+            return debug_msg(searchHandler.name);
         } else {
-            return print("not in support list");
+            return debug_msg("not in support list");
         }
     }
 
@@ -274,7 +283,7 @@
         console.time(listHandler.name);
         let list = document.querySelectorAll("#search_result_list");
         if (!list) {
-            print("list not found");
+            debug_msg("list not found");
         } else {
             list = list[list.length - 1].querySelectorAll("tr");
             list.forEach(tr => {
@@ -316,7 +325,7 @@
         console.time(gridHandler.name);
         let list = document.querySelectorAll(".search_result_img_box_inner");
         if (!list) {
-            print("list not found");
+            debug_msg("list not found");
         } else {
             let w = document.createElement("div");
             w.appendChild(newSpan("Can't get full CV/Author list in grid view. If you need it, switch to list view.", "dtr_list_w_text"));
@@ -360,29 +369,29 @@
     }
 
     function saveSetting() {
-        print("[saveSetting]");
+        debug_msg("[saveSetting]");
 
         if (setting_format.length > 0) {
             GM_setValue(key_format, setting_format);
-            print(`saved ${key_format}: ${setting_format}`);
+            debug_msg(`saved ${key_format}: ${setting_format}`);
         } else {
-            print(`${key_format} not saved cus is empty`);
+            debug_msg(`${key_format} not saved cus is empty`);
         }
 
         GM_setValue(key_adv, setting_adv);
-        print(`saved ${key_adv}: ${setting_adv}`);
+        debug_msg(`saved ${key_adv}: ${setting_adv}`);
 
         GM_setValue(key_f2h, setting_f2h);
-        print(`saved ${key_f2h}: ${setting_f2h}`);
+        debug_msg(`saved ${key_f2h}: ${setting_f2h}`);
 
         GM_setValue(key_show_ot, setting_show_ot);
-        print(`saved ${key_show_ot}: ${setting_show_ot}`);
+        debug_msg(`saved ${key_show_ot}: ${setting_show_ot}`);
 
         GM_setValue(key_show_ft, setting_show_ft);
-        print(`saved ${key_show_ft}: ${setting_show_ft}`);
+        debug_msg(`saved ${key_show_ft}: ${setting_show_ft}`);
 
         GM_setValue(key_sep, setting_sep);
-        print(`saved ${key_sep}: ${setting_sep}`);
+        debug_msg(`saved ${key_sep}: ${setting_sep}`);
     }
 
     function getData() {
@@ -489,22 +498,43 @@
     }
 
     function removeExcess(text) {
+        let o_text = text;
         // remove excess text
         let count = 0;
         while (count < 100 && text.match(reg_excess)) {
             text = text.replace(reg_excess, "");
             count++;
         }
-        // remove if it at start or end
+        if (text.length == 0) text = o_text;
+        // remove container if it at start or end
         count = 0;
         while (count < 100) {
+            let index_start = container_start.indexOf(text[0]);
+            if (index_start != -1) {
+                if (container_end[index_start] == text[text.length - 1]) {
+                    // found start & end
+                    text = text.slice(1, text.length - 1).trim();
+                    debug_msg(`[removeExcess] remove container:"${text}"`);
+                } else if (!text.includes(container_end[index_start])) {
+                    // found start but no end
+                    text = text.slice(1).trim();
+                    debug_msg(`[removeExcess] remove start:"${text}"`);
+                }
+            }
+            let index_end = container_end.indexOf(text[text.length - 1]);
+            if (index_end != -1) {
+                if (!text.includes(container_start[index_end])) {
+                    // found end but no start
+                    text = text.slice(0, text.length - 1).trim();
+                    debug_msg(`[removeExcess] remove end:"${text}"`);
+                }
+            }
+            if (index_start == -1 && index_end == -1) break;
             count++;
-            let index = container_start.indexOf(text[0]);
-            if (index == -1) break;
-            text = text.slice(1).trim();
-            if (container_end[index] == text[text.length - 1]) text = text.slice(0, text.length - 1).trim();
         }
         text = text.replace(reg_blank, " ");
+        text = text.length > 0 ? text : o_text;
+        debug_data(`o:[${o_text}]\np:[${text}]`);
         return text;
     }
 
@@ -667,7 +697,7 @@
         let lable;
         checkbox = newCheckbox(`dtr_${key_f2h}`, function () {
             setting_f2h = this.checked ? true : false;
-            print(`${key_f2h}: ${setting_f2h}`);
+            debug_msg(`${key_f2h}: ${setting_f2h}`);
         });
         lable = newLable(`dtr_${key_f2h}`, "Replace some half-width to full-width");
         if (setting_f2h) checkbox.checked = true;
@@ -675,7 +705,7 @@
 
         checkbox = newCheckbox(`dtr_${key_show_ot}`, function () {
             setting_show_ot = this.checked ? true : false;
-            print(`${key_show_ot}: ${setting_show_ot}`);
+            debug_msg(`${key_show_ot}: ${setting_show_ot}`);
         });
         lable = newLable(`dtr_${key_show_ot}`, "Show Original / ID+Original");
         if (setting_show_ot) checkbox.checked = true;
@@ -683,7 +713,7 @@
 
         checkbox = newCheckbox(`dtr_${key_show_ft}`, function () {
             setting_show_ft = this.checked ? true : false;
-            print(`${key_show_ft}: ${setting_show_ft}`);
+            debug_msg(`${key_show_ft}: ${setting_show_ft}`);
         });
         lable = newLable(`dtr_${key_show_ft}`, "Show Formatted / ID+Formatted");
         if (setting_show_ft) checkbox.checked = true;
@@ -850,7 +880,7 @@
         raw_text = raw_text.textContent.split("\n").filter(line => line.replace(reg_muti_blank, "") != "");
         let newtext = [];
         raw_text.forEach(line => { newtext.push(shiftCode(line)); });
-        print("newtext | ", newtext);
+        debug_msg("newtext | ", newtext);
 
         // get all line with number
         let extract = [];
@@ -858,7 +888,7 @@
             let number = reg_number.exec(line);
             if (number) { extract.push({ number: parseInt(number[0], 10), text: line, o_index: index, }); }
         });
-        print("extract | ", extract);
+        debug_msg("extract | ", extract);
 
         // extract line that number are continuous
         if (extract.length > 0) {
@@ -869,10 +899,10 @@
             let skip = 0;
             for (let index = 1; index < extract_copy.length; index += offset) {
                 if (offset == -1) offset = 1;
-                print("");
+                debug_msg("");
                 let this_n = extract_copy[index].number;
                 let previous_n = extract_copy[index - offset].number;
-                print(`index:${index} | this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | skip:${skip} | this:${extract[index].text}`);
+                debug_msg(`index:${index} | this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | skip:${skip} | this:${extract[index].text}`);
                 if (skip != 0 && skip == index) {
                     skip = 0;
                     continue;
@@ -880,15 +910,15 @@
                 if (offset == 1) {
                     if (this_n == previous_n) {
                         // see same number as previous, skip this one
-                        print(`skip | ${extract[index].text}`);
+                        debug_msg(`skip | ${extract[index].text}`);
                         continue;
                     } else if (this_n == previous_n + 1) {
                         if (track_list.length == 0) {
                             track_list.push(extract[index - 1].text);
-                            print(`add | ${extract[index - 1].text}`);
+                            debug_msg(`add | ${extract[index - 1].text}`);
                         }
                         track_list.push(extract[index].text);
-                        print(`add | ${extract[index].text}`);
+                        debug_msg(`add | ${extract[index].text}`);
                         not_add = 0;
                         continue;
                     } else if (index >= 2) {
@@ -896,10 +926,10 @@
                             offset = 2;
                             if (track_list.length == 0) {
                                 track_list.push(extract[index - 2].text);
-                                print(`add | ${extract[index - 2].text}`);
+                                debug_msg(`add | ${extract[index - 2].text}`);
                             }
                             track_list.push(extract[index].text);
-                            print(`add | ${extract[index].text}, offset: 2`);
+                            debug_msg(`add | ${extract[index].text}, offset: 2`);
                             not_add = 0;
                             continue;
                         }
@@ -907,18 +937,18 @@
                 } else if (offset == 2) {
                     if (this_n == previous_n) {
                         // see same number as previous, skip this one
-                        print(`skip | ${extract[index].text}`);
+                        debug_msg(`skip | ${extract[index].text}`);
                         continue;
                     } else if (this_n == previous_n + 1) {
                         track_list.push(extract[index].text);
-                        print(`add | ${extract[index].text}`);
+                        debug_msg(`add | ${extract[index].text}`);
                         not_add = 0;
                         continue;
                     } else if (this_n == extract[index - 1].number + 1) {
                         offset = -1;
                         skip = index;
                         track_list.push(extract[index].text);
-                        print(`add | ${extract[index].text}, offset: 1`);
+                        debug_msg(`add | ${extract[index].text}, offset: 1`);
                         not_add = 0;
                         continue;
                     }
@@ -928,23 +958,23 @@
                     if (track_list.length > 0) extract_result.push(track_list);
                     track_list = [];
                     not_add = 0;
-                    print("_____reset_____");
+                    debug_msg("_____reset_____");
                 }
             }
             if (track_list.length > 0) extract_result.push(track_list);
-            print("");
+            debug_msg("");
         }
         if (debug) console.groupEnd();
         //------------------------------------------------------
         if (debug) console.groupCollapsed();
-        print("extract_result | ", extract_result);
+        debug_msg("extract_result | ", extract_result);
         if (extract_result) {
             extract_result.forEach((result, result_index) => {
                 let check_list = removeExcessInTrackList(result, true);
-                print("====================");
-                print("check_list", check_list);
+                debug_msg("====================");
+                debug_msg("check_list", check_list);
                 if (check_list.some(line => line == "")) {
-                    print(`check_list is empty, try to extract from offset line`);
+                    debug_msg(`check_list is empty, try to extract from offset line`);
                     let extract_from = [];
                     result.forEach(track => {
                         let original = extract.find(ex => ex.text == track);
@@ -957,22 +987,22 @@
                             offset++;
                             extract_from.forEach(o_index => search_title.push(newtext[o_index + offset]));
                             if (search_title.some(t => result.indexOf(t) != -1)) {
-                                print("some offset title already in original list, list overlapped, abort");
+                                debug_msg("some offset title already in original list, list overlapped, abort");
                                 break;
                             } else if (search_title.length == extract_from.length) {
                                 let newlist = [];
                                 search_title.forEach((st, st_index) => { newlist.push(result[st_index] + st); });
-                                print("found newlist | ", search_title);
+                                debug_msg("found newlist | ", search_title);
                                 extract_result[result_index] = newlist;
                                 break;
                             } else if (search_title.length != extract_from.length) {
-                                print("2 list have different length, abort");
+                                debug_msg("2 list have different length, abort");
                                 break;
                             }
                         }
                     }
                 } else {
-                    print("pass");
+                    debug_msg("pass");
                 }
             });
         }
@@ -985,57 +1015,75 @@
         return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, " ").trim();
     }
 
-    function removeExcessInTrackList(list, check_list = false) {
+    function removeExcessInTrackList(list, no_index = false) {
         if (!list) return false;
-        let new_list = [];
-        let have2index = /(\d+)\D+(\d+)/;
         let reglist = [
+            reg_time,
             reg_text_start,
             reg_non_word_at_start,
             reg_text_start,
         ];
-        if (list.every(line => line.match(have2index))) reglist.splice(1, 0, /^\d+/);
-        list.forEach(line => {
-            print("====================");
-            if (line.match(/[総].[^時間]*時間/)) return;
-            let new_line = line.replace(reg_time, "");
-            if (!new_line.match(/\d+/)) return print("no number left, abort");
-            print(line);
-            print(new_line);
-            let c_index = container_start.indexOf(new_line[0]);
-            if (c_index != -1 && new_line[new_line.length - 1] == container_end[c_index]) {
-                new_line = new_line.slice(1, line.length - 1);
-            }
-            reglist.forEach(reg => {
-                new_line = new_line.replace(reg, "").trim();
-                print(new_line);
-            });
-            print(new_line);
-            new_line = new_line.replace(reg_muti_blank, " ").trim();
-            c_index = container_start.indexOf(new_line[0]);
-            if (c_index != -1 && new_line[new_line.length - 1] == container_end[c_index]) {
-                new_line = new_line.slice(1, line.length - 1);
-            }
-
-            if (check_list) {
-                new_line = new_line
-                    .replace(reg_muti_blank, "")
-                    .replace(/\d+/, "").trim();
-            }
-            new_list.push(new_line);
-        });
+        debug_msg(removeExcessInTrackList.name);        
+        let new_list = doRegList(list, reglist, no_index);
+        let have2index = /\d+\D+(?=\d+)/;
+        if (new_list.every(line => line.match(have2index))) {
+            debug_data("\n<<<2nd pass>>>\n\n");
+            new_list = doRegList(new_list, [have2index], no_index);
+        }
         return new_list;
+
+        function doRegList(_datalist, _reglist = [], _no_index = false) {
+            let _new_list = [];
+            let _reg_total = /総[^時間]*時間/;
+            debug_msg("reglist", _reglist);
+            debug_msg("list", _datalist);
+            _datalist.forEach(_line => {
+                let _new_line = _line;
+                _reglist.forEach(reg => {
+                    _new_line = _new_line.replace(reg, "").trim();
+                    //debug_msg(`"${_new_line}" by reg [${reg}]`);
+                });
+                _new_line = removeBracket(_new_line);
+                _new_line = _new_line.replace(reg_muti_blank, " ").trim();
+                if (_no_index) {
+                    _new_line = _new_line.replace(reg_muti_blank, "").replace(/^\d+/, "").trim();
+                }
+                if (!_line.match(_reg_total)) _new_list.push(_new_line);
+            });
+            debug_msg("after reglist", _new_list);
+            return _new_list;
+        }
+
+        function removeBracket(t = "") {
+            let index = container_start.indexOf(t[0]);
+            if (index != -1) {
+                if (container_end[index] == t[t.length - 1]) {
+                    // found start & end
+                    t = t.slice(1, t.length - 1).trim();
+                    debug_msg(`remove container:"${t}"`);
+                } else if (!t.includes(container_end[index])) {
+                    // found start but no end
+                    t = t.slice(1).trim();
+                    debug_msg(`remove start:"${t}"`);
+                }
+            } else {
+                index = container_end.indexOf(t[t.length - 1]);
+                if (index != -1) {
+                    if (!t.includes(container_start[index])) {
+                        // found end but no start
+                        t = t.slice(0, t.length - 1).trim();
+                        debug_msg(`remove end:"${t}"`);
+                    }
+                }
+            }
+            return t;
+        }
     }
 
     function addTracklist(list, from, index = 0) {
-        print("====================");
-        print("raw list | ", list);
-        let newlist = list;
-        if (from != "Official") {
-            newlist = removeExcessInTrackList(list);
-            print("processed | ", newlist);
-        }
-        if (newlist.some(line => line == "")) return print("found empty line, abort");
+        debug_msg("====================");
+        let newlist = removeExcessInTrackList(list);
+        if (newlist.some(line => line == "")) return debug_msg("found empty line, abort");
         if (newlist.every(line => line.match(/^\d+/))) {
             newlist = newlist.sort((a, b) =>
                 a.localeCompare(b,
@@ -1055,7 +1103,7 @@
         let row_count = textlist.length;
         let maxlength = Math.max(...textlist.map(t => getTrueLength(t)));
         textbox.value = textlist.join("\n");
-        print("final | ", textlist);
+        debug_msg("final | ", textlist);
         Object.assign(textbox, { id: id, rows: row_count + 1, cols: maxlength, });
 
         let copyall = Object.assign(document.createElement("button"), {
@@ -1079,15 +1127,18 @@
 
     function gettracklist() {
         let list = document.querySelector(".work_tracklist");
-        if (list) {
-            let tracklist = [];
-            list = list.querySelectorAll(".work_tracklist_item");
-            list.forEach(ele => { tracklist.push(`${ele.querySelector(".title").textContent}`); });
-            print("Official list | ", tracklist);
-            return tracklist;
-        } else {
-            return false;
-        }
+        if (!list) return false;
+        list = list.querySelectorAll(".work_tracklist_item");
+        if (!list) return false;
+
+        let tracklist = [];
+        list.forEach(ele => {
+            let title = ele.querySelector(".title").textContent;
+            if (title) tracklist.push(title);
+        });
+
+        debug_msg("Official list | ", tracklist);
+        return tracklist;
     }
 
     function appendNewLine(ele) {
@@ -1172,7 +1223,11 @@
         `;
     }
 
-    function print(...any) {
+    function debug_msg(...any) {
         if (debug) console.log(`[dlsite title reformat] `, ...any);
+    }
+
+    function debug_data(...any) {
+        if (debug) console.log(...any);
     }
 })();
