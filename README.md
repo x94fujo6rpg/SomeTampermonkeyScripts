@@ -333,6 +333,9 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.72
+  - improve track extract (add new extrator)
+
 - v0.71
   - if title is empty after process, return to original title
   - remove incomplete bracket `"(no_end" => "no_end"`, `"no_start)" => "no_start"`

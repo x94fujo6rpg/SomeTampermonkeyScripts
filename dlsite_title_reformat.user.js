@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.71
+// @version      0.72
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -95,6 +95,7 @@
     */
     const reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
     const reg_text_start = /^(トラック|track)/;
+    const reg_file_format = /(?<=[mM][pP]|[kK][uU])\d+|\d*\.*\d+(?=[kK][bB]|[kK][hH][zZ]|[bB][iI][tT]|[dD][iI][oO])/g;
     const max_depth = 10;
     debug_msg("container_start | ", container_start);
     debug_msg("container_end | ", container_end);
@@ -106,6 +107,7 @@
     debug_msg("reg_time | ", reg_time);
     debug_msg("reg_non_word_at_start | ", reg_non_word_at_start);
     debug_msg("reg_text_start | ", reg_text_start);
+    debug_msg("reg_file_format | ", reg_file_format);
 
     window.document.body.onload = main();
 
@@ -868,6 +870,11 @@
         console.timeEnd(productHandler.name);
     }
 
+    function naturalSort(a, b) {
+        let setting = { numeric: false, ignorePunctuation: false };
+        return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, setting);
+    }
+
     function extractTrackListFromText() {
         let raw_text = document.querySelector(".work_parts_container");
         if (!raw_text) return false;
@@ -880,132 +887,260 @@
         raw_text = raw_text.textContent.split("\n").filter(line => line.replace(reg_muti_blank, "") != "");
         let newtext = [];
         raw_text.forEach(line => { newtext.push(shiftCode(line)); });
-        debug_msg("newtext | ", newtext);
+        debug_msg("newtext", newtext);
 
         // get all line with number
+        let reg_prefix = /^\D+(?=\d+)/;
         let extract = [];
         newtext.forEach((line, index) => {
             let number = reg_number.exec(line);
-            if (number) { extract.push({ number: parseInt(number[0], 10), text: line, o_index: index, }); }
+            let prefix = line.match(reg_prefix);
+            if (number) {
+                extract.push({
+                    number: parseInt(number[0], 10),
+                    text: line,
+                    o_index: index,
+                    prefix: prefix ? prefix[0].trim() : "_no_prefix_",
+                });
+            }
         });
-        debug_msg("extract | ", extract);
+        debug_msg("extract", extract);
 
-        // extract line that number are continuous
-        if (extract.length > 0) {
-            let track_list = [];
-            let offset = 1;
-            let not_add = 0;
-            let extract_copy = Object.assign([], extract);
-            let skip = 0;
-            for (let index = 1; index < extract_copy.length; index += offset) {
-                if (offset == -1) offset = 1;
-                debug_msg("");
-                let this_n = extract_copy[index].number;
-                let previous_n = extract_copy[index - offset].number;
-                debug_msg(`index:${index} | this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | skip:${skip} | this:${extract[index].text}`);
-                if (skip != 0 && skip == index) {
-                    skip = 0;
+        if (extract.length == 0) return false;
+        // ======================================================================
+        // old extractor 
+        let track_list = [];
+        let offset = 1;
+        let not_add = 0;
+        let extract_copy = Object.assign([], extract);
+        let skip = 0;
+        for (let index = 1; index < extract_copy.length; index += offset) {
+            if (offset == -1) offset = 1;
+            debug_msg("");
+            let this_n = extract_copy[index].number;
+            let previous_n = extract_copy[index - offset].number;
+            debug_msg(`index:${index} | this_n:${this_n} | previous_n:${previous_n} | offset:${offset} | not_add:${not_add} | skip:${skip} | this:${extract[index].text}`);
+            if (skip != 0 && skip == index) {
+                skip = 0;
+                continue;
+            }
+            if (offset == 1) {
+                if (this_n == previous_n) {
+                    // see same number as previous, skip this one
+                    debug_msg(`skip | ${extract[index].text}`);
+                    continue;
+                } else if (this_n == previous_n + 1) {
+                    if (track_list.length == 0) {
+                        track_list.push(extract[index - 1].text);
+                        debug_msg(`add | ${extract[index - 1].text}`);
+                    }
+                    track_list.push(extract[index].text);
+                    debug_msg(`add | ${extract[index].text}`);
+                    not_add = 0;
+                    continue;
+                } else if (index >= 2) {
+                    if (this_n == extract[index - 2].number + 1) {
+                        offset = 2;
+                        if (track_list.length == 0) {
+                            track_list.push(extract[index - 2].text);
+                            debug_msg(`add | ${extract[index - 2].text}`);
+                        }
+                        track_list.push(extract[index].text);
+                        debug_msg(`add | ${extract[index].text}, offset: 2`);
+                        not_add = 0;
+                        continue;
+                    }
+                }
+            } else if (offset == 2) {
+                if (this_n == previous_n) {
+                    // see same number as previous, skip this one
+                    debug_msg(`skip | ${extract[index].text}`);
+                    continue;
+                } else if (this_n == previous_n + 1) {
+                    track_list.push(extract[index].text);
+                    debug_msg(`add | ${extract[index].text}`);
+                    not_add = 0;
+                    continue;
+                } else if (this_n == extract[index - 1].number + 1) {
+                    offset = -1;
+                    skip = index;
+                    track_list.push(extract[index].text);
+                    debug_msg(`add | ${extract[index].text}, offset: 1`);
+                    not_add = 0;
                     continue;
                 }
-                if (offset == 1) {
-                    if (this_n == previous_n) {
-                        // see same number as previous, skip this one
-                        debug_msg(`skip | ${extract[index].text}`);
-                        continue;
-                    } else if (this_n == previous_n + 1) {
-                        if (track_list.length == 0) {
-                            track_list.push(extract[index - 1].text);
-                            debug_msg(`add | ${extract[index - 1].text}`);
-                        }
-                        track_list.push(extract[index].text);
-                        debug_msg(`add | ${extract[index].text}`);
-                        not_add = 0;
-                        continue;
-                    } else if (index >= 2) {
-                        if (this_n == extract[index - 2].number + 1) {
-                            offset = 2;
-                            if (track_list.length == 0) {
-                                track_list.push(extract[index - 2].text);
-                                debug_msg(`add | ${extract[index - 2].text}`);
-                            }
-                            track_list.push(extract[index].text);
-                            debug_msg(`add | ${extract[index].text}, offset: 2`);
-                            not_add = 0;
-                            continue;
-                        }
-                    }
-                } else if (offset == 2) {
-                    if (this_n == previous_n) {
-                        // see same number as previous, skip this one
-                        debug_msg(`skip | ${extract[index].text}`);
-                        continue;
-                    } else if (this_n == previous_n + 1) {
-                        track_list.push(extract[index].text);
-                        debug_msg(`add | ${extract[index].text}`);
-                        not_add = 0;
-                        continue;
-                    } else if (this_n == extract[index - 1].number + 1) {
-                        offset = -1;
-                        skip = index;
-                        track_list.push(extract[index].text);
-                        debug_msg(`add | ${extract[index].text}, offset: 1`);
-                        not_add = 0;
-                        continue;
-                    }
+            }
+            not_add++;
+            if (not_add > 1 || this_n == 1) {
+                if (track_list.length > 0) extract_result.push(track_list);
+                track_list = [];
+                not_add = 0;
+                debug_msg("_____reset_____");
+            }
+        }
+        if (track_list.length > 0) extract_result.push(track_list);
+        debug_msg("");
+        // old extractor
+        // ======================================================================
+        // new extractor
+        function remove_non_track(list = []) {
+            let new_list = Object.assign([], list);
+            let reglist = [
+                reg_time,
+                reg_file_format,
+            ];
+            let reg_total = /総[^時間]*時間/;
+            new_list = new_list.filter(o => {
+                let clean_text = o.text;
+                reglist.forEach(reg => clean_text = clean_text.replace(reg, ""));
+                if (clean_text.match(reg_number) && !clean_text.match(reg_total)) {
+                    return true;
+                } else {
+                    debug_msg(`remove "${o.text}"`);
+                    return false;
                 }
-                not_add++;
-                if (not_add > 1 || this_n == 1) {
-                    if (track_list.length > 0) extract_result.push(track_list);
-                    track_list = [];
-                    not_add = 0;
-                    debug_msg("_____reset_____");
+            });
+            debug_msg("remove_non_track", Object.assign([], new_list));
+            return new_list;
+        }
+
+        function remove_single_track(list = []) {
+            let new_list = Object.assign([], list);
+            let no_single = [];
+            let tmp = [];
+            while (new_list.length > 0) {
+                let o = new_list.shift();
+                if (tmp.length == 0 || tmp[0].number == o.number - 1) {
+                    tmp.unshift(o);
+                } else {
+                    if (tmp.length > 1) tmp.reverse().forEach(x => no_single.push(x));
+                    tmp = [o];
                 }
             }
-            if (track_list.length > 0) extract_result.push(track_list);
-            debug_msg("");
+            if (tmp.length > 1) tmp.reverse().forEach(x => no_single.push(x));
+            new_list = no_single.reverse();
+            debug_msg("remove_single_track", Object.assign([], new_list));
+            return new_list;
+        }
+
+        function match_index2title(list = []) {
+            let new_list = Object.assign([], list);
+            let match_list = {};
+            new_list.forEach(o => {
+                if (!match_list[o.number]) {
+                    match_list[o.number] = [o.text];
+                } else {
+                    match_list[o.number].push(o.text);
+                }
+            });
+            debug_msg("match_index2title", Object.assign({}, match_list));
+            return match_list;
+        }
+
+        function remove_non_continuous(obj = {}) {
+            let match_list = Object.assign({}, obj);
+            let pre_index = false;
+            for (let index in match_list) {
+                let i = parseInt(index, 10);
+                if (!pre_index || i == pre_index + 1) {
+                    pre_index = i;
+                } else {
+                    debug_msg(`remove "${match_list[index]}"`);
+                    delete match_list[index];
+                }
+            }
+            debug_msg("remove_non_continuous", Object.assign({}, match_list));
+            return match_list;
+        }
+
+        function regroup_by_index(obj = {}) {
+            let match_list = Object.assign({}, obj);
+            let new_list = Array.from(match_list[1], x => []);
+            for (let index in new_list) {
+                for (let key in match_list) {
+                    new_list[index] = new_list[index].concat(match_list[key]);
+                }
+            }
+            debug_msg("re-group by index", Object.assign([], new_list));
+            return new_list.length > 0 ? new_list : false;
+        }
+
+        function group_by_prefix(list = []) {
+            let copy = Object.assign([], list);
+            let tmp = {};
+            copy.forEach(o => {
+                if (!tmp[o.prefix]) {
+                    tmp[o.prefix] = [o];
+                } else {
+                    tmp[o.prefix].push(o);
+                }
+            });
+            copy = tmp;
+            for (let key in tmp) { // remove group that list.length < 2
+                if (tmp[key].length < 2) delete tmp[key];
+            }
+            debug_msg("group by prefix", Object.assign({}, copy));
+            return copy;
+        }
+        extract_copy = Object.assign([], extract);
+        extract_copy = extract_copy.sort((a, b) => naturalSort(a.text, b.text));
+        debug_msg("pre-sort by text", Object.assign([], extract_copy));
+        extract_copy = remove_non_track(extract_copy);
+        //extract_copy = remove_single_track(extract_copy);
+        let prefix_group = group_by_prefix(extract_copy);
+        for (let prefix in prefix_group) {
+            debug_msg(`group [${prefix}]`);
+            let group = prefix_group[prefix];
+            let match_list = match_index2title(group);
+            //match_list = remove_non_continuous(match_list);
+            if (match_list[1]) {
+                match_list = regroup_by_index(match_list);
+                if (match_list) {
+                    match_list.forEach(list => extract_result.push(list));
+                }
+            }
         }
         if (debug) console.groupEnd();
         //------------------------------------------------------
         if (debug) console.groupCollapsed();
         debug_msg("extract_result | ", extract_result);
-        if (extract_result) {
-            extract_result.forEach((result, result_index) => {
-                let check_list = removeExcessInTrackList(result, true);
-                debug_msg("====================");
-                debug_msg("check_list", check_list);
-                if (check_list.some(line => line == "")) {
-                    debug_msg(`check_list is empty, try to extract from offset line`);
-                    let extract_from = [];
-                    result.forEach(track => {
-                        let original = extract.find(ex => ex.text == track);
-                        if (original) extract_from.push(original.o_index);
-                    });
-                    if (extract_from.length == result.length) {
-                        let search_title = [];
-                        let offset = 0;
-                        while (offset < max_depth) {
-                            offset++;
-                            extract_from.forEach(o_index => search_title.push(newtext[o_index + offset]));
-                            if (search_title.some(t => result.indexOf(t) != -1)) {
-                                debug_msg("some offset title already in original list, list overlapped, abort");
-                                break;
-                            } else if (search_title.length == extract_from.length) {
-                                let newlist = [];
-                                search_title.forEach((st, st_index) => { newlist.push(result[st_index] + st); });
-                                debug_msg("found newlist | ", search_title);
-                                extract_result[result_index] = newlist;
-                                break;
-                            } else if (search_title.length != extract_from.length) {
-                                debug_msg("2 list have different length, abort");
-                                break;
-                            }
+        if (extract_result.length == 0) return false;
+        extract_result.forEach((result, result_index) => {
+            let check_list = removeExcessInTrackList(result, true);
+            debug_msg("====================");
+            debug_msg("check_list", check_list);
+            if (check_list.some(line => line == "")) {
+                debug_msg(`check_list is empty, try to extract from offset line`);
+                let extract_from = [];
+                result.forEach(track => {
+                    let original = extract.find(ex => ex.text == track);
+                    if (original) extract_from.push(original.o_index);
+                });
+                if (extract_from.length == result.length) {
+                    let search_title = [];
+                    let offset = 0;
+                    while (offset < max_depth) {
+                        offset++;
+                        extract_from.forEach(o_index => search_title.push(newtext[o_index + offset]));
+                        if (search_title.some(t => result.indexOf(t) != -1)) {
+                            debug_msg("some offset title already in original list, list overlapped, abort");
+                            break;
+                        } else if (search_title.length == extract_from.length) {
+                            let newlist = [];
+                            search_title.forEach((st, st_index) => { newlist.push(result[st_index] + st); });
+                            debug_msg("found newlist | ", search_title);
+                            extract_result[result_index] = newlist;
+                            break;
+                        } else if (search_title.length != extract_from.length) {
+                            debug_msg("2 list have different length, abort");
+                            break;
                         }
                     }
-                } else {
-                    debug_msg("pass");
                 }
-            });
-        }
+            } else {
+                debug_msg("pass");
+            }
+        });
         if (debug) console.groupEnd();
         return extract_result.length > 0 ? extract_result.sort((a, b) => b.length - a.length) : false;
     }
@@ -1023,7 +1158,7 @@
             reg_non_word_at_start,
             reg_text_start,
         ];
-        debug_msg(removeExcessInTrackList.name);        
+        debug_msg(removeExcessInTrackList.name);
         let new_list = doRegList(list, reglist, no_index);
         let have2index = /\d+\D+(?=\d+)/;
         if (new_list.every(line => line.match(have2index))) {
