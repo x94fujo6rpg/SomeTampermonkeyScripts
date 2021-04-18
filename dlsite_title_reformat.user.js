@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.72
+// @version      0.73
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -95,19 +95,14 @@
     */
     const reg_non_word_at_start = /^[\u0021-\u002f\u003a-\u0040\u005b-\u0060\u007b-\u007e\uff5f-\uff63　\s]/;
     const reg_text_start = /^(トラック|track)/;
-    const reg_file_format = /(?<=[mM][pP]|[kK][uU])\d+|\d*\.*\d+(?=[kK][bB]|[kK][hH][zZ]|[bB][iI][tT]|[dD][iI][oO])/g;
+    const reg_non_track = /(?<=[mM][pP]|[kK][uU])\d+|\d*\.*\d+(?=[kK][bB]|[kK][hH][zZ]|[bB][iI][tT]|[dD][iI][oO])/g;
+    const reg_non_track2 = /([mM][pP]|[kK][uU])\d+|\d*\.*\d+([kK][bB]|[kK][hH][zZ]|[bB][iI][tT]|[dD][iI][oO])/g;
     const max_depth = 10;
     debug_msg("container_start | ", container_start);
     debug_msg("container_end | ", container_end);
     debug_msg("reg_container | ", reg_container);
     debug_msg("reg_excess | ", reg_excess);
-    debug_msg("reg_blank | ", reg_blank);
-    debug_msg("reg_muti_blank | ", reg_muti_blank);
-    debug_msg("reg_ascii | ", reg_ascii);
     debug_msg("reg_time | ", reg_time);
-    debug_msg("reg_non_word_at_start | ", reg_non_word_at_start);
-    debug_msg("reg_text_start | ", reg_text_start);
-    debug_msg("reg_file_format | ", reg_file_format);
 
     window.document.body.onload = main();
 
@@ -155,21 +150,17 @@
 
     function newCheckbox(id, onclick) {
         let ck = document.createElement("input");
-        Object.assign(ck, {
-            type: "checkbox",
-            id: id,
-            onclick: onclick,
-        });
+        ck.type = "checkbox";
+        ck.id = id;
+        ck.onclick = onclick;
         return ck;
     }
 
     function newLable(forid = "", text = "", className = "dtr_textsize05") {
         let lable = document.createElement("label");
-        Object.assign(lable, {
-            className: className,
-            htmlFor: forid,
-            textContent: text,
-        });
+        lable.className = className;
+        lable.htmlFor = forid;
+        lable.textContent = text;
         return lable;
     }
 
@@ -607,10 +598,8 @@
         appendNewLine(pos);
         //------------------------------------------------------
         let box = document.createElement("div");
-        Object.assign(box, {
-            id: "format_setting_ui",
-            className: "dtr_setting_box",
-        });
+        box.id = "format_setting_ui";
+        box.className = "dtr_setting_box";
         box.style.display = "none";
         let textarea;
         //------------------------------------------------------
@@ -650,12 +639,10 @@
         appendNewLine(box);
         //------------------------------------------------------
         textarea = document.createElement("textarea");
-        Object.assign(textarea, {
-            className: "dtr_textsize05 dtr_max_width",
-            id: "format_title_setting",
-            rows: 1,
-            value: setting_format,
-        });
+        textarea.className = "dtr_textsize05 dtr_max_width";
+        textarea.id = "format_title_setting";
+        textarea.rows = 1;
+        textarea.value = setting_format;
         textarea.readOnly = !setting_adv;
         box.appendChild(newSpan("Format setting:"));
         appendNewLine(box);
@@ -663,13 +650,12 @@
         appendNewLine(box);
 
         textarea = document.createElement("textarea");
-        Object.assign(textarea, {
-            className: "dtr_textsize05 dtr_max_width",
-            id: "format_title_preview",
-            readOnly: true,
-            rows: 1,
-            value: parseFormatString(setting_format),
-        });
+        textarea.className = "dtr_textsize05 dtr_max_width";
+        textarea.id = "format_title_preview";
+        textarea.readOnly = true;
+        textarea.rows = 1;
+        textarea.value = parseFormatString(setting_format);
+
         box.appendChild(newSpan("Preview:"));
         appendNewLine(box);
         box.appendChild(textarea);
@@ -722,14 +708,13 @@
         appendAll(ck_area, [checkbox, lable, newLine()]);
 
         textarea = document.createElement("textarea");
-        Object.assign(textarea, {
-            className: "dtr_textsize05",
-            id: `dtr_${key_sep}`,
-            rows: 1,
-            cols: 1,
-            value: setting_sep,
-            style: "resize: none;",
-        });
+        textarea.className = "dtr_textsize05";
+        textarea.id = `dtr_${key_sep}`;
+        textarea.rows = 1;
+        textarea.cols = 1;
+        textarea.value = setting_sep;
+        textarea.style = "resize: none;";
+
         lable = newLable(`dtr_${key_sep}`, "Separator: ");
         appendAll(ck_area, [
             lable, textarea, newLable(`dtr_${key_sep}`, " for data have muti value like tags"),
@@ -741,11 +726,10 @@
         box.appendChild(newSpan("data list:"));
         appendNewLine(box);
         textarea = document.createElement("textarea");
-        Object.assign(textarea, {
-            className: "dtr_textsize05",
-            id: "format_title_all_data",
-            readOnly: true,
-        });
+        textarea.className = "dtr_textsize05";
+        textarea.id = "format_title_all_data";
+        textarea.readOnly = true;
+
         box.appendChild(textarea);
         pos.append(box);
 
@@ -758,7 +742,6 @@
     function listAllData() {
         let textbox = document.getElementById("format_title_all_data");
         textbox.value = "";
-
         let count = 0;
         let maxlength = 0;
         let s;
@@ -766,14 +749,10 @@
             s = `%${key}%: ${formatted_data[key]}\n`;
             textbox.value += s;
             count++;
-            if (formatted_data[key]) {
-                if (s.length > maxlength) maxlength = s.length;
-            }
+            if (formatted_data[key] && s.length > maxlength) maxlength = s.length;
         }
-        Object.assign(textbox, {
-            rows: count + 1,
-            cols: maxlength * 2,
-        });
+        textbox.rows = count + 1;
+        textbox.cols = maxlength << 1;
     }
 
     function updateSettingString(id, format_string) {
@@ -887,21 +866,29 @@
         raw_text = raw_text.textContent.split("\n").filter(line => line.replace(reg_muti_blank, "") != "");
         let newtext = [];
         raw_text.forEach(line => { newtext.push(shiftCode(line)); });
-        debug_msg("newtext", newtext);
+        //debug_msg("newtext", newtext);
 
-        // get all line with number
+        // get all line with number & remove excess text
         let reg_prefix = /^\D+(?=\d+)/;
+        let reg_suffix = /(?<=\d)\D/;
+        let reg_exclude = /https*:\/\/|総再生|総時間|合計/;
+        let reg_age = /[rR]\-*\d+/g;
         let extract = [];
         newtext.forEach((line, index) => {
-            let number = reg_number.exec(line);
-            let prefix = line.match(reg_prefix);
-            if (number) {
-                extract.push({
-                    number: parseInt(number[0], 10),
-                    text: line,
-                    o_index: index,
-                    prefix: prefix ? prefix[0].trim() : "_no_prefix_",
-                });
+            let text = line.replace(reg_age, "").replace(reg_non_track2, "").replace(reg_time, "");
+            if (!text.match(reg_exclude)) {
+                let number = text.match(reg_number);
+                let prefix = text.match(reg_prefix);
+                let suffix = text.match(reg_suffix);
+                if (number) {
+                    extract.push({
+                        number: parseInt(number[0], 10),
+                        text: text,
+                        o_index: index,
+                        prefix: prefix ? prefix[0] : "_no_prefix_",
+                        suffix: suffix ? suffix[0] : "_no_suffix_",
+                    });
+                }
             }
         });
         debug_msg("extract", extract);
@@ -979,15 +966,14 @@
             }
         }
         if (track_list.length > 0) extract_result.push(track_list);
-        debug_msg("");
-        // old extractor
-        // ======================================================================
-        // new extractor
+        debug_data("extractor 1\n" +
+            "======================================================================\n" +
+            "extractor 2");
         function remove_non_track(list = []) {
             let new_list = Object.assign([], list);
             let reglist = [
                 reg_time,
-                reg_file_format,
+                reg_non_track,
             ];
             let reg_total = /総[^時間]*時間/;
             new_list = new_list.filter(o => {
@@ -1053,9 +1039,9 @@
             return match_list;
         }
 
-        function regroup_by_index(obj = {}) {
+        function regroup_by_index(obj = {}, start = 1) {
             let match_list = Object.assign({}, obj);
-            let new_list = Array.from(match_list[1], x => []);
+            let new_list = Array.from(match_list[start], x => []);
             for (let index in new_list) {
                 for (let key in match_list) {
                     new_list[index] = new_list[index].concat(match_list[key]);
@@ -1065,39 +1051,55 @@
             return new_list.length > 0 ? new_list : false;
         }
 
-        function group_by_prefix(list = []) {
+        function group_by_key(list = [], key = "") {
             let copy = Object.assign([], list);
             let tmp = {};
             copy.forEach(o => {
-                if (!tmp[o.prefix]) {
-                    tmp[o.prefix] = [o];
+                if (!tmp[o[key]]) {
+                    tmp[o[key]] = [o];
                 } else {
-                    tmp[o.prefix].push(o);
+                    tmp[o[key]].push(o);
                 }
             });
             copy = tmp;
-            for (let key in tmp) { // remove group that list.length < 2
-                if (tmp[key].length < 2) delete tmp[key];
+            for (let i in tmp) { // remove group that list.length < 2
+                if (tmp[i].length < 2) delete tmp[i];
             }
-            debug_msg("group by prefix", Object.assign({}, copy));
+            debug_msg(`group by key[${key}]`, Object.assign({}, copy));
             return copy;
         }
+
         extract_copy = Object.assign([], extract);
         extract_copy = extract_copy.sort((a, b) => naturalSort(a.text, b.text));
         debug_msg("pre-sort by text", Object.assign([], extract_copy));
-        extract_copy = remove_non_track(extract_copy);
+        //extract_copy = remove_non_track(extract_copy);
         //extract_copy = remove_single_track(extract_copy);
-        let prefix_group = group_by_prefix(extract_copy);
-        for (let prefix in prefix_group) {
+        let group_prefix = group_by_key(extract_copy, "prefix");
+        for (let prefix in group_prefix) {
             debug_msg(`group [${prefix}]`);
-            let group = prefix_group[prefix];
+            let group = group_prefix[prefix];
             let match_list = match_index2title(group);
             //match_list = remove_non_continuous(match_list);
-            if (match_list[1]) {
-                match_list = regroup_by_index(match_list);
-                if (match_list) {
-                    match_list.forEach(list => extract_result.push(list));
-                }
+            if (match_list[0]) {
+                match_list = regroup_by_index(match_list, 0);
+                if (match_list) match_list.forEach(list => extract_result.push(list));
+            } else if (match_list[1]) {
+                match_list = regroup_by_index(match_list, 1);
+                if (match_list) match_list.forEach(list => extract_result.push(list));
+            }
+        }
+
+        let group_suffix = group_by_key(extract_copy, "suffix");
+        for (let suffix in group_suffix) {
+            debug_msg(`group [${suffix}]`);
+            let group = group_suffix[suffix];
+            let match_list = match_index2title(group);
+            if (match_list[0]) {
+                match_list = regroup_by_index(match_list, 0);
+                if (match_list) match_list.forEach(list => extract_result.push(list));
+            } else if (match_list[1]) {
+                match_list = regroup_by_index(match_list, 1);
+                if (match_list) match_list.forEach(list => extract_result.push(list));
             }
         }
         if (debug) console.groupEnd();
@@ -1150,7 +1152,7 @@
         return string.replace(reg_fullwidth_code, match => String.fromCharCode(match.charCodeAt(0) - 0xFEE0)).replace(reg_muti_blank, " ").trim();
     }
 
-    function removeExcessInTrackList(list, no_index = false) {
+    function removeExcessInTrackList(list = [], no_index = false) {
         if (!list) return false;
         let reglist = [
             reg_time,
@@ -1170,7 +1172,7 @@
         function doRegList(_datalist, _reglist = [], _no_index = false) {
             let _new_list = [];
             let _reg_total = /総[^時間]*時間/;
-            debug_msg("reglist", _reglist);
+            //debug_msg("reglist", _reglist);
             debug_msg("list", _datalist);
             _datalist.forEach(_line => {
                 let _new_line = _line;
@@ -1215,43 +1217,59 @@
         }
     }
 
-    function addTracklist(list, from, index = 0) {
+    async function SHA(text = "") {
+        const msgUint8 = new TextEncoder().encode(text);                              // encode as (utf-8) Uint8Array
+        const hashBuffer = await crypto.subtle.digest('SHA-1', msgUint8);             // hash the message SHA-1/256/384/512
+        const hashArray = Array.from(new Uint8Array(hashBuffer));                     // convert buffer to byte array
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join(''); // convert bytes to hex string
+        return hashHex;
+    }
+
+    async function addTracklist(list, from, index = 0) {
         debug_msg("====================");
-        let newlist = removeExcessInTrackList(list);
-        if (newlist.some(line => line == "")) return debug_msg("found empty line, abort");
-        if (newlist.every(line => line.match(/^\d+/))) {
-            newlist = newlist.sort((a, b) =>
+        let textlist = removeExcessInTrackList(list);
+        if (textlist.some(line => line == "")) return debug_msg("found empty line, abort");
+        if (textlist.every(line => line.match(/^\d+/))) {
+            textlist = textlist.sort((a, b) =>
                 a.localeCompare(b,
                     navigator.languages[0] || navigator.language, {
                     numeric: true,
                 })
             );
         }
-
-        let pos = document.querySelector("[itemprop='description']");
-        let textbox = document.createElement("textarea");
-        let id = `dtr_tracklist${index}`;
-        let box = Object.assign(document.createElement("div"), { className: "dtr_tracklist" });
-        let textlist = [];
-        newlist.forEach((line, index) => { textlist.push(`${index + 1}. ${line}`); });
+        textlist = textlist.map((line, index) => `${index + 1}. ${line}`);
+        debug_msg("final | ", textlist);
 
         let row_count = textlist.length;
         let maxlength = Math.max(...textlist.map(t => getTrueLength(t)));
-        textbox.value = textlist.join("\n");
-        debug_msg("final | ", textlist);
-        Object.assign(textbox, { id: id, rows: row_count + 1, cols: maxlength, });
 
-        let copyall = Object.assign(document.createElement("button"), {
-            textContent: "Copy All",
-            onclick: () => { navigator.clipboard.writeText(document.getElementById(id).value); },
-        });
+        textlist = textlist.join("\n");
+
+        let hash = await SHA(textlist);
+        let duplicate = document.querySelector(`[hash="${hash}"]`);
+
+        if (duplicate) return debug_msg(`found duplicate[${hash}], abort`);
+
+        let box = document.createElement("div");
+        box.className = "dtr_tracklist";
+        box.setAttribute("hash", hash);
+
+        let textbox = document.createElement("textarea");
+        textbox.id = `dtr_tracklist${index}`;
+        textbox.rows = row_count + 1;
+        textbox.cols = maxlength;
+        textbox.value = textlist;
+
+        let copyall = document.createElement("button");
+        copyall.textContent = "Copy";
+        copyall.onclick = () => { navigator.clipboard.writeText(document.getElementById(id).value); };
 
         let span = newSpan(from);
         if (from != "Official") span.className = "dtr_setting_w_text";
 
+        let pos = document.querySelector("[itemprop='description']");
         pos.insertAdjacentElement("afterbegin", box);
         appendAll(box, [textbox, newLine(), copyall, newLine(), span,]);
-        box.insertAdjacentElement("afterend", newLine());
 
         function getTrueLength(string = "") {
             let length = 0;
@@ -1309,10 +1327,8 @@
 
     function newSpan(text = "", className = "dtr_textsize05") {
         let span = document.createElement("span");
-        Object.assign(span, {
-            className: className,
-            textContent: text,
-        });
+        span.className = className;
+        span.textContent = text;
         return span;
     }
 
@@ -1353,7 +1369,7 @@
 
             .dtr_tracklist{
                 display: inline-grid;
-                margin: 1rem;
+                margin: 1rem 1rem 2rem;
             }
         `;
     }
@@ -1366,3 +1382,4 @@
         if (debug) console.log(...any);
     }
 })();
+
