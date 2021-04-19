@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.73
+// @version      0.74
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -1262,7 +1262,7 @@
 
         let copyall = document.createElement("button");
         copyall.textContent = "Copy";
-        copyall.onclick = () => { navigator.clipboard.writeText(document.getElementById(id).value); };
+        copyall.onclick = () => { navigator.clipboard.writeText(document.getElementById(`dtr_tracklist${index}`).value); };
 
         let span = newSpan(from);
         if (from != "Official") span.className = "dtr_setting_w_text";
