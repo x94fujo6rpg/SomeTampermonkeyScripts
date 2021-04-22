@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.09
+// @version      1.11
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -26,7 +26,6 @@
     let m = "[ehx direct download] ";
     let debug_message = true;
     let debug_adv = false;
-    let gallery_nodes;
     let gdata = [];
     let gallery_count = 0;
     let timer_list = [];
@@ -512,9 +511,9 @@
             for (let tag_key of tag_key_list) {
                 let data_key = tag_key.replace(":", "");
                 data[data_key] = [];
-                copy_tags.every(tag => { if (tag.includes(tag_key)) data[data_key].push(tag); });
+                copy_tags.forEach(tag => { if (tag.includes(tag_key)) data[data_key].push(tag); });
                 // remove used
-                copy_tags = copy_tags.filter(tag => data[data_key].indexOf(tag) == -1);
+                copy_tags = copy_tags.filter(tag => !data[data_key].includes(tag));
             }
             data.misc = copy_tags; // unuse list
 

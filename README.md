@@ -94,8 +94,11 @@ click button to enable (pervent too many requests)
 
 ### updates
 
-- v1.09
+- v1.11
   - improve sort speed
+  - fix tag system
+    - sort by group/circle/artist
+    - exclude by tag
 
 - v1.08
   - fix addToDownloadedList use wrong limit
