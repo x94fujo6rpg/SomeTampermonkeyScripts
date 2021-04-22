@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.11
+// @version      1.12
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -599,17 +599,37 @@
         );
         appendAllChild(form, input_list);
         let nodelist = [form];
+
+        let sort_jp = document.createElement("div");
+        sort_jp.textContent = "Sort by JP";
+        sort_jp.style = "display: inline-block;";
+
+        let sort_en = document.createElement("div");
+        sort_en.textContent = "Sort by EN";
+        sort_en.style = "display: inline-block;";
+
         nodelist.push([
-            newButton("exhddl_sort_by_title_jp", "Title (JP)", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
+            sort_jp,
             newSeparate(),
-            newButton("exhddl_sort_by_title_en", "Title (EN)", style_list.top_button, () => { sortGalleryByKey("title"); }),
+            newButton("exhddl_sort_by_title_jp", "Full Title", style_list.top_button, () => { sortGalleryByKey("title_jpn"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_title_pure", "Title (ignore Prefix/Group/End)", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
+            newButton("exhddl_sort_by_title_pure", "ignore Prefix/Group/End", style_list.top_button, () => { sortGalleryByKey("title_pure_jpn"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_title_no_group", "Title (ignore Prefix/Group)", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
+            newButton("exhddl_sort_by_title_no_group", "ignore Prefix/Group", style_list.top_button, () => { sortGalleryByKey("title_no_group_jpn"); }),
             newSeparate(),
-            newButton("exhddl_sort_by_title_no_event", "Title (ignore Prefix)", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+            newButton("exhddl_sort_by_title_no_event", "ignore Prefix", style_list.top_button, () => { sortGalleryByKey("title_no_event_jpn"); }),
+            newLine(),
+
+            sort_en,
             newSeparate(),
+            newButton("exhddl_sort_by_title_en", "Full Title", style_list.top_button, () => { sortGalleryByKey("title"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_pure", "ignore Prefix/Group/End", style_list.top_button, () => { sortGalleryByKey("title_pure"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_no_group", "ignore Prefix/Group", style_list.top_button, () => { sortGalleryByKey("title_no_group"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_title_no_event", "ignore Prefix", style_list.top_button, () => { sortGalleryByKey("title_no_event"); }),
+            newLine(),
 
             newButton("exhddl_sort_by_date", "Date (Default)", style_list.top_button, () => { sortGalleryByKey("posted"); }),
             newSeparate(),

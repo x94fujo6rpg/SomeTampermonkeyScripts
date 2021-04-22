@@ -94,6 +94,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.12
+  - separate jp/en sorting
+
 - v1.11
   - improve sort speed
   - fix tag system
