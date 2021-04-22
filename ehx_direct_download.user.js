@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.08
+// @version      1.09
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -661,13 +661,37 @@
         }
 
         function sortGalleryByKey(key = "") {
-            if (!key) return;
-            getAllGalleryNode();
-            sortGdata();
-            let sorted_id = getSortedGalleryID(gdata, key);
+            if (!key) return print("no key");
+            dTime(sortGalleryByKey.name);
+            dGroup();
+            let sortedID = getSortedID(gdata, key);
             let container = document.querySelector(".itg.gld");
-            removeAllGallery();
-            sorted_id.forEach(id => container.appendChild(gallery_nodes[id].node));
+            dGroupEnd();
+            if (container) {
+                sortedID.forEach(id => {
+                    let gallery = document.querySelector(`[gid="${id}"]`);
+                    if (gallery) container.appendChild(gallery);
+                });
+            } else {
+                print(`${m}container not found`);
+            }
+            dTimeEnd(sortGalleryByKey.name);
+
+            function getSortedID(gdata, sort_key) {
+                let descending = document.getElementById(id_list.sort_setting).checked;
+                return gdata.sort((a, b) => {
+                    return descending ? naturalSort(b[sort_key], a[sort_key]) : naturalSort(a[sort_key], b[sort_key]);
+                }).map(g => {
+                    dPrint(`${String(g.gid).padStart(10)} | ${g[sort_key]}`);
+                    return g.gid;
+                });
+            }
+
+            function naturalSort(a, b) {
+                let numeric = document.getElementById(id_list.sort_numeric).checked;
+                let ignore_punctuation = document.getElementById(id_list.sort_ignore_punctuation).checked;
+                return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: numeric, ignorePunctuation: ignore_punctuation });
+            }
         }
 
         function setExclude() {
@@ -874,22 +898,6 @@
 
     function visitGallery(link) {
         if (link) {
-            // send request to server, not sure this count or not. (no effect to link states)
-            /*
-            let r = new XMLHttpRequest();
-            r.open("get", link, true);
-            r.onreadystatechange = function () {
-                if (r.readyState == 4) {
-                    if (r.status == 200) {
-                        print(`${m}server request success, gallery:${link}`);
-                    } else {
-                        print(`${m}server request failed, gallery:${link}`);
-                        print(r);
-                    }
-                }
-            };
-            r.send();
-            */
             // trigger :visited
             let current = window.location.href;
             history.pushState({}, "", link); // add link to history. this will change current winodw link.
@@ -990,69 +998,6 @@
         }
         text = text.replace(blank_reg, " ");
         return text;
-    }
-
-    function sortGdata() {
-        let newdata = [];
-        for (let gid in gallery_nodes) {
-            newdata.push(gdata.find(gallery_data => gallery_data.gid == gid));
-        }
-        gdata = newdata;
-    }
-
-    function getSortedGalleryID(object_list, sort_key) {
-        let newlist = [];
-        let descending = document.getElementById(id_list.sort_setting).checked;
-        newlist = object_list.sort((a, b) => {
-            return descending ? naturalSort(b[sort_key], a[sort_key]) : naturalSort(a[sort_key], b[sort_key]);
-        });
-
-        let new_id_list = [];
-        print(`${m}sort by: ${sort_key}`);
-        dGroup();
-        if (newlist) {
-            for (let data of newlist) {
-                new_id_list.push(data.gid);
-                dPrint(`${String(data.gid).padStart(10)} | ${data[sort_key]}`);
-            }
-        }
-        dGroupEnd();
-
-        return new_id_list;
-
-        function naturalSort(a, b) {
-            let numeric = document.getElementById(id_list.sort_numeric).checked;
-            let ignore_punctuation = document.getElementById(id_list.sort_ignore_punctuation).checked;
-            return String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: numeric, ignorePunctuation: ignore_punctuation });
-        }
-    }
-
-    function getAllGalleryNode() {
-        gallery_nodes = {};
-        forEachGallery(gallery => {
-            let id = gallery.getAttribute("gid");
-            let title = gallery.getAttribute("gtitle");
-            let deepcopy = gallery.cloneNode(true);
-            copyOnclick(gallery, deepcopy, `#gallery_dl_${id}`);
-            copyOnclick(gallery, deepcopy, `#t_title_${id}`);
-            copyOnclick(gallery, deepcopy, `#copy_title_${id}`);
-            copyOnclick(gallery, deepcopy, `#gallery_status_${id}`);
-            copyOnclick(gallery, deepcopy, `#exhddl_exclude_${id}`);
-            gallery_nodes[id] = {
-                id: id,
-                title: title,
-                node: deepcopy,
-            };
-        });
-
-        function copyOnclick(original, copy, css_selector) {
-            let o = original.querySelector(css_selector);
-            if (o) copy.querySelector(css_selector).onclick = o.onclick;
-        }
-    }
-
-    function removeAllGallery() {
-        forEachGallery(gallery => gallery.remove());
     }
 
     function fixTitlePrefix() {

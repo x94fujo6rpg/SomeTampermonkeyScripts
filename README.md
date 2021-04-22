@@ -94,6 +94,9 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.09
+  - improve sort speed
+
 - v1.08
   - fix addToDownloadedList use wrong limit
 
