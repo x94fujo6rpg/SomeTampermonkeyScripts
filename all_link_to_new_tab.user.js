@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/all_link_to_new_tab.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/all_link_to_new_tab.user.js
-// @version      0.01
+// @version      0.02
 // @description  make all link open in new tab
 // @author       x94fujo6
 // @match        *://*/*
@@ -16,11 +16,13 @@
 	'use strict';
 	console.log("script start");
 	const
+		linkReg = /^(https|http):\/\/.+/,
 		openLink = (link) => window.open(link, "_blank", "noreferrer"),
 		setOnclick = () => {
 			let links = document.querySelectorAll("[href]");
 			if (links) {
 				links.forEach(link => {
+					if (!link.href.match(linkReg)) return;
 					link.onclick = function (event) {
 						openLink(link.href);
 						event.preventDefault();
