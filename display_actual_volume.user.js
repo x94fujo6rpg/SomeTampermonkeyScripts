@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.1
+// @version      0.2
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -50,16 +50,14 @@
 				let pos = ele.querySelector(targetClass),
 					newEle = document.createElement("div");
 				newEle.className = `${pos.className} davCss`;
-				newEle.innerHTML = `
-					<h5>${text}</h5>
-				`;
+				newEle.innerHTML = `<h5>${text}</h5>`;
 				pos.insertAdjacentElement("afterend", newEle);
 			}
 
 			function getNum(ele, max) {
 				let text = ele.textContent.match(numReg),
 					num = text ? parseFloat(text[1]) : false;
-				return num ? calc(num, max) : false;
+				return num !== false ? calc(num, max) : 0;
 
 				function calc(num, max) {
 					return Math.round(num * max) / 100;
