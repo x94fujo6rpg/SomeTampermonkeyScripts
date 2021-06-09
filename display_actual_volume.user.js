@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.2
+// @version      0.3
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -13,10 +13,29 @@
 /* jshint esversion: 9 */
 
 (function () {
-	let dataURL = "https://chihsuan.github.io/reservoir-data/data.json";
-	$.getJSON(dataURL)
-		.done((data) => main(data))
-		.fail(() => console.log("getJSON failed"));
+	wait();
+
+	function log(...any) {
+		console.log(`%c[顯示實際水量]%c`, "color:OrangeRed;", "", ...any);
+	}
+
+	function wait(retry = 30) {
+		let target = document.querySelectorAll(".state.blue,.state.red");
+		if (!target.length && retry > 0) {
+			retry--;
+			log(`target not found, remaining retries [${retry}]`);
+			setTimeout(() => wait(retry), 500);
+		} else {
+			setTimeout(getData, 500);
+		}
+	}
+
+	function getData() {
+		let dataURL = "https://chihsuan.github.io/reservoir-data/data.json";
+		$.getJSON(dataURL)
+			.done((data) => main(data))
+			.fail(() => console.log("getJSON failed"));
+	}
 
 	function main(data) {
 		data = mapToID(data);
