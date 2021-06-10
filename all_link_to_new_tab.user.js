@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name         open all links in new tab
+// @name         all links in new tab
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/all_link_to_new_tab.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/all_link_to_new_tab.user.js
