@@ -50,7 +50,7 @@
 			});
 			log(`added missing id [${count}]`);
 		},
-		start = () => {			
+		start = () => {
 			log(`script start`);
 			blacklist.addEventListener("input", autoSave);
 			addUser.addEventListener("click", autoSave);
