@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.4
+// @version      0.5
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -41,12 +41,18 @@
 		data = mapToID(data);
 		let eles = document.querySelectorAll("div.reservoir-wrap>div"),
 			numReg = /：(\d+.\d+)/,
-			sum = sumAll(data, "volumn");
+			sum = sumAll(data, "volumn"),
+			sumMax = sumAll(data, "baseAvailable");
 		if (!eles) return;
-		eles.forEach(ele => addData(ele, sum));
+		eles.forEach(ele => {
+			addData(ele, sum, sumMax);
 
-		let ele = addSum(sum, data);
-		addData(ele, sum);
+			let name = ele.querySelector(".name");
+			if (name) name.childNodes[0].textContent += "　　";
+		});
+
+		let ele = addSum(sum, sumMax, data);
+		addData(ele, sum, sumMax);
 		editCss();
 
 		function sumAll(data, target) {
@@ -65,7 +71,7 @@
 			return newData;
 		}
 
-		function addSum(sum, rdata) {
+		function addSum(sum, sumMax, rdata) {
 			let reservoirName = "全台水庫總合",
 				dataForSvg = {};
 			dataForSvg[reservoirName] = {
@@ -77,7 +83,7 @@
 				volumn: parseFloat(sum).toFixed(2),
 				updateAt: "userscript",
 				id: "reservoir999",
-				baseAvailable: sumAll(rdata, "baseAvailable"),
+				baseAvailable: parseFloat(sumMax).toFixed(2),
 			};
 			let reservoir = dataForSvg[reservoirName];
 			reservoir.percentage = Math.round((reservoir.volumn / reservoir.baseAvailable) * 10000) / 100;
@@ -97,7 +103,7 @@
 				ele.className = "reservoir";
 				ele.innerHTML = `
 					<div class="name">
-						<h3>${reservoirName}</h3>
+						<h3>${reservoirName}　　</h3>
 					</div>
 					<svg id="reservoir999" width="100%" height="250"></svg>
 					<div class="volumn">
@@ -226,7 +232,7 @@
 			}
 		}
 
-		function addData(ele, sum) {
+		function addData(ele, sum, sumMax) {
 			let id = ele.querySelector("svg").id,
 				rData = data[id],
 				eff = ele.querySelector("div.volumn"),
@@ -234,8 +240,9 @@
 				red = ele.querySelector("div.state.red h5");
 			if (!rData) return;
 			let max = rData.baseAvailable;
+			addNewLine(ele, ".volumn", `　└ 佔全台：${Math.floor(max / sumMax * 10000) / 100}%`);
 			addNewLine(ele, ".volumn", `最大蓄水量：${max}萬立方公尺`);
-			addNewLine(ele, ".volumn", `目前蓄水量佔全台：${getPercent(eff, sum)}%`);
+			addNewLine(ele, ".volumn", `　└ 佔全台：${getPercent(eff, sum)}%`);
 			if (blue) addNewLine(ele, ".state.blue", `昨日水量上升：${calcVolume(blue, max)}萬立方公尺`);
 			if (red) addNewLine(ele, ".state.red", `昨日水量下降：${calcVolume(red, max)}萬立方公尺`);
 
