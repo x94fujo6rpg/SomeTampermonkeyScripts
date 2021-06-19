@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.5
+// @version      0.6
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -57,7 +57,10 @@
 
 		function sumAll(data, target) {
 			let sum = 0;
-			for (let key in data) sum += parseFloat(data[key][target]);
+			for (let key in data) {
+				let num = parseFloat(data[key][target]);
+				sum += isNaN(num) ? 0 : num;
+			}
 			log(`${sumAll.name} [${target}]: ${sum}`);
 			return sum;
 		}
