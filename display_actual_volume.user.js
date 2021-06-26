@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.6
+// @version      0.7
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -246,15 +246,20 @@
 			addNewLine(ele, ".volumn", `　└ 佔全台：${Math.floor(max / sumMax * 10000) / 100}%`);
 			addNewLine(ele, ".volumn", `最大蓄水量：${max}萬立方公尺`);
 			addNewLine(ele, ".volumn", `　└ 佔全台：${getPercent(eff, sum)}%`);
-			if (blue) addNewLine(ele, ".state.blue", `昨日水量上升：${calcVolume(blue, max)}萬立方公尺`);
-			if (red) addNewLine(ele, ".state.red", `昨日水量下降：${calcVolume(red, max)}萬立方公尺`);
+			if (blue) {
+				addNewLine(ele, ".state.blue", `昨日水量上升：${calcVolume(blue, max)}萬立方公尺`);
+			} else if (red) {
+				addNewLine(ele, ".state.red", `昨日水量下降：${calcVolume(red, max)}萬立方公尺`);
+			} else {
+				addNewLine(ele, ".dueDay", `　`, true);
+			}
 
-			function addNewLine(ele, targetClass, text) {
+			function addNewLine(ele, targetClass, text, empty = false) {
 				let pos = ele.querySelector(targetClass),
 					newEle = document.createElement("div");
-				newEle.className = `${pos.className} davCss`;
+				if (!empty) newEle.className = `${pos.className} davCss`;
 				newEle.innerHTML = `<h5>${text}</h5>`;
-				pos.insertAdjacentElement("afterend", newEle);
+				pos.insertAdjacentElement(empty ? "beforebegin" : "afterend", newEle);
 			}
 
 			function getNum(ele) {
