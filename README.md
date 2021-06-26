@@ -416,6 +416,8 @@ click button to copy
 reformat date & title in search result  
 click button to copy  
 ![](https://i.imgur.com/amKQlOX.jpg)  
+- v0.12
+  - fix broken scrollbar cause by checkout-js error
 
 ## [[reddit img relink]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)  
 **only work for New UI**  
