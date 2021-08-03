@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/display_actual_volume.user.js
-// @version      0.7
+// @version      0.8
 // @description  顯示最大蓄水量，顯示上升/下降的實際水量而不是百分比
 // @author       x94fujo6
 // @match        https://water.taiwanstat.com/
@@ -54,6 +54,116 @@
 		let ele = addSum(sum, sumMax, data);
 		addData(ele, sum, sumMax);
 		editCss();
+		add_sort();
+
+		function add_sort() {
+			let
+				b_data = [
+					{ t: "預設", key: "sid" },
+					{ t: "有效蓄水", key: "vol" },
+					{ t: "最大蓄水", key: "max" },
+					{ t: "昨日上升", key: "inc_v" },
+					{ t: "昨日下降", key: "dec_v" },
+					{ t: "昨日上升(%)", key: "inc_p" },
+					{ t: "昨日下降(%)", key: "dec_p" },
+				],
+				pos = document.querySelector("div.reservoir-wrap"),
+				box = Object.assign(document.createElement("div"), { className: "sortbox" }),
+				sel_a = Object.assign(document.createElement("select"), { id: "sort_des" }),
+				sel_b = Object.assign(document.createElement("select"), { id: "sort_key" }),
+				option,
+				sorting = () => {
+					let des = document.querySelector("#sort_des").selectedOptions[0].value,
+						key = document.querySelector("#sort_key").selectedOptions[0].value;
+					resort(key, parseInt(des));
+				},
+				b = Object.assign(document.createElement("button"), { textContent: "排序", onclick: () => sorting() });
+
+			box.style = `
+				text-align: center;
+				font-size: large;
+			`;
+
+			b.style = `
+				margin: 0px 10px;
+				padding: 0px 20px;
+			`;
+
+			sel_a.innerHTML = `
+				<option value="1">降序</option>
+				<option value="0">升序</option>
+			`;
+
+			b_data.forEach(data => {
+				option = document.createElement("option");
+				option.text = data.t;
+				option.value = data.key;
+				sel_b.appendChild(option);
+			});
+
+			box.appendChild(sel_a);
+			box.appendChild(sel_b);
+			box.appendChild(b);
+			pos.insertAdjacentElement("beforebegin", box);
+
+			function resort(key, des = true) {
+				let
+					pos = document.querySelector("div.reservoir-wrap"),
+					eles = pos.querySelectorAll("div.reservoir"),
+					sort_by = {
+						sid: true,
+						vol: /有效蓄水量：(\d+\.\d+)萬立方公尺/,
+						max: /最大蓄水量：(\d+\.\d+)萬立方公尺/,
+						inc_p: /昨日水量上升：(\d+\.\d+)%/,
+						inc_v: /昨日水量上升：(\d+\.\d+)萬立方公尺/,
+						dec_p: /昨日水量下降：(\d+\.\d+)%/,
+						dec_v: /昨日水量下降：(\d+\.\d+)萬立方公尺/,
+					},
+					data = [],
+					rid, sortdata,
+					ns = (a, b) => String(a).localeCompare(String(b), navigator.languages[0] || navigator.language, { numeric: true });
+	
+				if (!sort_by[key]) throw Error("unknown key");
+	
+				// set id for sort
+				if (!eles[0].getAttribute("sid")) {
+					eles.forEach(e => {
+						e.setAttribute("sid", e.querySelector("svg").id);
+					});
+				}
+	
+				eles.forEach(e => {
+					rid = e.getAttribute("sid");
+					if (key !== "sid") {
+						sortdata = e.innerHTML.match(sort_by[key]);
+						sortdata = sortdata ? sortdata[1] : "";
+					} else {
+						sortdata = rid;
+					}
+					data.push({
+						ele: e,
+						sortdata: sortdata,
+					});
+				});
+	
+				if (key !== "sid") {
+					if (!des) {
+						data = data.sort((a, b) => ns(a.sortdata, b.sortdata));
+					} else {
+						data = data.sort((a, b) => ns(b.sortdata, a.sortdata));
+					}
+				} else {
+					if (des) {
+						data = data.sort((a, b) => ns(a.sortdata, b.sortdata));
+					} else {
+						data = data.sort((a, b) => ns(b.sortdata, a.sortdata));
+					}
+				}
+	
+				log("sort result:", data);
+				data.forEach(o => pos.appendChild(o.ele));
+			}
+		}
 
 		function sumAll(data, target) {
 			let sum = 0;
@@ -75,7 +185,7 @@
 		}
 
 		function addSum(sum, sumMax, rdata) {
-			let reservoirName = "全台水庫總合",
+			let reservoirName = "全台水庫",
 				dataForSvg = {};
 			dataForSvg[reservoirName] = {
 				name: reservoirName,

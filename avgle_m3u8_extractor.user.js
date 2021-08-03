@@ -46,10 +46,12 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 		b = document.querySelector("#aet_dl_button");
 		b.disabled = true;
 
+		//add observer
 		let ob = new MutationObserver(() => {
 			b.textContent = "waitting data...";
 			ob.disconnect();
 		});
+		
 		ob.observe(document.querySelector("#player_3x2_container"), { attributes: true });
 
 		await cap_segments().then(data => {
