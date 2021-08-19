@@ -11,7 +11,7 @@
 // @grant        GM_setValue
 // @grant        GM_registerMenuCommand
 // @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
-// @run-at		 document-start
+// @run-at       document-start
 // ==/UserScript==
 
 (function () {
