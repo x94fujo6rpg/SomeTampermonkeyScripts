@@ -2,8 +2,8 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.03
-// @description  修復PTT網頁板開圖、阻擋黑名單ID的推文/圖片
+// @version      0.04
+// @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
 // @grant        GM_xmlhttpRequest
@@ -16,8 +16,8 @@
 
 (function () {
 	let
-		blacklist_id = ["s910408","ig49999","bowen5566","sos976431"],
-		blacklist_img = ["Dey10PF","WfOR5a8","wsG5vrZ","Q7hvcZw","7h9s0iC","g28oNwO","y9arWAn","9QnqRM3","UeImoq1","snzmE7h","cJXK0nM","jWy4BKY","feMElhb","CpGkeGb","txz4iGW","W2i4y4k","aVXa6GN","Mni1ayO"],
+		blacklist_id = ["s910408", "ig49999", "bowen5566", "sos976431"],
+		blacklist_img = ["Dey10PF", "WfOR5a8", "wsG5vrZ", "Q7hvcZw", "7h9s0iC", "g28oNwO", "y9arWAn", "9QnqRM3", "UeImoq1", "snzmE7h", "cJXK0nM", "jWy4BKY", "feMElhb", "CpGkeGb", "txz4iGW", "W2i4y4k", "aVXa6GN", "Mni1ayO"],
 		blocked_id = new Set(),
 		blocked_img = new Set();
 	const
@@ -52,9 +52,7 @@
 							if (!blacklist_img.find(img => img == text)) blocked_img.add(text);
 						}
 					}
-					if (ck_img) {
-						if (!blacklist_id.find(id => id == user)) blocked_id.add(user);
-					}
+					if (ck_img) if (!blacklist_id.find(id => id == user)) blocked_id.add(user);
 				}
 			});
 			return true;
@@ -84,7 +82,7 @@
 					/imgur\.com\/a\/\w{5,7}/,
 					/imgur\.com\/\w{5,7}/,
 					/pbs\.twimg\.com\/media\/[\w-]+/,
-					/(?:https:|http:)(?:\/\/).*\.\w{3,4}$/,
+					/(?<=https:\/\/|http:\/\/).*\.\w{3,4}$/,
 				],
 				twitter_format = /(?<=media[^\.\n]+\.|format=)\w{3,4}/,
 				format_check = /\.(jpg|jpeg|png|webp|gif|gifv|mp4|webm)$/;
@@ -251,9 +249,9 @@
 			const set_list = (list_id = "", data = []) => { GM_config.set(list_id, data.join("\n")); };
 			GM_config.onOpen = () => {
 				let ids = [{ id: "blocked_id", data: blocked_id }, { id: "blocked_img", data: blocked_img },];
-				ids.forEach(o => { 
-					slog(o.data); 
-					set_list(o.id, [...o.data]); 
+				ids.forEach(o => {
+					slog(o.data);
+					set_list(o.id, [...o.data]);
 				});
 			};
 			GM_config.onSave = () => {
@@ -271,3 +269,4 @@
 		};
 	document.body.onload = start_script;
 })();
+
