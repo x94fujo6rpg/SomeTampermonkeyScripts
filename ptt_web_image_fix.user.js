@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.06
+// @version      0.07
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -125,7 +125,7 @@
 				GM_xmlhttpRequest({
 					method: "GET", url,
 					onload: async (rs) => {
-						let full_url = rs.responseText.match(/(https:\/\/i.imgur\.com\/\w+\.\w+)\W/);
+						let full_url = rs.responseText.match(/(https:\/\/i.imgur\.com\/\w+\.\w{3,4})\W[\w#]+">/);
 						full_url = full_url ? full_url[1] : false;
 						slog(!full_url ? `${url} has no data` : `GET ${url} done`);
 						return reslove([full_url, rs.status]);
@@ -133,16 +133,20 @@
 				});
 			});
 		},
-		create_img_ele = (url) => {
+		create_img_ele = (url, get_img) => {
 			let box = Object.assign(document.createElement("div"), { className: "richcontent" }),
 				a = Object.assign(document.createElement("a"), {
 					href: url,
 					target: "_blank",
 					style: "text-decoration: none; box-shadow: none; background: none;",
-					innerHTML: `<img src="${url}" referrerpolicy="no-referrer" rel="noreferrer noopener nofollow">`, //loading="lazy"
+					innerHTML: `<img src="${url}" referrerpolicy="no-referrer" rel="noreferrer noopener nofollow">`, //loading="lazy" 
 					referrerPolicy: "no-referrer",
 					rel: "noreferrer noopener nofollow",
 				});
+			if (!get_img) {
+				a.style = a.innerHTML = "";
+				a.textContent = `${url} (分段修復)`;
+			}
 			a.setAttribute(fixed, 1);
 			box.appendChild(a);
 			return box;
@@ -155,7 +159,7 @@
 				textContent: rd_text(text),
 			});
 		},
-		fix_image = async (obj) => {
+		fix_image = async (obj, get_img) => {
 			let url, status;
 			if (obj.url.includes("imgur")) {
 				for (let retry = 3; retry >= 0; retry--) {
@@ -167,26 +171,25 @@
 				url = obj.url;
 			}
 			if (!url) url = "https://i.imgur.com/removed.png";
-			url = (blacklist_img.find(img => url.includes(img))) ? create_rd_ele(url) : create_img_ele(url);
+			url = (blacklist_img.find(img => url.includes(img))) ? create_rd_ele(url) : create_img_ele(url, get_img);
 			obj.e.insertAdjacentElement("afterend", url);
 			obj.e.target = "_blank";
 			obj.e.setAttribute(fixed, 1);
 			return;
 		},
-		process_ele = async (eles, extractor, log) => {
+		process_ele = async (eles, extractor, log, get_img = true) => {
 			if (!eles.length) return;
 			eles = await extractor(eles);
 			if (!eles?.length) return;
 			slog(log, eles);
-			eles.forEach(e => fix_image(e));
+			eles.forEach(e => fix_image(e, get_img));
 			return;
 		},
 		main = async () => {
 			let eles = document.querySelectorAll("a[href]");
 			await process_ele(eles, extract_url, "try fix");
-			if (!GM_config.get("fix_segment")) return;
 			await sleep(1000);
-			await process_ele(eles, extract_in_text, "try fix spaced");
+			await process_ele(eles, extract_in_text, "try fix spaced", GM_config.get("fix_segment"));
 		},
 		sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms)),
 		start_script = async () => {
@@ -197,7 +200,7 @@
 			await remove_blacklist_target();
 			await remove_richcontent();
 			await main();
-			GM_config.onOpen(); // reload
+			GM_config.onOpen(); // update ui
 		},
 		load_value = async () => {
 			blacklist_id = GM_config.get("blacklist_id").split("\n");
