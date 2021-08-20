@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.04
+// @version      0.05
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -39,20 +39,17 @@
 				ele = div.querySelector(".push-content");
 				text = ele.textContent;
 				ck_id = blacklist_id.find(id => id == user);
-				ck_img = blacklist_img.find(img => text.includes(img));
+				ck_img = blacklist_img.find(img => text.includes(`/${img}`));
 				if (ck_id || ck_img) {
-					slog(`found ${ck_id} in blacklist, text:[ ${text.replace(/(http|https)(:\/\/)/, "")} ]`);
+					slog(`found ${ck_id} in blacklist, text:[${text.replace(":", "").trim()}]`); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
 					ele.title = text;
 					ele.innerHTML = rd_text(text);
 					ele.style = "color: darkred;";
 					if (ck_id) {
 						text = text.match(reg);
-						if (text) {
-							text = text[1];
-							if (!blacklist_img.find(img => img == text)) blocked_img.add(text);
-						}
+						if (text && !ck_img) blocked_img.add(text[1]);
 					}
-					if (ck_img) if (!blacklist_id.find(id => id == user)) blocked_id.add(user);
+					if (ck_img && !ck_id) blocked_id.add(user);
 				}
 			});
 			return true;
@@ -180,6 +177,7 @@
 		main = async () => {
 			let eles = document.querySelectorAll("a[href]");
 			await process_ele(eles, extract_url, "try fix");
+			if (!GM_config.get("fix_segment")) return;
 			await sleep(1000);
 			await process_ele(eles, extract_in_text, "try fix spaced");
 		},
@@ -205,36 +203,50 @@
 				title: "腳本設定",
 				fields: {
 					// This is the id of the field
+					fix_segment: {
+						label: "嘗試對分段網址開圖 (小心使用)",
+						section: "功能設定",
+						type: "checkbox",
+						default: true,
+					},
 					blacklist_id: {
-						label: "[黑名單]\nID",
+						label: "ID",
+						section: "黑名單",
 						type: "textarea",
 						default: blacklist_id.join("\n")
 					},
 					blocked_id: {
-						label: "[已阻擋]\n未在名單中的ID",
+						label: "已阻擋，但未在名單中的ID",
 						type: "textarea",
 						default: [...blocked_id].join("\n")
 					},
 					blacklist_img: {
-						label: "[黑名單]\n圖片名稱",
+						label: "圖片名稱",
 						type: "textarea",
 						default: blacklist_img.join("\n")
 					},
 					blocked_img: {
-						label: "[已阻擋]\n未在名單中的圖片名稱",
+						label: "已阻擋，但未在名單中的圖片名稱",
 						type: "textarea",
 						default: [...blocked_img].join("\n")
 					},
 				},
 				css: `
+					#settings_fix_segment_var {
+						display: inline-flex;
+    					margin: 0.5rem !important;
+						border: 0.1rem solid;
+    					padding: 0.5rem;
+					}
+
 					#settings_blacklist_id_var,#settings_blacklist_img_var,#settings_blocked_id_var,#settings_blocked_img_var {
-						width: 20% !important;
-						height: 80% !important;
+						width: calc(90% / 4) !important;
+						height: 60% !important;
 						margin: 1rem !important;
 						display: inline-block;
 					}
 
-					#settings_blacklist_id_field_label,#settings_blacklist_img_field_label,#settings_blocked_id_field_label,#settings_blocked_img_field_label {
+					#settings_blacklist_id_field_label,#settings_blacklist_img_field_label,#settings_blocked_id_field_label,#settings_blocked_img_field_label,#settings_fix_segment_field_label {
 						font-size: 1rem !important;
 						text-align: center;
     					display: block;
@@ -250,7 +262,7 @@
 			GM_config.onOpen = () => {
 				let ids = [{ id: "blocked_id", data: blocked_id }, { id: "blocked_img", data: blocked_img },];
 				ids.forEach(o => {
-					slog(o.data);
+					slog(o.id, o.data);
 					set_list(o.id, [...o.data]);
 				});
 			};
@@ -262,7 +274,7 @@
 					};
 				ids.forEach(id => {
 					let list = load_list(id);
-					slog(id, JSON.stringify(list));
+					slog("save", id, list.length);
 					set_list(id, list);
 				});
 			};
