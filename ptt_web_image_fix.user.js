@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.05
+// @version      0.06
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -18,15 +18,15 @@
 	let
 		blacklist_id = ["s910408", "ig49999", "bowen5566", "sos976431"],
 		blacklist_img = ["Dey10PF", "WfOR5a8", "wsG5vrZ", "Q7hvcZw", "7h9s0iC", "g28oNwO", "y9arWAn", "9QnqRM3", "UeImoq1", "snzmE7h", "cJXK0nM", "jWy4BKY", "feMElhb", "CpGkeGb", "txz4iGW", "W2i4y4k", "aVXa6GN", "Mni1ayO"],
-		blocked_id = new Set(),
-		blocked_img = new Set();
+		blocked_id = new Set([]),
+		blocked_img = new Set([]);
 	const
 		script_name = "fix ptt img", fixed = "fix_by_script",
 		rd_text = (text = "") => {
 			if (text.length <= 11) return " ██REDACTED██";
 			let rp = (len) => "█".repeat(len),
 				side = (text.length - 11) / 2;
-			if (side > 1) side = rp(side);
+			side = (side > 1) ? rp(side) : "█";
 			return ` ${side}REDACTED${side}`;
 		},
 		remove_blacklist_target = async () => {
@@ -41,20 +41,27 @@
 				ck_id = blacklist_id.find(id => id == user);
 				ck_img = blacklist_img.find(img => text.includes(`/${img}`));
 				if (ck_id || ck_img) {
-					slog(`found ${ck_id} in blacklist, text:[${text.replace(":", "").trim()}]`); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
 					ele.title = text;
 					ele.innerHTML = rd_text(text);
 					ele.style = "color: darkred;";
-					if (ck_id) {
+					slog_c(`%cblock by id blacklist %c${ck_id}:%c${ele.title.replace(":", "").trim()}`, "#FF0000;#FFFF00;"); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
+					if (ck_id && !ck_img) {
 						text = text.match(reg);
-						if (text && !ck_img) blocked_img.add(text[1]);
+						if (text) {
+							slog_c(`%cblock by id blacklist %c${user}:%c${ele.title.replace(":", "").trim()}%c img [%c${text[1]}%c] not in list`, "#40E0D0;#FFFF00;;#40E0D0;;#40E0D0");
+							blocked_img.add(text[1]);
+						}
 					}
-					if (ck_img && !ck_id) blocked_id.add(user);
+					if (ck_img && !ck_id) {
+						slog_c(`%cblock by img blacklist %c${user}:%c${ele.title.replace(":", "").trim()}%c user [%c${user}%c] not in list`, "#FFA500;#FFFF00;;#FFA500;;#FFA500");
+						blocked_id.add(user);
+					}
 				}
 			});
 			return true;
 		},
 		slog = (...any) => console.log(`[${script_name}]`, ...any),
+		slog_c = (s = "", c = "") => console.log(`[${script_name}] ${s}`, ...c.split(";").map(_c => `color:${_c};`)),
 		wait_tab = () => {
 			return new Promise(resolve => {
 				if (document.visibilityState === "visible") return resolve();
@@ -132,7 +139,7 @@
 					href: url,
 					target: "_blank",
 					style: "text-decoration: none; box-shadow: none; background: none;",
-					innerHTML: `<img src="${url}" referrerpolicy="no-referrer" loading="lazy" rel="noreferrer noopener nofollow">`,
+					innerHTML: `<img src="${url}" referrerpolicy="no-referrer" rel="noreferrer noopener nofollow">`, //loading="lazy"
 					referrerPolicy: "no-referrer",
 					rel: "noreferrer noopener nofollow",
 				});
@@ -186,18 +193,21 @@
 			slog("script start");
 			await wait_tab();
 			await ini_config();
+			await load_value();
+			await remove_blacklist_target();
+			await remove_richcontent();
+			await main();
+			GM_config.onOpen(); // reload
+		},
+		load_value = async () => {
 			blacklist_id = GM_config.get("blacklist_id").split("\n");
 			blacklist_img = GM_config.get("blacklist_img").split("\n");
 			slog("load blacklist, id", blacklist_id.length, "img", blacklist_img.length);
-			await remove_blacklist_target();
-			await remove_richcontent();
-			main();
+			return true;
 		},
 		ini_config = async () => {
 			GM_registerMenuCommand("設定(alt+Q)", () => GM_config.open());
-			document.addEventListener("keydown", (e) => {
-				if (e.altKey && e.key == "q") GM_config.open();
-			});
+			document.addEventListener("keydown", (e) => { if (e.altKey && e.key == "q") GM_config.open(); });
 			GM_config.init({
 				id: "settings", // The id used for this instance of GM_config
 				title: "腳本設定",
@@ -211,12 +221,12 @@
 					},
 					blacklist_id: {
 						label: "ID",
-						section: "黑名單",
+						section: ["黑名單", "每行一個ID/圖片檔名"],
 						type: "textarea",
 						default: blacklist_id.join("\n")
 					},
 					blocked_id: {
-						label: "已阻擋，但未在名單中的ID",
+						label: "由於圖片被阻擋，但ID未在名單中",
 						type: "textarea",
 						default: [...blocked_id].join("\n")
 					},
@@ -226,7 +236,7 @@
 						default: blacklist_img.join("\n")
 					},
 					blocked_img: {
-						label: "已阻擋，但未在名單中的圖片名稱",
+						label: "由於ID被阻擋，但圖片未在名單中",
 						type: "textarea",
 						default: [...blocked_img].join("\n")
 					},
@@ -258,26 +268,33 @@
 					}
 				`,
 			});
-			const set_list = (list_id = "", data = []) => { GM_config.set(list_id, data.join("\n")); };
+			const blacklist = ["blacklist_id", "blacklist_img",],
+				load_list = (list_id = "") => {
+					let list = GM_config.get(list_id);
+					return list;
+				};
 			GM_config.onOpen = () => {
-				let ids = [{ id: "blocked_id", data: blocked_id }, { id: "blocked_img", data: blocked_img },];
-				ids.forEach(o => {
-					slog(o.id, o.data);
-					set_list(o.id, [...o.data]);
+				let ui_id = [
+					{ id: "blocked_id", data: blocked_id },
+					{ id: "blocked_img", data: blocked_img },
+				];
+				ui_id.forEach(o => {
+					slog("load", o.id, o.data.size);
+					GM_config.fields[o.id].value = [...o.data].join("\n");
+				});
+				blacklist.forEach(id => {
+					let list = load_list(id);
+					slog("load", id, list.split("\n").length);
+					GM_config.fields[id].value = list;
 				});
 			};
 			GM_config.onSave = () => {
-				let ids = ["blacklist_id", "blacklist_img",],
-					load_list = (list_id = "") => {
-						let list = new Set(GM_config.get(list_id).split("\n"));
-						return [...list];
-					};
-				ids.forEach(id => {
+				blacklist.forEach(id => {
 					let list = load_list(id);
-					slog("save", id, list.length);
-					set_list(id, list);
+					slog("save", id, list.split("\n").length);
 				});
 			};
+			return true;
 		};
 	document.body.onload = start_script;
 })();
