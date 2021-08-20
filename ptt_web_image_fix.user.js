@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.07
+// @version      0.08
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -75,7 +75,7 @@
 			let eles = document.querySelectorAll(".richcontent");
 			if (!eles.length) { slog(`no richcontent found`); return false; }
 			slog(`remove ${eles.length} richcontent`);
-			eles.forEach(e => e.remove());
+			eles.forEach(e => { if (!e.innerHTML.match(/(youtube.com|youtu.be|-player")/)) e.remove(); });
 			return true;
 		},
 		async_push = async (list, item) => list.push(item),
@@ -93,11 +93,8 @@
 			if (e.getAttribute(fixed)) return false;
 			if (adv) {
 				if (e.nextSibling) {
-					if (e.nextSibling.nodeType == 3) {
-						url += e.nextSibling.textContent.trim();
-					} else {
-						return false;
-					}
+					if (e.nextSibling.nodeType !== 3) return false;
+					url += e.nextSibling.textContent.trim();
 				}
 				if (reg_list.find(reg => e.textContent.match(reg))) return false;
 			}
@@ -271,11 +268,9 @@
 					}
 				`,
 			});
-			const blacklist = ["blacklist_id", "blacklist_img",],
-				load_list = (list_id = "") => {
-					let list = GM_config.get(list_id);
-					return list;
-				};
+			const
+				blacklist = ["blacklist_id", "blacklist_img",],
+				load_list = (list_id = "") => { return GM_config.get(list_id); };
 			GM_config.onOpen = () => {
 				let ui_id = [
 					{ id: "blocked_id", data: blocked_id },
