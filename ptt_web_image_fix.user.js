@@ -44,7 +44,7 @@
 					ele.title = text;
 					ele.innerHTML = rd_text(text);
 					ele.style = "color: darkred;";
-					slog_c(`%cblock by id blacklist %c${ck_id}:%c${ele.title.replace(":", "").trim()}`, "#FF0000;#FFFF00;"); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
+					slog_c(`%cblock by id blacklist %c${user}:%c${ele.title.replace(":", "").trim()}`, "#FF0000;#FFFF00;"); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
 					if (ck_id && !ck_img) {
 						text = text.match(reg);
 						if (text) {
