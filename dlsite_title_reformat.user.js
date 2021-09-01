@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.74
+// @version      0.75
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -107,24 +107,63 @@
     window.document.body.onload = main();
 
     function main() {
-        let link = window.location.href;
-        let match_list = [
-            "/circle/profile/",
-            "/fsr/",
-            "/genres/works",
-        ];
+        let
+            link = window.location.href,
+            match_list = [
+                "/circle/profile/",
+                "/fsr/",
+                "/genres/works",
+            ];
         if (link.includes("/product_id/")) {
             myCss();
             productHandler();
             fix_switch_link();
             return debug_msg(productHandler.name);
-        } else if (match_list.some(key => link.includes(key))) {
+        }
+        if (match_list.some(key => link.includes(key))) {
             myCss();
             searchHandler();
             fix_switch_link();
             return debug_msg(searchHandler.name);
+        }
+        if (link.includes("/announce/list")) {
+            return sort_ann_list();
+        }
+        return debug_msg("not in support list");
+    }
+
+    function sort_ann_list() {
+        let
+            container = document.querySelector(".n_worklist"),
+            item = container.querySelectorAll("div.n_worklist_item"),
+            data = [],
+            likes = 0,
+            type = "unknown";
+
+        data = [...item].map(i => {
+            likes = i.querySelector(".work_sales_info>div>span");
+            type = i.querySelector(".work_category");
+            return {
+                item: i,
+                likes: likes ? parseInt(likes.textContent) : 0,
+                type: type ? [...type.classList].pop() : "_unknown",
+            };
+        });
+        data = sort_by(data, "likes");
+        data = sort_by(data, "type");
+        data.forEach(i => container.appendChild(i.item));
+    }
+
+    function sort_by(data, key = "", dec = true) {
+        if (dec) {
+            return data.sort((a, b) => s(b[key], a[key]));
         } else {
-            return debug_msg("not in support list");
+            return data.sort((a, b) => s(a[key], b[key]));
+        }
+        function s(a, b) {
+            if (a < b) return -1;
+            if (a > b) return 1;
+            return 0;
         }
     }
 
@@ -249,6 +288,39 @@
         ele.className = classname;
         ele.onclick = () => sortByID();
         pos.appendChild(ele);
+
+        ele = document.createElement("div");
+        ele.textContent = "SortByType:";
+        ele.style = "margin: 0.5rem;";
+        pos.appendChild(ele);
+
+        ele = document.createElement("button");
+        ele.textContent = "Descent";
+        ele.className = classname;
+        ele.onclick = () => sortByType(true);
+        pos.appendChild(ele);
+
+        ele = document.createElement("button");
+        ele.textContent = "Ascent";
+        ele.className = classname;
+        ele.onclick = () => sortByType();
+        pos.appendChild(ele);
+    }
+
+    function sortByType(descent = false) {
+        let grid_mode = document.querySelector(".display_block.on") ? true : false;
+        let eles = document.querySelectorAll(grid_mode ? ".search_result_img_box_inner" : "#search_result_list tr");
+        let pos = document.querySelector(grid_mode ? "#search_result_img_box" : "#search_result_list tbody");
+        let data = [], type = "";
+        data = [...eles].map(e => {
+            type = e.querySelector(".work_category");
+            return {
+                ele: e,
+                type: type ? [...type.classList].pop() : "_unknown",
+            };
+        });
+        data = sort_by(data, "type", descent);
+        data.forEach(item => pos.appendChild(item.ele));
     }
 
     async function sortByID(descent = false) {

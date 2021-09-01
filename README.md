@@ -342,6 +342,10 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.75
+  - sort by `type & favorites count` at `https://www.dlsite.com/maniax/announce/list`
+  - add sort by type button at `search result / circle`
+
 - v0.73
   - prevent duplicate track list
 
