@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.77
+// @version      0.78
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -128,7 +128,8 @@
             return debug_msg(searchHandler.name);
         }
         if (link.includes("/announce/list")) {
-            return sort_ann_list();
+            debug_msg("announce list");
+            return wait_for_fav();
         }
         return debug_msg("not in support list");
     }
@@ -143,18 +144,27 @@
         });
     }
 
-    function sleep(ms = 0) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    function wait_for_fav(max_retry = 10) {
+        let
+            list = document.querySelector(".n_worklist"),
+            ck = [...list.children].every(item => item.querySelector(".work_sales_info") ? true : false);
+        if (max_retry <= 0) return debug_msg(`max retries exceeded, abort`);
+        if (!ck) return retry();
+        debug_msg(`found fav`);
+        return setTimeout(sort_ann_list, 1500);
+        function retry() {
+            debug_msg(`wait for ele, retry ${max_retry}`);
+            setTimeout(() => wait_for_fav(--max_retry), 1000);
+        }
     }
 
-    async function sort_ann_list() {
+    function sort_ann_list() {
         let
             container = document.querySelector(".n_worklist"),
             item = container.querySelectorAll("div.n_worklist_item"),
             data = [],
             likes = 0,
             type = "unknown";
-        await sleep(3000);
         data = [...item].map(i => {
             likes = i.querySelector(".work_sales_info>div>span");
             type = i.querySelector(".work_category");
