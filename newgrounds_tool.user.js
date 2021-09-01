@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js
-// @version      0.01
+// @version      0.02
 // @description  download video/auto select best resolution...etc
 // @author       x94fujo6
 // @match        https://www.newgrounds.com/portal/view/*
@@ -35,10 +35,10 @@
 		if (!isPlayer()) return slog("not video");
 		if (!button || !video) return slog("no play button or source");
 		button.click();
-		setTimeout(add_download, 1000);
+		setTimeout(() => button.click(), 1000);
+		setTimeout(add_download, 2000);
 
 		async function add_download() {
-			button.click();
 			let res = await sel_best(),
 				video_data = document.querySelector(`.ng-video-player>video>source`),
 				pos = document.querySelector(`.body-guts`),
@@ -54,7 +54,7 @@
 			filename = filename[1];
 			format = format[1];
 			dl_button.href = video_data.src;
-			dl_button.title = dl_button.download = `${title} [${res}]${format}`;			
+			dl_button.title = dl_button.download = `${title} [${res}]${format}`;
 			dl_button.innerHTML = `[ Left Click ]  to Copy Title: ${dl_button.title}<br>[ Right Click > Save as ]  to Download`;
 			dl_button.style = `
 				display: block;
