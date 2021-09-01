@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.75
+// @version      0.76
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -132,14 +132,18 @@
         return debug_msg("not in support list");
     }
 
-    function sort_ann_list() {
+    function sleep(ms = 0) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async function sort_ann_list() {
         let
             container = document.querySelector(".n_worklist"),
             item = container.querySelectorAll("div.n_worklist_item"),
             data = [],
             likes = 0,
             type = "unknown";
-
+        await sleep(3000);
         data = [...item].map(i => {
             likes = i.querySelector(".work_sales_info>div>span");
             type = i.querySelector(".work_category");
