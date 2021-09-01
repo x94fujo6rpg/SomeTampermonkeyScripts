@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.76
+// @version      0.77
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -106,7 +106,7 @@
 
     window.document.body.onload = main();
 
-    function main() {
+    async function main() {
         let
             link = window.location.href,
             match_list = [
@@ -114,6 +114,7 @@
                 "/fsr/",
                 "/genres/works",
             ];
+        await wait_tab();
         if (link.includes("/product_id/")) {
             myCss();
             productHandler();
@@ -130,6 +131,16 @@
             return sort_ann_list();
         }
         return debug_msg("not in support list");
+    }
+    
+    function wait_tab() {
+        return new Promise(resolve => {
+            if (document.visibilityState === "visible") return resolve();
+            debug_msg("tab in background, script paused");
+            document.addEventListener("visibilitychange", () => {
+                if (document.visibilityState === "visible") { debug_msg("script unpaused"); return resolve(); }
+            });
+        });
     }
 
     function sleep(ms = 0) {
