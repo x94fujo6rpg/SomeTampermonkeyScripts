@@ -27,6 +27,7 @@ click link to install
 | [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)    |
 | [nexusmods skip countdown](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#nexusmods-skip-countdown) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js) |
 | [avgle m3u8 extractor](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#avgle-m3u8-extractor)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)     |
+| [newgrounds tool](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#newgrounds-tool)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js)          |
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
@@ -523,3 +524,8 @@ change it to like `._ts_` `.tmp` so windows does't recognize it, but ffmpeg stil
 reference:  
 https://github.com/download-online-video/chrome-avgle-helper/issues/21  
 https://github.com/download-online-video/chrome-avgle-helper/issues/54  
+
+## [[newgrounds tool]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js)
+- auto select best resolution
+- extract video link & download (right click)
+
