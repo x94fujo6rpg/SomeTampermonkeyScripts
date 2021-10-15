@@ -10,24 +10,25 @@ an extension can only execute JavaScript that is included within its package.
 some scripts I made  
 click link to install  
 
-| script                                                                                                      | install                                                                                                   |
-| ----------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| [ehx direct download](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-direct-download)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)      |
-| [ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-link-color)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)           |
-| [ehx torrent text](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-torrent-text)                 | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)         |
-| [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)    |
-| [mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)   |
-| [pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)             | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)            |
-| [youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)       |
-| [prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)          |
-| [sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)          | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)     |
-| [google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)   |
-| [reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)               | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)        |
-| [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)      |
-| [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)    |
-| [nexusmods skip countdown](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#nexusmods-skip-countdown) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js) |
-| [avgle m3u8 extractor](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#avgle-m3u8-extractor)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)     |
-| [newgrounds tool](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#newgrounds-tool)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js)          |
+| script                                                                                                        | install                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| [ehx direct download](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-direct-download)             | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)      |
+| [ehx link color](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-link-color)                       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_link_color.user.js)           |
+| [ehx torrent text](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#ehx-torrent-text)                   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_torrent_text.user.js)         |
+| [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)    |
+| [mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)   |
+| [pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)               | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)            |
+| [youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)       |
+| [prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)          |
+| [sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)            | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)     |
+| [google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)   |
+| [reddit img relink](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#reddit-img-relink)                 | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/reddit_img_relink.user.js)        |
+| [anti-bili-anti-copy](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#anti-bili-anti-copy)             | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/anti-bili-anti-copy.user.js)      |
+| [fc2 show all products](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#fc2-show-all-products)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js)    |
+| [nexusmods skip countdown](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#nexusmods-skip-countdown)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/nexusmods_skip_countdown.user.js) |
+| [avgle m3u8 extractor](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#avgle-m3u8-extractor)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)     |
+| [newgrounds tool](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#newgrounds-tool)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js)          |
+| [AutoEQ to EasyQ converter](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#autoeq-to-easyq-converter) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js)          |
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
@@ -529,3 +530,23 @@ https://github.com/download-online-video/chrome-avgle-helper/issues/54
 - auto select best resolution
 - extract video link & download (right click)
 
+## [[AutoEQ to EasyQ converter]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoEQ_to_EasyQ.user.js)
+![](https://i.imgur.com/qZgTYoF.png)  
+[AutoEq](https://github.com/jaakkopasanen/AutoEq)、[Search your headphone](https://github.com/jaakkopasanen/AutoEq/tree/master/results)  
+[EasyQ](https://www.kvraudio.com/product/easyq_by_rs_met)  
+[Require VST adapter (for foobar2000)](https://wiki.hydrogenaud.io/index.php?title=Foobar2000:Components/VST_2.4_adapter_(foo_vst))  
+  
+disable other EQ DSP or **VST adapter** may crash foobar  
+  
+Components > VST plug-ins > load EasyQ dll file  
+DSP > EasyQ > load xml file  
+  
+  
+#### Quick switch different EQ  
+close **EasyQ** window after load eq  
+type under **DSP chain presets** for preset name and click **save**  
+  
+View > Layout > Enable layout editing mode  
+right click on toolbar > add **DSP switcher**  
+to disable editing mode  
+View > Layout > Enable layout editing mode  
