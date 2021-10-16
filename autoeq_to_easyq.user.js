@@ -95,11 +95,15 @@
 		xml.documentElement.setAttribute("PatchFormat", 2);
 		xml.documentElement.setAttribute("GlobalGain", article.innerText.match(/preamp of -(.*)dB and/)[1]);
 		xml_file.forEach(line => {
-			let new_band = document.createElementNS(null, "Band");
+			let new_band = document.createElementNS(null, "Band"),
+				f = parseInt(line[1].replace(" Hz", "")),
+				g = parseFloat(line[3].replace(" dB", "")),
+				q = parseFloat(line[2]),
+				b = (1 / q).toFixed(8);
 			new_band.setAttributeNS(null, "Mode", "Peak/Dip");
-			new_band.setAttributeNS(null, "Frequency", line[1].replace(" Hz", ""));
-			new_band.setAttributeNS(null, "Gain", line[3].replace(" dB", ""));
-			new_band.setAttributeNS(null, "Bandwidth", (1 / parseFloat(line[2])).toFixed(8));
+			new_band.setAttributeNS(null, "Frequency", f);
+			new_band.setAttributeNS(null, "Gain", g);
+			new_band.setAttributeNS(null, "Bandwidth", b);
 			xml.documentElement.appendChild(new_band);
 		});
 		xml_file = xml_head + (new XMLSerializer()).serializeToString(xml);

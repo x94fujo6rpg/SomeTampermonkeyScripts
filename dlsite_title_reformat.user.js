@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.78
+// @version      0.79
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -264,7 +264,7 @@
         b.id = "dtr_cover_dl";
         b.textContent = "Cover";
         b.onclick = () => {
-            let url = document.querySelector(`img[src*="${id}"`).src;
+            let url = document.querySelector(`img[src*="${id}_"`).src;
             url = to_full_size_image(url);
             let rq = new XMLHttpRequest();
             rq.open("GET", url, true);
