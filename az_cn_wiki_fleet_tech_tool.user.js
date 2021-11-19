@@ -3,8 +3,8 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/az_cn_wiki_fleet_tech_tool.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/az_cn_wiki_fleet_tech_tool.user.js
-// @version      0.02
-// @description  海事局的艦隊科技頁面 可以點擊編號來標記已120的船
+// @version      0.03
+// @description  海事局的艦隊科技頁面 可以點擊該行來標記已120的船
 // @author       x94fujo6
 // @match        https://wiki.biligame.com/blhx/%E8%88%B0%E9%98%9F%E7%A7%91%E6%8A%80
 // @grant        GM_getValue
@@ -13,6 +13,9 @@
 
 /**
  * [changelog]
+ * 0.03
+ * 修改標記顏色/等待的selector、正確應用delay參數
+ * 因用手機看wiki時部分欄位會被隱藏，標記方式改為整行都能觸發
  * 
  * 0.02
  * 自動修復當頁面在背景中載入後標題列的錯位問題 (WIKI本身問題 關掉腳本一樣會)
@@ -24,13 +27,13 @@
 	'use strict';
 	const
 		key = { ship_id: "ship_id", },
-		bg_color = "gray",
+		bg_color = "silver",
 		getValue = () => GM_getValue(key.ship_id, []),
 		setValue = (list) => GM_setValue(key.ship_id, (list instanceof Array) ? list : []),
 		log = (...any) => console.log(`%c[碧航艦隊科技工具]%c`, "color:OrangeRed;", "", ...any),
 		sleep = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
 
-	waitPageLoad(30, "#CardSelectTr", main);
+	waitPageLoad(30, "#CardSelectTr>thead", main);
 
 	async function waitPageLoad(retry = 30, selector = "", run = () => { }, delay = 1000) {
 		await waitTab();
@@ -55,9 +58,9 @@
 				if (!target && retry > 0) {
 					retry--;
 					log(`target not found, remaining retries [${retry}]`);
-					setTimeout(() => waitEle(retry), 500);
+					setTimeout(() => waitEle(retry), delay);
 				} else {
-					await sleep(1000);
+					await sleep(delay);
 					run();
 				}
 			} else {
@@ -65,6 +68,7 @@
 			}
 		}
 	}
+
 
 	function main() {
 		let
@@ -81,14 +85,14 @@
 
 		fixDataHeader();
 
-		table.children.forEach(tr => addSwitch([...tr.children], tr.children[0]));
+		table.children.forEach(tr => addSwitch([...tr.children], tr));
 		msg.innerHTML = `
 			<div style="display: inline-flex;">
 				<div style="color: red;">碧航艦隊科技工具</div>作用中，點擊艦船編號可進行標記。 已標記: <div id="wiki_tool_marked_count">${getValue().length}</div>
-			</div>	
+			</div>
 			<div>
 				<button id="wiki_tool_edit">編輯/查看列表</button>
-				<div id="wiki_tool_box" style="display: none;">					
+				<div id="wiki_tool_box" style="display: none;">
 					<textarea id="wiki_tool_marked_list"></textarea>
 					<button id="wiki_tool_save">儲存並更新</button>
 				</div>
@@ -135,8 +139,8 @@
 			}
 		}
 
-		function addSwitch(elelist, id) {
-			id.onclick = () => checkList();
+		function addSwitch(elelist, target) {
+			target.onclick = () => checkList();
 			checkList(true); // at start
 
 			async function checkList(ini = false) {
@@ -150,7 +154,7 @@
 						setValue([..._list]);
 					},
 					_list = new Set(getValue()),
-					_id = id.innerText.trim(),
+					_id = elelist[0].innerText.trim(),
 					_name = elelist[1].innerText.trim(),
 					_isInList = _list.has(_id);
 
