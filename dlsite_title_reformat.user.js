@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.79
+// @version      0.81
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -874,9 +874,8 @@
         setting();
         console.time(productHandler.name);
         //------------------------------------------------------
-        let pos = document.querySelector("#work_name").querySelector("a");
-        pos.style.display = "none";
-        pos = pos.parentNode;
+        let pos = document.querySelector("#work_name");
+        pos.innerHTML = `<div style="display:none">${pos.innerText}</div>`;
 
         let id = formatted_data.id;
         let cover = document.querySelector(`img[itemprop="image"]`).src;
