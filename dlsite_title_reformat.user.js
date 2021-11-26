@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.81
+// @version      0.82
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -133,7 +133,7 @@
         }
         return debug_msg("not in support list");
     }
-    
+
     function wait_tab() {
         return new Promise(resolve => {
             if (document.visibilityState === "visible") return resolve();
@@ -691,14 +691,16 @@
                 }
             },
         });
-        pos.appendChild(button);
-        appendNewLine(pos);
         //------------------------------------------------------
         let box = document.createElement("div");
         box.id = "format_setting_ui";
         box.className = "dtr_setting_box";
         box.style.display = "none";
         let textarea;
+        //------------------------------------------------------
+        pos.insertAdjacentElement("afterbegin", box);
+        pos.insertAdjacentElement("afterbegin", newLine());
+        pos.insertAdjacentElement("afterbegin", button);
         //------------------------------------------------------
         button = document.createElement("button");
         let mode = setting_adv ? "on" : "off";
@@ -828,7 +830,6 @@
         textarea.readOnly = true;
 
         box.appendChild(textarea);
-        pos.append(box);
 
         listAllData();
 
@@ -871,7 +872,6 @@
 
     function productHandler() {
         getData();
-        setting();
         console.time(productHandler.name);
         //------------------------------------------------------
         let pos = document.querySelector("#work_name");
@@ -942,6 +942,7 @@
             if (list) list.reverse().forEach((result, index) => addTracklist(result, spantext, index));
         }
         //------------------------------------------------------
+        setting();
         console.timeEnd(productHandler.name);
     }
 
