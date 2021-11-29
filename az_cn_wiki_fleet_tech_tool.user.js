@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/az_cn_wiki_fleet_tech_tool.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/az_cn_wiki_fleet_tech_tool.user.js
-// @version      0.04
+// @version      0.05
 // @description  海事局的艦隊科技頁面 可以點擊該行來標記已120的船 顯示艦船頭像
 // @author       x94fujo6
 // @match        https://wiki.biligame.com/blhx/%E8%88%B0%E9%98%9F%E7%A7%91%E6%8A%80
@@ -11,23 +11,26 @@
 // @grant        GM_setValue
 // ==/UserScript==
 
-/**
- * [changelog]
- * 0.04
- * 顯示艦船頭像(海事局)
- * 自動更新並快取
- * 
- * 0.03
- * 修改標記顏色/等待的selector、正確應用delay參數
- * 因用手機看wiki時部分欄位會被隱藏，標記方式改為整行都能觸發
- * 
- * 0.02
- * 自動修復當頁面在背景中載入後標題列的錯位問題 (WIKI本身問題 關掉腳本一樣會)
- * https://i.imgur.com/kQWlEU1.jpg
- * 
- */
+/*
+[changelog]
+0.05
+現在可以關閉/開啟標記功能
 
-(function () {
+0.04
+顯示艦船頭像(海事局)
+自動更新並快取
+
+0.03
+修改標記顏色/等待的selector、正確應用delay參數
+因用手機看wiki時部分欄位會被隱藏，標記方式改為整行都能觸發
+
+0.02
+自動修復當頁面在背景中載入後標題列的錯位問題 (WIKI本身問題 關掉腳本一樣會)
+https://i.imgur.com/kQWlEU1.jpg
+
+*/
+
+(async function () {
 	'use strict';
 	const
 		key = { ship_id: "ship_id", ship_icon: "ship_icon" },
@@ -36,43 +39,44 @@
 		setValue = (_key, _list) => GM_setValue(_key, (_list instanceof Array) ? _list : []),
 		log = (...any) => console.log(`%c[碧航艦隊科技工具]%c`, "color:OrangeRed;", "", ...any),
 		sleep = (ms = 0) => new Promise(resolve => setTimeout(resolve, ms));
+	let
+		waitting_result = false;
 
-	waitPageLoad(30, "#CardSelectTr>thead", main);
+	await waitTab();
+	waitting_result = await waitEle({ retry: 30, selector: "#CardSelectTr>thead" });
+	if (!waitting_result) return;
 
-	async function waitPageLoad(retry = 30, selector = "", run = () => { }, delay = 1000) {
-		await waitTab();
-		waitEle();
+	main();
 
-		function waitTab() {
-			return new Promise(resolve => {
-				if (document.visibilityState === "visible") return resolve();
-				log("tab in background, script paused");
-				document.addEventListener("visibilitychange", () => {
-					if (document.visibilityState === "visible") {
-						log("script unpaused");
-						return resolve();
-					}
-				});
-			});
-		}
-
-		async function waitEle() {
-			if (selector.length) {
-				let target = document.querySelector(selector);
-				if (!target && retry > 0) {
-					retry--;
-					log(`target not found, remaining retries [${retry}]`);
-					setTimeout(() => waitEle(retry), delay);
-				} else {
-					await sleep(delay);
-					run();
+	function waitTab() {
+		return new Promise(resolve => {
+			if (document.visibilityState === "visible") return resolve();
+			log("tab in background, script paused");
+			document.addEventListener("visibilitychange", () => {
+				if (document.visibilityState === "visible") {
+					log("script unpaused");
+					return resolve();
 				}
-			} else {
-				throw Error("selector is empty");
-			}
-		}
+			});
+		});
 	}
 
+	async function waitEle({ retry = 30, selector = "", delay = 500 }) {
+		let result = false;
+		for (let i = 0; i < retry; i++) {
+			result = document.querySelector(selector);
+			if (result) break;
+			if (!result) log(`target[${selector}] not found, remaining retries [${retry - i}]`, result);
+			await sleep(delay);
+		}
+		if (result) {
+			log(`found target[${selector}] continue`);
+			return true;
+		} else {
+			log(`max retries exceeded, target[${selector}] not found`);
+			return false;
+		}
+	}
 
 	async function main() {
 		let
@@ -125,9 +129,15 @@
 					<textarea id="wiki_tool_marked_list"></textarea>
 					<button id="wiki_tool_save" class="btn btn-default">儲存並更新</button>
 				</div>
+				<button id="wiki_tool_switch" class="btn btn-default" style="width: 12rem;">標記功能: OFF</button>
 			</div>
 		`;
 		pos.insertAdjacentElement("beforebegin", msg);
+
+		waitting_result = false;
+		waitting_result = await waitEle({ retry: 30, selector: "#wiki_tool_switch" });
+		if (!waitting_result) return;
+
 		document.querySelector("#wiki_tool_edit").onclick = () => {
 			let
 				box = document.querySelector("#wiki_tool_box"),
@@ -149,6 +159,14 @@
 				changeColor([...tr.children], _isInList ? bg_color : "");
 			});
 			updateList(_list);
+		};
+		document.querySelector("#wiki_tool_switch").onclick = function () {
+			let is_on = this.classList.contains("active");
+			if (is_on) this.classList.remove("active");
+			if (!is_on) this.classList.add("active");
+			this.classList.remove(is_on ? "btn-success" : "btn-default");
+			this.classList.add(!is_on ? "btn-success" : "btn-default");
+			this.textContent = `標記功能: ${is_on ? "OFF" : "ON"}`;
 		};
 
 		log("載入清單", getValue(key.ship_id));
@@ -333,7 +351,9 @@
 					_list = new Set(getValue(key.ship_id)),
 					_id = elelist[0].innerText.trim(),
 					_name = elelist[1].innerText.trim(),
-					_isInList = _list.has(_id);
+					_isInList = _list.has(_id),
+					_is_on = document.querySelector("#wiki_tool_switch")?.classList.contains("active");
+				if (!_is_on && !ini) return;
 				if (ini) data_srcipt.push(_id);
 				if (_isInList) {
 					if (!ini) {
