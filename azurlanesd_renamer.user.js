@@ -3,10 +3,12 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/azurlanesd_renamer.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/azurlanesd_renamer.user.js
-// @version      0.01
+// @version      0.02
 // @description  附加可讀的名稱
 // @author       x94fujo6
 // @match		 https://pelom777.github.io/AzurLaneSD/*
+// @match		 http://pelom777.github.io/AzurLaneSD/*
+// @match		 https://pelom.gitee.io/azurlanesd/*
 // @match		 http://pelom.gitee.io/azurlanesd/*
 // ==/UserScript==
 /* jshint esversion: 9 */
