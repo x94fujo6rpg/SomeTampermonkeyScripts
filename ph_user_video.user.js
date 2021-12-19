@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.07
+// @version      0.08
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -33,7 +33,7 @@
         let link = document.location.href;
         if (link.includes("viewkey")) {
             setLink();
-        } else if (link.includes("/videos")) {
+        } else if (link.includes("/videos") || link.includes("/playlist")) {
             reDirect(link);
         } else {
             replaceLink(".usernameWrap");
@@ -96,7 +96,7 @@
                     if (a) if (!a.href.includes("/videos")) a.href = `${a.href}/videos/public`;
                 });
             } else {
-                print(`${targetid} not found`);
+                print(`target ${css_selector} not found`);
             }
         }
 
@@ -104,36 +104,55 @@
             let vids = document.querySelector(".profileVids"); // profileVids videoUList
             if (!vids) {
                 if (link.includes("/public")) {
+                    console.log("public");
                     document.location.href = link.replace("/public", "");
-                    return;
-                } else {
-                    console.log("can't found video list, abort");
-                    return;
                 }
+                if (link.includes("/playlist")) {
+                    console.log("playlist");
+                    vids = document.querySelector(".container.playlistSectionWrapper");
+                    if (vids) mutiSelect(vids);
+                }
+                console.log("can't found video list, abort");
+                return;
             } else {
                 mutiSelect(vids);
             }
 
             function mutiSelect(vid_list) {
-                let textbox = document.createElement("textarea");
-                Object.assign(textbox, {
-                    id: "selected_vid_list",
-                    rows: 10,
-                    cols: 70,
-                    style: "width: auto; height: auto; display: block;",
-                });
-                vid_list.insertAdjacentElement("afterbegin", textbox);
-                textbox.insertAdjacentElement("beforebegin", document.createElement("br"));
+                let
+                    select_box = document.createElement("div"),
+                    textbox = document.createElement("textarea"),
+                    textbox_style = `
+                        width: 100%;
+                        height: auto;
+                        display: block;
+                        margin: auto;
+                    `;
 
-                let button;
-                button = newButton("myButton", "Copy", copyAll);
-                textbox.insertAdjacentElement("afterend", button);
-                button = newButton("myButton", "Invert Select", invertSecect);
-                textbox.insertAdjacentElement("afterend", button);
-                button = newButton("myButton", "Unselect All", unsecectAll);
-                textbox.insertAdjacentElement("afterend", button);
-                button = newButton("myButton", "Select All", secectAll);
-                textbox.insertAdjacentElement("afterend", button);
+                select_box.style = `
+                    display: flex;
+                    text-align: center;
+                    flex-wrap: wrap;
+                    width: 50%;
+                    margin: auto;
+                `;
+                select_box.innerHTML = `<textarea id="selected_vid_list" rows="10" cols="70" style="${textbox_style}"></textarea>`;
+                vid_list.insertAdjacentElement("afterbegin", select_box);
+
+                let button,
+                    button_class = "myButton line-4-item",
+                    button_box = document.createElement("div");
+                button_box.style = `width: 100%;`;
+                [
+                    { text: "Select All", click: secectAll },
+                    { text: "Unselect All", click: unsecectAll },
+                    { text: "Invert Select", click: invertSecect },
+                    { text: "Copy", click: copyAll },
+                ].forEach(o => {
+                    button = newButton(button_class, o.text, o.click);
+                    button_box.appendChild(button);
+                });
+                select_box.appendChild(button_box);
 
                 vid_list = vid_list.querySelectorAll(".pcVideoListItem");
                 addCheckbox(vid_list);
@@ -279,10 +298,15 @@
 
         .myButton {
             position: relative;
-            padding: 0.2rem;
-            margin: 0.2rem;
+            padding: 0.5rem 0;
+            margin: 0.5rem;
             width: max-content;
-            border-style:solid;
+            font-size: 1rem;
+        }
+
+        .line-4-item {
+            max-width: 100%;
+            width: calc(90% / 4);
         }
 
         .myButton:active, .myButtonB:active {
