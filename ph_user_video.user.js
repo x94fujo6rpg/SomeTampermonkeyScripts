@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.08
+// @version      0.09
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -30,10 +30,11 @@
 
     function main() {
         myCss();
-        let link = document.location.href;
+        let link = document.location.href,
+            target_list = ["/videos", "/playlist", "video/search",];
         if (link.includes("viewkey")) {
             setLink();
-        } else if (link.includes("/videos") || link.includes("/playlist")) {
+        } else if (target_list.some(t => link.includes(t))) {
             reDirect(link);
         } else {
             replaceLink(".usernameWrap");
@@ -110,6 +111,11 @@
                 if (link.includes("/playlist")) {
                     console.log("playlist");
                     vids = document.querySelector(".container.playlistSectionWrapper");
+                    if (vids) mutiSelect(vids);
+                }
+                if (link.includes("/search")) {
+                    console.log("search");
+                    vids = document.querySelector("#videoSearchResult").parentElement;
                     if (vids) mutiSelect(vids);
                 }
                 console.log("can't found video list, abort");
@@ -306,7 +312,7 @@
 
         .line-4-item {
             max-width: 100%;
-            width: calc(90% / 4);
+            width: calc(80% / 4);
         }
 
         .myButton:active, .myButtonB:active {
