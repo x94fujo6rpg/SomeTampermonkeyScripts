@@ -29,6 +29,7 @@ click link to install
 | [avgle m3u8 extractor](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#avgle-m3u8-extractor)           | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/avgle_m3u8_extractor.user.js)     |
 | [newgrounds tool](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#newgrounds-tool)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/newgrounds_tool.user.js)          |
 | [AutoEQ to EasyQ converter](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#autoeq-to-easyq-converter) | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js)          |
+| [4chan Base64 Decode Tool](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#4chan-base64-decode-tool)   | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/4ch_b64_tool.user.js)             |
 
 ## [[ehx direct download]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js)  
 **only work in Thumbnail mode**  
@@ -550,3 +551,17 @@ View > Layout > Enable layout editing mode
 right click on toolbar > add **DSP switcher**  
 to disable editing mode  
 View > Layout > Enable layout editing mode  
+
+
+## [[4chan Base64 Decode Tool]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/4ch_b64_tool.user.js)
+![](https://i.imgur.com/YTsCIJe.png)
+- appears in the `/thread` page
+- decode Base64
+- auto recursive decoding if the message is coded multiple times
+
+example:
+```
+Vm1wR2FtVkdTWGxXYms1cVVteGFXVlpyVmt0VE1WWnhVbTFHVGxadFVsWlZNVkpYWVVVeFdWRnNiRmRXYlZKeVdWWmFXbVZHWkhGWGJIQnNZVE5DU1ZkWE1UUmtNVlp6VVd4V1RsSkVRVGs9
+```
+
+
