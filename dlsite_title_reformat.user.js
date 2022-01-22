@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.82
+// @version      0.83
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -875,7 +875,7 @@
         console.time(productHandler.name);
         //------------------------------------------------------
         let pos = document.querySelector("#work_name");
-        pos.innerHTML = `<div style="display:none">${pos.innerText}</div>`;
+        pos.innerHTML = `<div style="${setting_show_ot ? '' : 'display:none;'} user-select: text;">${pos.innerText}</div>`;
 
         let id = formatted_data.id;
         let cover = document.querySelector(`img[itemprop="image"]`).src;
@@ -889,18 +889,23 @@
         //------------------------------------------------------
         // ID + original title
         if (notSame_o_c && setting_show_ot) {
-            pos.append(newSpan(title_id_o, ""));
+            let span = newSpan(title_id_o, "");
+            span.style = "user-select: text;";
+            pos.append(span);
             appendNewLine(pos);
         }
         //------------------------------------------------------
         // ID + formatted title
         if (notSame_f_c_o && setting_show_ft) {
-            pos.append(newSpan(title_id_f, ""));
+            let span = newSpan(title_id_f, "");
+            span.style = "user-select: text;";
+            pos.append(span);
             appendNewLine(pos);
         }
         //------------------------------------------------------
         // custom title
         let span = newSpan(title_id_c, "");
+        span.style = "user-select: text;";
         span.id = "format_title_custom_span";
         pos.append(span);
         appendNewLine(pos);
