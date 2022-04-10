@@ -345,6 +345,9 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.87
+  - auto re-run script by refresh after click display mode switch
+
 - v0.84
   - fix not work in search (wait element)
 

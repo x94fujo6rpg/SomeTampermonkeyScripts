@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.86
+// @version      0.87
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -245,10 +245,25 @@
         let display_list = document.querySelector(".display_normal.on"),
             display_grid = document.querySelector(".display_block.on");
         console.log(`[${searchHandler.name}] display_list:${Boolean(display_list)}, display_grid:${Boolean(display_grid)}`);
+        setRefreshPage();
         if (display_list) {
             listHandler();
         } else if (display_grid) {
             gridHandler();
+        }
+
+        function setRefreshPage() {
+            document.querySelectorAll(".display_normal,.display_block")
+                .forEach(ele => ele.addEventListener("click", () => {
+                    let href_o = document.location.href,
+                        timer_id = setInterval(() => {
+                            let href_new = document.location.href;
+                            if (href_new != href_o) {
+                                clearInterval(timer_id);
+                                document.location.reload();
+                            }
+                        }, 500);
+                }));
         }
     }
 
