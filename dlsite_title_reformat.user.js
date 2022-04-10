@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.84
+// @version      0.85
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -111,7 +111,7 @@
             link = window.location.href,
             match_list = [
                 "/circle/profile/",
-                "/fsr/",
+                "/fsr",
                 "/genres/works",
             ];
         await wait_tab();
@@ -231,7 +231,7 @@
 
     function waitHTML(css_selector, run) {
         let id = setInterval(() => {
-            if (document.querySelectorAll(css_selector)) {
+            if (document.querySelectorAll(css_selector).length) {
                 run();
                 clearInterval(id);
             }
