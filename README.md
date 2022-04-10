@@ -345,6 +345,9 @@ let autoclose = true;
 click button to copy  
 ![](https://i.imgur.com/kdsvTit.jpg)  
 
+- v0.84
+  - fix not work in search (wait element)
+
 - v0.83
   - fix title
   - make title selectable

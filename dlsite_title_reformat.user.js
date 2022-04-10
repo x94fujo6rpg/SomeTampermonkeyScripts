@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.83
+// @version      0.84
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -123,9 +123,9 @@
         }
         if (match_list.some(key => link.includes(key))) {
             myCss();
-            searchHandler();
+            waitHTML(".display_normal .display_block", () => searchHandler());
             fix_switch_link();
-            return debug_msg(searchHandler.name);
+            return debug_msg("match link");
         }
         if (link.includes("/announce/list")) {
             debug_msg("announce list");
@@ -162,12 +162,13 @@
         let
             container = document.querySelector(".n_worklist"),
             item = container.querySelectorAll("div.n_worklist_item"),
-            data = [],
+            data = [], no_fav = item.length,
             likes = 0,
             type = "unknown";
         data = [...item].map(i => {
             likes = i.querySelector(".work_sales_info>div>span");
             type = i.querySelector(".work_category");
+            if (!likes) no_fav++;
             return {
                 item: i,
                 likes: likes ? parseInt(likes.textContent) : 0,
@@ -228,9 +229,19 @@
         return lable;
     }
 
+    function waitHTML(css_selector, run) {
+        let id = setInterval(() => {
+            if (document.querySelectorAll(css_selector)) {
+                run();
+                clearInterval(id);
+            }
+        }, 1000);
+    }
+
     function searchHandler() {
-        let display_list = document.querySelector(".display_normal.on");
-        let display_grid = document.querySelector(".display_block.on");
+        let display_list = document.querySelector(".display_normal.on"),
+            display_grid = document.querySelector(".display_block.on");
+        console.log(`[${searchHandler.name}] display_list:${Boolean(display_list)}, display_grid:${Boolean(display_grid)}`);
         if (display_list) {
             listHandler();
         } else if (display_grid) {
@@ -936,6 +947,9 @@
             pos.append(newCopyButton(title_f, "DefaultFormat"));
             pos.append(newCopyButton(title_id_f, "ID+DefaultFormat"));
         }
+
+        setting();
+
         //------------------------------------------------------
         // creat track list if any
         let list = gettracklist();
@@ -947,7 +961,6 @@
             if (list) list.reverse().forEach((result, index) => addTracklist(result, spantext, index));
         }
         //------------------------------------------------------
-        setting();
         console.timeEnd(productHandler.name);
     }
 
@@ -1484,4 +1497,3 @@
         if (debug) console.log(...any);
     }
 })();
-
