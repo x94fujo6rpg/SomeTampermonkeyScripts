@@ -411,6 +411,7 @@
                     circle_text,
                     cv, tags,
                     pos, newbox, node_list;
+                if (tr.querySelector(".page_no")) return;
                 pos = tr.querySelector("dl");
                 id = tr.querySelector(".work_thumb a[href*='/product_id/']").id.replace("_link_", "");
                 title_o_text = pos.querySelector(".work_name a[href*='/product_id/']").textContent;
