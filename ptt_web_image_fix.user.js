@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.08
+// @version      0.09
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -35,7 +35,7 @@
 				push = document.querySelectorAll("div.push"),
 				reg = /(?<=\/)(\w+)(?:\.\w{3,4})*$/;
 			push.forEach(div => {
-				user = div.querySelector(".push-userid").textContent;
+				user = div.querySelector(".push-userid").textContent.trim();
 				ele = div.querySelector(".push-content");
 				text = ele.textContent;
 				ck_id = blacklist_id.find(id => id == user);
