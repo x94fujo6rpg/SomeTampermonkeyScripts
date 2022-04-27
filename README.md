@@ -577,13 +577,12 @@ Vm1wR2FtVkdTWGxXYms1cVVteGFXVlpyVmt0VE1WWnhVbTFHVGxadFVsWlZNVkpYWVVVeFdWRnNiRmRX
 
 
 ## [[pixiv blacklist]](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/pixiv_blacklist.user.js)
-
-visit user's main page `www.pixiv.net/users/xxxxxxxx`
-to add/remove user from blacklist
-
-when in search result `www.pixiv.net/tags/*`
-if the user is in the blacklist
-script will hide that user's artwork
-
+visit user's main page `www.pixiv.net/users/xxxxxxxx`  
+to add/remove user from blacklist  
+  
+when in search result `www.pixiv.net/tags/*`  
+if the user is in the blacklist  
+script will hide that user's artwork  
+  
 ![](https://i.imgur.com/wtcIFtt.jpg)
 
