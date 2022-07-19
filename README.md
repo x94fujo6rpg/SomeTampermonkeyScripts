@@ -1,10 +1,9 @@
-The end of user scripts on chrome  
-1 year left after chrome 88  
-
+The end of user scripts
+[https://developer.chrome.com/docs/extensions/mv3/mv2-sunset/](https://developer.chrome.com/docs/extensions/mv3/mv2-sunset/)
 [https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code)  
 [https://github.com/Tampermonkey/tampermonkey/issues/644](https://github.com/Tampermonkey/tampermonkey/issues/644)  
 Remotely hosted code is no longer allowed;  
-an extension can only execute JavaScript that is included within its package.  
+an extension can only execute JavaScript that is **included within its package**.  
 
 # SomeTampermonkeyScripts  
 some scripts I made  
@@ -18,7 +17,7 @@ click link to install
 | [dlsite title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#dlsite-title-reformat)         | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js)    |
 | [mangaoh title reformat](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#mangaoh-title-reformat)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/mangaoh_title_reformat.user.js)   |
 | [pornhub user video](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#pornhub-user-video)               | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js)            |
-| [youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)       |
+| ~~[youtube url normalizer](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#youtube-url-normalizer)~~       | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ytb_url_normalizer.user.js)       |
 | [prts redirector](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#prts-redirector)                     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/prts_redirector.user.js)          |
 | [sharer.pw auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#sharerpw-auto-click)            | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/sharer-pw_auto_click.user.js)     |
 | [google drive auto click](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts#google-drive-auto-click)     | [raw](https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js)   |
@@ -97,6 +96,10 @@ click button to enable (pervent too many requests)
   - make all gallery show entire title
 
 ### updates
+
+- v1.13
+  - new button style
+  - change save format (auto migrate)
 
 - v1.12
   - separate jp/en sorting

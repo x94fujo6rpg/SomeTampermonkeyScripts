@@ -14,12 +14,22 @@
 // @run-at       document-start
 // ==/UserScript==
 
+/*
+0.09
+新增阻擋關鍵字功能
+自行修改key_word內容 (regex)
+F12控制台會顯示整批被阻擋之ID跟推文內容
+ID阻擋>圖片阻擋>關鍵字阻擋
+*/
+
 (function () {
 	let
 		blacklist_id = ["s910408", "ig49999", "bowen5566", "sos976431"],
 		blacklist_img = ["Dey10PF", "WfOR5a8", "wsG5vrZ", "Q7hvcZw", "7h9s0iC", "g28oNwO", "y9arWAn", "9QnqRM3", "UeImoq1", "snzmE7h", "cJXK0nM", "jWy4BKY", "feMElhb", "CpGkeGb", "txz4iGW", "W2i4y4k", "aVXa6GN", "Mni1ayO"],
 		blocked_id = new Set([]),
 		blocked_img = new Set([]);
+	let key_word = `五樓|覺青|莫斯科|演員|司機|小丑|嘻嘻`;
+	key_word = new RegExp(key_word);
 	const
 		script_name = "fix ptt img", fixed = "fix_by_script",
 		rd_text = (text = "") => {
@@ -32,19 +42,31 @@
 		remove_blacklist_target = async () => {
 			let user, text, ele,
 				ck_id, ck_img,
-				push = document.querySelectorAll("div.push"),
+				push_content = document.querySelectorAll("div.push"),
 				reg = /(?<=\/)(\w+)(?:\.\w{3,4})*$/;
-			push.forEach(div => {
+			let ck_kw, kw_list = [];
+			push_content.forEach(div => {
 				user = div.querySelector(".push-userid").textContent.trim();
 				ele = div.querySelector(".push-content");
 				text = ele.textContent;
 				ck_id = blacklist_id.find(id => id == user);
 				ck_img = blacklist_img.find(img => text.includes(`/${img}`));
-				if (ck_id || ck_img) {
+				//ck_kw = key_word.find(key => text.toLowerCase().match(`${key}`));
+				ck_kw = text.toLowerCase().match(key_word);
+
+				if (ck_id || ck_img || ck_kw) {
 					ele.title = text;
 					ele.innerHTML = rd_text(text);
 					ele.style = "color: darkred;";
 					slog_c(`%cblock by id blacklist %c${user}:%c${ele.title.replace(":", "").trim()}`, "#FF0000;#FFFF00;"); //.replace(/:[\s]*(https|https)*(:\/\/)*/, "")
+					if (ck_kw && !ck_id && !ck_img) {
+						kw_list.push(
+							{
+								user,
+								text
+							}
+						);
+					}
 					if (ck_id && !ck_img) {
 						text = text.match(reg);
 						if (text) {
@@ -52,12 +74,31 @@
 							blocked_img.add(text[1]);
 						}
 					}
-					if (ck_img && !ck_id) {
+					if (!ck_id && ck_img) {
 						slog_c(`%cblock by img blacklist %c${user}:%c${ele.title.replace(":", "").trim()}%c user [%c${user}%c] not in list`, "#FFA500;#FFFF00;;#FFA500;;#FFA500");
 						blocked_id.add(user);
 					}
 				}
 			});
+			if (kw_list.length > 0) {
+				let _list = kw_list.map(data => data.user);
+				_list = new Set(_list);
+				_list = [..._list];
+				slog(`block by key word`);
+				slog(`\n` + _list.join("\n"));
+				_list = {};
+				kw_list.forEach(data => {
+					if (!_list[data.user]) {
+						_list[data.user] = [];
+					}
+					_list[data.user].push(data.text);
+				});
+				Object.keys(_list).forEach(id => {
+					_list[id].forEach(t => {
+						console.log(`${id}${t}`);
+					});
+				});
+			}
 			return true;
 		},
 		slog = (...any) => console.log(`[${script_name}]`, ...any),

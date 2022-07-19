@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/fc2_show_all_products.user.js
-// @version      0.2
+// @version      0.3
 // @description  show full list of products in 1 page and sort by id / show full title
 // @author       x94fujo6
 // @match        https://adult.contents.fc2.com/*
@@ -80,10 +80,14 @@
 
     function sortList() {
         let pos = document.querySelector("section.seller_user_articlesList");
+        let products;
+        let list;
+        
         if (!pos) return;
 
-        let products = [...pos.children];
-        let list = products.map(div => processDiv(div));
+        dPrint("sortList");
+        products = [...pos.children];
+        list = products.map(div => processDiv(div));
 
         document.querySelector(".c-pager-101").remove();
         list.sort((a, b) => b.id - a.id);
@@ -201,23 +205,32 @@
             textContent: id,
             style: `font-size: 1.5rem;`,
         });
+        let all_link;
+        let remove_ele = [
+            ".items_article_SmapleVideo",
+            "span.c-cntCard-110-f_thumb_type",
+            "button",
+            "section.c-tooltip-107",
+            ".detail-layout",
+            ".c-cntCard-110-f_seller",
+        ];
         box.insertAdjacentElement("afterbegin", title_span);
         box.insertAdjacentElement("afterbegin", id_span);
         title_ele.remove();
 
         div.querySelector("img").setAttribute("loading", "lazy");
-        div.querySelector(".items_article_SmapleVideo").remove(); //heavy element
+        remove_ele.forEach(css_selector => {
+            removeFromEle(div, css_selector);
+        });
 
-        div.querySelector("span.c-cntCard-110-f_thumb_type").remove();
-        div.querySelector("button").remove();
-        div.querySelector("section.c-tooltip-107").remove();
-
-        //div.querySelector(".detail-layout").remove();
-        div.querySelector(".c-cntCard-110-f_seller").remove();
-
-        let all_link = div.querySelectorAll("a");
+        all_link = div.querySelectorAll("a");
         if (all_link) all_link.forEach(a => { a.target = "_blank"; });
         return { id: id, ele: div.cloneNode(true) };
+
+        function removeFromEle(ele, css_selector) {
+            let target = ele.querySelector(css_selector);
+            if (target) target.remove();
+        }
 
         function convertToSpan(ele) {
             return Object.assign(document.createElement("span"), {

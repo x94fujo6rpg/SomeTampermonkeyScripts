@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.12
+// @version      1.13
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -65,9 +65,21 @@
     };
     let style_list = {
         top_button: { width: "max-content" },
-        gallery_button: { width: "max-content", alignSelf: "center", },
+        gallery_button: {
+            //width: "max-content",
+            width: "75%",
+            alignSelf: "center",
+            lineHeight: "1.75rem",
+            border: "transparent solid 0.125rem",
+            borderRadius: "0.25rem",
+            marginTop: "0.75rem",
+        },
         gallery_marked: { backgroundColor: "black" },
-        button_marked: { color: "gray", backgroundColor: "transparent" },
+        button_marked: {
+            color: "gray",
+            backgroundColor: "transparent",
+            border: "gray solid 0.125rem",
+        },
         ex: { backgroundColor: "goldenrod" },
         mainbox: { textAlign: "center", lineHeight: "2rem" },
         separator: { color: "transparent" },
@@ -137,8 +149,9 @@
 
                     .gallery_box {
                         text-align: center;
-                        line-height: 2rem;
-                        margin: auto auto 0rem auto;
+                        /*line-height: 2rem;*/
+                        /*margin: auto auto 0rem auto;*/
+                        margin: auto 0.25rem 0.25rem;
                         max-height: max-content;
                     }
 
@@ -475,9 +488,12 @@
                 downloaded_list = [gid];
             }
             let list_length = downloaded_list.length;
-            downloaded_list = downloaded_list.join();
-            GM_setValue(key_list.dl_list, downloaded_list);
-            print(`${m}save list. [list_size:${downloaded_list.length} (limit:${gallery_data_limit.max_size}), list_length:${list_length} (possible limit:${gallery_data_limit.max_length})]`);
+            setGMData(key_list.dl_list, downloaded_list);
+
+            //downloaded_list = downloaded_list.join();
+            //GM_setValue(key_list.dl_list, downloaded_list);
+
+            print(`${m}save list. [list_size:${downloaded_list.join().length} (limit:${gallery_data_limit.max_size}), list_length:${list_length} (possible limit:${gallery_data_limit.max_length})]`);
 
             updateGalleryStatus();
 
@@ -774,7 +790,8 @@
                         list.splice(index, 1);
                         print(`${m}remove [${value}] from list [${key}]`);
                     }
-                    GM_setValue(key_list[key], list.join());
+                    setGMData(key_list[key], list);
+                    //GM_setValue(key_list[key], list.join());
                 }
             }
         }
@@ -940,9 +957,11 @@
         }
         downloaded_list.push(gid);
         let list_length = downloaded_list.length;
-        downloaded_list = downloaded_list.join();
-        GM_setValue(key_list.dl_list, downloaded_list);
-        print(`${m}add [${gid}] to list. [list_size:${downloaded_list.length}, list_length:${list_length}]`);
+        setGMData(key_list.dl_list, downloaded_list);
+
+        //downloaded_list = downloaded_list.join();
+        //GM_setValue(key_list.dl_list, downloaded_list);
+        print(`${m}add [${gid}] to list. [list_size:${downloaded_list.join().length}, list_length:${list_length}]`);
     }
 
     function my_popUp(URL, w, h) {
@@ -1383,9 +1402,20 @@
         return text.trim();
     }
 
+    function setGMData(key, data) {
+        return GM_setValue(key, data);
+    }
+
     function getGMList(key = "") {
         let value = GM_getValue(key_list[key], default_value[key]);
-        return value.length > 0 ? value.split(",") : [];
+
+        if (typeof value == "string") {
+            return value.length > 0 ? value.split(",") : [];
+        }
+
+        if (value instanceof Array) {
+            return value;
+        }
     }
 
     function getGMValue(key = "") {

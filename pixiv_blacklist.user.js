@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         pixiv blacklist
-// @version      0.01
+// @version      0.02
 // @description  hide unwant artist in search
 // @author       x94fujo6
 // @match        https://www.pixiv.net/*
@@ -12,6 +12,7 @@
 
 (async function () {
 	let current = window.location.href;
+	let retry_count = 0;
 
 	console.log("script start");
 
@@ -59,7 +60,7 @@
 				if (user_id) {
 					user_id = Number(user_id.href.match(/users\/(\d+)/)[1]);
 				} else {
-					return;
+					return false;
 				}
 				if (blacklist.has(user_id)) {
 					let nodes = [...ele.childNodes[0].childNodes];
@@ -68,7 +69,9 @@
 						node.style.opacity = 0;
 						node.style.pointerEvents = "none";
 					});
+					return true;
 				}
+				return false;
 			},
 			is_user = document.location.href.includes("/users/"),
 			result = false,
@@ -135,22 +138,49 @@
 					});
 				} else {
 					console.log("user button not found");
-					return;
+					return false;
 				}
+				console.log("script end [user]");
+				return true;
 			}
 		} else {
+			let count = 0;
 			console.log("search");
+			/*
+			await (async function () {
+				for (let group of result) {
+					let artworks = group.querySelectorAll("li");
+					for (let art of artworks) {
+						if (checkBlacklist(art)) count++;
+					}
+				}
+			})();
+			*/
+
 			result.forEach(r => {
 				let all = r.querySelectorAll("li");
 				all.forEach(ele => {
-					setTimeout(
-						() => {
-							checkBlacklist(ele);
-						}
-					);
+					if (checkBlacklist(ele)) count++;
 				});
 			});
+
+			console.log(`script hide ${count} artworks`);
+			console.log("script end [search]");
+			if (count == 0) {
+				if (retry_count < 3) {
+					retry_count++;
+					setTimeout(() => {
+						console.log(`retry ${retry_count}`);
+						main();
+					}, 1000);
+				} else {
+					retry_count = 0;
+					console.log(`end retry`);
+				}
+			}
+			return count;
 		}
 		console.log("script end");
+		return false;
 	}
 })();
