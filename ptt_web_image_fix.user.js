@@ -2,7 +2,7 @@
 // @name         PTT Web Image Fix
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ptt_web_image_fix.user.js
-// @version      0.09
+// @version      0.11
 // @description  修復PTT網頁板自動開圖、嘗試修復被截斷的網址、阻擋黑名單ID的推文/圖片
 // @author       x94fujo6
 // @include      https://www.ptt.cc/*
@@ -15,7 +15,7 @@
 // ==/UserScript==
 
 /*
-0.09
+0.11
 新增阻擋關鍵字功能
 自行修改key_word內容 (regex)
 F12控制台會顯示整批被阻擋之ID跟推文內容
