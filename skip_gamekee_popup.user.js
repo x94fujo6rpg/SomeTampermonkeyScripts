@@ -2,7 +2,7 @@
 // @name         skip gamekee popup
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/skip_gamekee_popup.user.js
-// @version      0.1
+// @version      0.2
 // @description  自動關閉gamekee註冊訊息
 // @author       x94fujo6
 // @include      https://*.gamekee.com/*
@@ -12,9 +12,9 @@
 	function wait_tab() {
 		return new Promise(resolve => {
 			if (document.visibilityState === "visible") return resolve();
-			debug_msg("tab in background, script paused");
+			console.log("tab in background, script paused");
 			document.addEventListener("visibilitychange", () => {
-				if (document.visibilityState === "visible") { debug_msg("script unpaused"); return resolve(); }
+				if (document.visibilityState === "visible") { console.log("script unpaused"); return resolve(); }
 			});
 		});
 	}
