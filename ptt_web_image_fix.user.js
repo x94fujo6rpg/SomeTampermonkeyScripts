@@ -225,8 +225,10 @@ ID阻擋>圖片阻擋>關鍵字阻擋
 		},
 		main = async () => {
 			let eles = document.querySelectorAll("a[href]");
+			/*
 			await process_ele(eles, extract_url, "try fix");
 			await sleep(1000);
+			*/
 			await process_ele(eles, extract_in_text, "try fix spaced", GM_config.get("fix_segment"));
 		},
 		sleep = (ms = 100) => new Promise(resolve => setTimeout(resolve, ms)),
@@ -236,7 +238,7 @@ ID阻擋>圖片阻擋>關鍵字阻擋
 			await ini_config();
 			await load_value();
 			await remove_blacklist_target();
-			await remove_richcontent();
+			//await remove_richcontent();
 			await main();
 			GM_config.onOpen(); // update ui
 		},

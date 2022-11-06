@@ -2,7 +2,7 @@
 // @name         18comic漫画下载edited
 // @namespace    http://github.com/eternalphane/Userscripts/
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/18comic_edited.user.js
-// @version      1.0.5.5
+// @version      1.0.5.6
 // @description  从18comic上下载cbz格式（整话阅读）或webp格式（分页阅读）的漫画
 // @author       eternalphane (edit by x94fujo6)
 // @license      MIT
@@ -94,6 +94,19 @@
 		document.body.classList.remove('noscroll');
 		overlay.hidden = true;
 	});
+
+	(() => {
+		let class_name = "scramble-page",
+			ele = document.querySelector(`.${class_name}`);
+		if (ele) {
+			[...ele.parentNode.children]
+				.forEach(e => {
+					if (!(e.classList.contains(class_name))) {
+						e.remove();
+					}
+				});
+		}
+	})();
 
 	function get_num(aid, img_index) {
 		if (aid >= 268850) {
