@@ -1,3 +1,7 @@
+If you are using Tampermonkey, it might be a problem after the recent update of the extension.  
+Scripts does not load regularly and needs to be refresh the page several times.  
+[Tampermonkey/tampermonkey#1617](https://github.com/Tampermonkey/tampermonkey/issues/1617)  
+
 The end of user scripts
 [https://developer.chrome.com/docs/extensions/mv3/mv2-sunset/](https://developer.chrome.com/docs/extensions/mv3/mv2-sunset/)
 [https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code](https://developer.chrome.com/docs/extensions/mv3/intro/mv3-migration/#remotely-hosted-code)  
