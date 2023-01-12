@@ -101,6 +101,10 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.14
+  - If the gallery is unavailable  
+    ![](https://i.imgur.com/P4Tn9ho.png)  
+
 - v1.13
   - new button style
   - change save format (auto migrate)

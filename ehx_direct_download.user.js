@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.13
+// @version      1.14
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -199,10 +199,30 @@
             if (_link[3] === "g") {
                 let gid = _link[4];
                 let archive_download = findEleByText("a", "Archive Download");
-                archive_download.addEventListener("click", () => {
-                    addToDownloadedList(gid);
-                });
-                print(`${m}set trigger for updateList on gallery:${gid}`);
+                if (archive_download) {
+                    archive_download.addEventListener("click", () => {
+                        addToDownloadedList(gid);
+                    });
+                    print(`${m}set trigger for updateList on gallery:${gid}`);
+                } else {
+                    if (typeof gotonext != "undefined") {
+                        let search_site = `https://panda.chaika.moe/search/?qsearch=${encodeURIComponent(link)}`;
+                        let redir = () => {
+                            let _ele = document.querySelector("#continue");
+                            _ele.firstChild.text = "(Go to Front Page)";
+                            _ele = _ele.parentElement;
+                            _ele.children[1].remove();
+                            _ele.innerHTML = `${_ele.innerHTML}
+                            <p></p>
+                            <br>
+                            <p><a href="${search_site}">[ Search on panda.chaika.moe ]</a></p>
+                            `;
+                        };
+                        gotonext = () => { };
+                        redir();
+                        return;
+                    }
+                }
             }
 
             let url = document.location.href;
