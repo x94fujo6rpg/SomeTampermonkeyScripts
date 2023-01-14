@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js
-// @version      0.02
+// @version      0.03
 // @description  convert & download XML for EasyQ
 // @author       x94fujo6
 // @match        https://github.com/jaakkopasanen/AutoEq/*
@@ -107,7 +107,7 @@
 				f = parseInt(line[2].replace(" Hz", "")),
 				g = parseFloat(line[4].replace(" dB", "")),
 				q = parseFloat(line[3]),
-				b = (1 / q).toFixed(8);
+				b = calcOct(q);
 			console.log({ mode: m, frequency: f, gain: g, q, bandwidth: b });
 			new_band.setAttributeNS(null, "Mode", m);
 			new_band.setAttributeNS(null, "Frequency", f);
@@ -119,7 +119,16 @@
 		console.log(xml_file);
 		return [filename, xml_file, article];
 
-		function mode(input = ""){
+		function calcOct(input = 0) {
+			let l = 100000000,
+				Q1 = ((2 * input * input) + 1) / (2 * input * input),
+				Q2 = Math.pow(2 * Q1, 2) / 4,
+				Q3 = Math.sqrt(Q2 - 1),
+				Q4 = Q1 + Q3;
+			return Math.round(l * Math.log(Q4) / Math.log(2)) / l;
+		}
+
+		function mode(input = "") {
 			let table = {
 				"Peaking": "Peak/Dip",
 				"LowShelf": "Low Shelving",
