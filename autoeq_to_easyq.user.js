@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/autoeq_to_easyq.user.js
-// @version      0.01
+// @version      0.02
 // @description  convert & download XML for EasyQ
 // @author       x94fujo6
 // @match        https://github.com/jaakkopasanen/AutoEq/*
@@ -90,28 +90,48 @@
 			xml = document.implementation.createDocument(null, "Equalizer"),
 			xml_file = [],
 			filename = "",
-			article = document.querySelector(`div[data-target="readme-toc.content"]>article`);
+			article = document.querySelector(`div[data-target="readme-toc.content"]>article`),
+			preamp = article.innerText.match(/preamp of (.*)dB/);
 		if (!extractData()) return false;
+		if (preamp) {
+			preamp = preamp[1].match(/[\d\.]+/gm).reverse()[0];
+		} else {
+			preamp = 0;
+		}
 		xml.documentElement.setAttribute("PatchFormat", 2);
-		xml.documentElement.setAttribute("GlobalGain", article.innerText.match(/preamp of -(.*)dB and/)[1]);
+		xml.documentElement.setAttribute("GlobalGain", preamp);
+		console.log(xml_file);
 		xml_file.forEach(line => {
 			let new_band = document.createElementNS(null, "Band"),
-				f = parseInt(line[1].replace(" Hz", "")),
-				g = parseFloat(line[3].replace(" dB", "")),
-				q = parseFloat(line[2]),
+				m = mode(line[1]),
+				f = parseInt(line[2].replace(" Hz", "")),
+				g = parseFloat(line[4].replace(" dB", "")),
+				q = parseFloat(line[3]),
 				b = (1 / q).toFixed(8);
-			new_band.setAttributeNS(null, "Mode", "Peak/Dip");
+			console.log({ mode: m, frequency: f, gain: g, q, bandwidth: b });
+			new_band.setAttributeNS(null, "Mode", m);
 			new_band.setAttributeNS(null, "Frequency", f);
 			new_band.setAttributeNS(null, "Gain", g);
 			new_band.setAttributeNS(null, "Bandwidth", b);
 			xml.documentElement.appendChild(new_band);
 		});
 		xml_file = xml_head + (new XMLSerializer()).serializeToString(xml);
+		console.log(xml_file);
 		return [filename, xml_file, article];
+
+		function mode(input = ""){
+			let table = {
+				"Peaking": "Peak/Dip",
+				"LowShelf": "Low Shelving",
+				"HighShelf": "High Shelving",
+			};
+			return table[input];
+		}
 
 		function extractData() {
 			let data = article.querySelector(`table`),
 				o = article.querySelector(`a[href="https://github.com/jaakkopasanen/AutoEq#usage"]`);
+			console.log(data);
 			if (!data || !o) {
 				return false;
 			} else {
