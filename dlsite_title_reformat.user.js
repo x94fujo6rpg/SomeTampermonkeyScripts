@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.87
+// @version      0.88
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -286,12 +286,22 @@
         links.forEach(link => link.href += current);
     }
 
-    const to_full_size_image = url => url.replace(/(.*)resize(.*)_240x240(.*)/, "$1modpub$2$3");
+    const to_full_size_image = url => url.replace(/(.*)resize(.*)_\d+x\d+(.*)/, "$1modpub$2$3");
+
+    function newCoverUrl(id, is_b = false) {
+        let url = document.querySelector(`img[src*="${id}_"`).src;
+        url = to_full_size_image(url);
+        if (is_b) {
+            return newCopyButton(url, "Cover(Url)");
+        } else {
+            return url;
+        }
+    }
 
     function newCoverDownload(id) {
         let b = document.createElement("button");
         b.id = "dtr_cover_dl";
-        b.textContent = "Cover";
+        b.textContent = "Cover(DL)";
         b.onclick = () => {
             let url = document.querySelector(`img[src*="${id}_"`).src;
             url = to_full_size_image(url);
@@ -422,7 +432,10 @@
                     newLine(),
                     newCopyButton(title_o_text), newLine(),
                     newCopyButton(title_f_text), newLine(),
-                    newCopyButton(id), newSeparate(), newCoverDownload(id), newSeparate(), newCopyButton(circle_text),
+                    newCopyButton(id), newSeparate(),
+                    newCoverDownload(id), newSeparate(),
+                    newCoverUrl(id, true), newSeparate(),
+                    newCopyButton(circle_text),
                 ];
                 if (title_o_text == title_f_text) node_list.splice(3, 2);
                 newbox = appendAll(document.createElement("dd"), node_list);
@@ -466,7 +479,8 @@
                 cv = cv ? getMutipleDataToList(cv) : "";
 
                 node_list = [
-                    newCopyButton(id), newSeparate(), newCoverDownload(id), newLine(),
+                    newCopyButton(id), newLine(),
+                    newCoverDownload(id), newSeparate(), newCoverUrl(id, true), newLine(),
                     newCopyButton(title_o_text, "Original"), newSeparate(),
                     newCopyButton(title_f_text, "Formatted"), newLine(),
                     newCopyButton(circle_text, "Circle"),
@@ -908,7 +922,6 @@
         pos.innerHTML = `<div style="${setting_show_ot ? '' : 'display:none;'} user-select: text;">${pos.innerText}</div>`;
 
         let id = formatted_data.id;
-        let cover = document.querySelector(`img[itemprop="image"]`).src;
         let title_o = formatted_data.title_original;
         let title_f = formatted_data.title_formatted;
         let title_id_c = parseFormatString(setting_format);
@@ -916,6 +929,12 @@
         let title_id_f = `${id} ${title_f}`;
         let notSame_o_c = Boolean(title_id_o != title_id_c);
         let notSame_f_c_o = Boolean(title_id_f != title_id_c && title_id_f != title_id_o);
+        //------------------------------------------------------
+        // Cover url
+        let span_cover = newSpan(newCoverUrl(id), "");
+        span_cover.style = "user-select: text;";
+        pos.append(span_cover);
+        appendNewLine(pos);
         //------------------------------------------------------
         // ID + original title
         if (notSame_o_c && setting_show_ot) {
@@ -946,6 +965,10 @@
         //------------------------------------------------------
         // add download cover
         pos.append(newCoverDownload(id));
+        pos.append(newSeparate());
+        //------------------------------------------------------
+        // add copy cover url
+        pos.append(newCopyButton(newCoverUrl(id), "Cover(Url)"));
         pos.append(newSeparate());
         //------------------------------------------------------
         // add copy custom format button
