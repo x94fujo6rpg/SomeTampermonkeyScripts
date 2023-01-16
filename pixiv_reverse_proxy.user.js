@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         pixiv reverse proxy
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
-// @version      0.0.1
+// @version      0.0.2
 // @description  Reverse proxy all images. If you are experiencing 56k speeds on pixiv, try this. (I can't even load my own post. WTF)
 // @author       x94fujo6
 // @match        https://www.pixiv.net/*
+// @match        https://i.pximg.net/*
 // @grant        none
 // @run-at       document-start
 // ==/UserScript==
@@ -13,9 +14,18 @@
 (function () {
 
 	setInterval(() => {
-		replaceLink();
-		replaceImg();
+		main();
 	}, 1000);
+
+	function main() {
+		let url = window.location.href;
+		if (url.includes("//i.pximg.net")) {
+			window.location.href = url.replace("//i.pximg.net", "//i.pixiv.cat");
+		} else {
+			replaceLink();
+			replaceImg();
+		}
+	}
 
 	function replaceLink() {
 		let images = document.querySelectorAll("a[href*='i.pximg.net']");
