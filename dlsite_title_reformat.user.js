@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.88
+// @version      0.89
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -287,10 +287,10 @@
     }
 
     const to_full_size_image = url => url.replace(/(.*)resize(.*)_\d+x\d+(.*)/, "$1modpub$2$3");
+    const getCover = id => to_full_size_image(document.querySelector(`img[src*="${id}_img_main"`).src);
 
     function newCoverUrl(id, is_b = false) {
-        let url = document.querySelector(`img[src*="${id}_"`).src;
-        url = to_full_size_image(url);
+        let url = getCover(id);
         if (is_b) {
             return newCopyButton(url, "Cover(Url)");
         } else {
@@ -303,8 +303,7 @@
         b.id = "dtr_cover_dl";
         b.textContent = "Cover(DL)";
         b.onclick = () => {
-            let url = document.querySelector(`img[src*="${id}_"`).src;
-            url = to_full_size_image(url);
+            let url = getCover(id);
             let rq = new XMLHttpRequest();
             rq.open("GET", url, true);
             rq.responseType = "blob";
