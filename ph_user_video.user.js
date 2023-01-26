@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ph_user_video.user.js
-// @version      0.09
+// @version      0.11
 // @description  redirect link to user video list / muti select & copy video links
 // @author       x94fujo6
 // @match        https://*.pornhub.com/*
@@ -32,12 +32,26 @@
         myCss();
         let link = document.location.href,
             target_list = ["/videos", "/playlist", "video/search",];
+
+        //enable this if you want auto switch to EN
+        //switchLan();
+
         if (link.includes("viewkey")) {
             setLink();
         } else if (target_list.some(t => link.includes(t))) {
             reDirect(link);
         } else {
             replaceLink(".usernameWrap");
+        }
+
+        function switchLan() {
+            let host = document.location.host,
+                target_host = "www.pornhub.com";
+            if (host != target_host) {
+                setTimeout(() => {
+                    document.querySelector(`li[data-lang="en"] a`).click();
+                }, 1000);
+            }
         }
 
         function setLink() {
@@ -106,7 +120,7 @@
             if (!vids) {
                 if (link.includes("/public")) {
                     console.log("public");
-                    document.location.href = link.replace("/public", "");
+                    setTimeout(() => document.location.href = link.replace("/public", ""), 1000);
                 }
                 if (link.includes("/playlist")) {
                     console.log("playlist");
