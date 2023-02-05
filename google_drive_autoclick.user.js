@@ -3,10 +3,11 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/google_drive_autoclick.user.js
-// @version      0.1
+// @version      0.2
 // @description  auto skip & click download
 // @author       x94fujo6
 // @match        https://drive.google.com/*
+// @match        https://docs.google.com/*
 // @grant        none
 // ==/UserScript==
 
@@ -16,11 +17,19 @@
 
     function main() {
         let link = window.location.href;
-        if (link.includes("drive.google.com/file/d/")) {
+        let list = [
+            "drive",
+            "docs",
+        ];
+        let index = list.findIndex(key => link.includes(`//${key}.`));
+        if (index == -1) {
+            return;
+        }
+        if (link.includes("google.com/file/d/")) {
             //	https://drive.google.com/file/d/*/view
             let id = link.split("/");
             id = id[id.length - 2];
-            window.location.href = `https://drive.google.com/u/0/uc?id=${id}&export=download`;
+            window.location.href = `https://${list[index]}.google.com/u/0/uc?id=${id}&export=download`;
         } else if (link.includes("uc?")) {
             if (!link.includes("confirm=")) {
                 // https://drive.google.com/u/0/uc?id=*&export=download
