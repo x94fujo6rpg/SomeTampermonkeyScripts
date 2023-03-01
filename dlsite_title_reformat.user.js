@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.89
+// @version      0.91
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -287,7 +287,21 @@
     }
 
     const to_full_size_image = url => url.replace(/(.*)resize(.*)_\d+x\d+(.*)/, "$1modpub$2$3");
-    const getCover = id => to_full_size_image(document.querySelector(`img[src*="${id}_img_main"`).src);
+    const getCover = (id) => {
+        let ele = document.querySelector(`#_link_${id} img`);
+
+        if (ele) {
+            // grid / list
+            if (ele.src.includes("data:image")) {
+                return to_full_size_image(`https:${ele.getAttribute("data-src")}`);
+            } else {
+                return to_full_size_image(ele.src);
+            }
+        } else {
+            return to_full_size_image(document.querySelector(`img[src*="${id}_img_main"`).src);
+        }
+    };
+
 
     function newCoverUrl(id, is_b = false) {
         let url = getCover(id);
