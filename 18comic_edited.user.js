@@ -2,7 +2,7 @@
 // @name         18comic漫画下载edited
 // @namespace    http://github.com/eternalphane/Userscripts/
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/18comic_edited.user.js
-// @version      1.0.5.8
+// @version      1.0.5.9
 // @description  从18comic上下载cbz格式（整话阅读）或webp格式（分页阅读）的漫画
 // @author       eternalphane (edit by x94fujo6)
 // @license      MIT
@@ -110,6 +110,7 @@
 
 	function get_num(aid, img_index) {
 		let n = md5(`${aid}${img_index}`).slice(-1).charCodeAt(0);
+		if (aid < 268850) return 10;
 		if (aid >= 268850 && aid <= 421925) n %= 10;
 		if (aid >= 421926) n %= 8;
 		return ((n % 10) + 1) * 2;
