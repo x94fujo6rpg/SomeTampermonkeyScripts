@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/dlsite_title_reformat.user.js
-// @version      0.91
+// @version      0.92
 // @description  remove title link / remove excess text / custom title format / click button to copy
 // @author       x94fujo6
 // @match        https://www.dlsite.com/*
@@ -297,18 +297,31 @@
             } else {
                 return to_full_size_image(ele.src);
             }
+        }
+
+        ele = document.querySelector(`img[src*="${id}_img_main"`);
+        if (ele) {
+            return to_full_size_image(ele.src);
         } else {
-            return to_full_size_image(document.querySelector(`img[src*="${id}_img_main"`).src);
+            return false;
         }
     };
 
-
     function newCoverUrl(id, is_b = false) {
         let url = getCover(id);
-        if (is_b) {
-            return newCopyButton(url, "Cover(Url)");
+        if (url) {
+            if (is_b) {
+                return newCopyButton(url, "Cover(Url)");
+            } else {
+                return url;
+            }
         } else {
-            return url;
+            url = "no cover";
+            if (is_b) {
+                return newCopyButton(url, url);
+            } else {
+                return url;
+            }
         }
     }
 
