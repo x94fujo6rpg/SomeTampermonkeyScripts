@@ -3,7 +3,7 @@
 // @namespace    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts
 // @updateURL    https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
 // @downloadURL  https://github.com/x94fujo6rpg/SomeTampermonkeyScripts/raw/master/ehx_direct_download.user.js
-// @version      1.14
+// @version      1.15
 // @description  direct download archive from list / sort gallery (in current page) / show full title in pure text
 // @author       x94fujo6
 // @match        https://e-hentai.org/*
@@ -677,8 +677,17 @@
             newSeparate(),
             newButton("exhddl_sort_by_category", "Category", style_list.top_button, () => { sortGalleryByKey("category"); }),
             newSeparate(),
+
+            newButton("exhddl_sort_by_page", "Page Count", style_list.top_button, () => { sortGalleryByKey("filecount"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_rating", "Rating", style_list.top_button, () => { sortGalleryByKey("rating"); }),
+            newSeparate(),
+            newButton("exhddl_sort_by_uploader", "Uploader", style_list.top_button, () => { sortGalleryByKey("uploader"); }),
+            newLine(),
+            /*
             newButton("exhddl_sort_by_ex", "???", style_list.top_button, () => { sortGalleryByKey("expunged"); }),
             newLine(),
+            */
 
             newButton("exhddl_fix_title", "Fix/Unfix Event in Title (Search in torrents/same title gallery)", style_list.top_button, () => { fixTitlePrefix(); }),
             newSeparate(),

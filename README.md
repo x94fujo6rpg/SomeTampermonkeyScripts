@@ -101,6 +101,12 @@ click button to enable (pervent too many requests)
 
 ### updates
 
+- v1.15
+  - add sort
+    - Page Count
+    - Rating
+    - Uploader
+
 - v1.14
   - If the gallery is unavailable  
     ![](https://i.imgur.com/P4Tn9ho.png)  
